@@ -1,5 +1,27 @@
 
+import os
+import sys
 from pydantic_settings import BaseSettings
+
+
+def get_env_file() -> str:
+    """
+    Intelligently determine which environment file to load.
+    
+    Uses .env.local for development and testing (local Supabase).
+    Uses .env.production for production deployment.
+    """
+    # Check explicit ENVIRONMENT variable first
+    env_var = os.getenv("ENVIRONMENT", "").lower()
+    if env_var == "production":
+        return ".env.production"
+    
+    # Check if running in production (common production indicators)
+    if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RENDER") or os.getenv("HEROKU") or os.getenv("SCALEWAY_CONTAINER"):
+        return ".env.production"
+    
+    # Default to local for development and tests
+    return ".env.local"
 
 
 class Settings(BaseSettings):
@@ -24,7 +46,7 @@ class Settings(BaseSettings):
     api_description: str = "Backend API for AI-powered RPG game"
 
     class Config:
-        env_file = ".env.local"
+        env_file = get_env_file()
         env_file_encoding = "utf-8"
         case_sensitive = False
         extra = "ignore"
