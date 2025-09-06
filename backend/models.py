@@ -8,6 +8,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+# ============================================
+# CONSTANTS (Not in DB - hardcoded in app)
+# ============================================
+
 # Preset character portraits (no need for separate DB table)
 PRESET_PORTRAITS = {
     "male": [
@@ -25,8 +29,15 @@ PRESET_PORTRAITS = {
 }
 
 
+# ============================================
+# DATABASE MODELS (Direct DB tables)
+# ============================================
+
 class Character(BaseModel):
-    """Single character model for both API and database."""
+    """
+    DATABASE MODEL - maps to 'characters' table.
+    Used for both API responses and database operations.
+    """
     id: UUID | None = None
     user_id: UUID | None = None
     name: str = Field(..., min_length=1, max_length=50)
@@ -62,7 +73,10 @@ class Character(BaseModel):
 
 
 class GameSession(BaseModel):
-    """Single game session model for both API and database."""
+    """
+    DATABASE MODEL - maps to 'game_sessions' table.
+    Used for both API responses and database operations.
+    """
     id: UUID | None = None
     character_id: UUID
     current_scene: dict[str, Any] = Field(default_factory=dict)
@@ -92,8 +106,15 @@ class GameSession(BaseModel):
             self.play_time_seconds = int(delta.total_seconds())
 
 
+# ============================================
+# API MODELS (Not in DB - for API communication)
+# ============================================
+
 class StoryChoice(BaseModel):
-    """Individual story choice."""
+    """
+    API MODEL - Individual story choice.
+    Used in API responses, not stored directly in DB.
+    """
     id: str
     text: str = Field(..., max_length=200)
     preview: str = Field(..., max_length=50)
@@ -101,7 +122,10 @@ class StoryChoice(BaseModel):
 
 
 class StoryScene(BaseModel):
-    """Story scene with narration and choices."""
+    """
+    API MODEL - Story scene with narration and choices.
+    Used for game flow, not stored as-is in DB.
+    """
     scene_id: str
     narration: str = Field(..., min_length=50, max_length=1000)
     image_url: str
@@ -111,16 +135,25 @@ class StoryScene(BaseModel):
 
 
 class StoryBranch(BaseModel):
-    """Pre-rendered story branch."""
+    """
+    API MODEL - Pre-rendered story branch.
+    Used for parallel generation, temporary in memory.
+    """
     choice_id: str
     scene: StoryScene | None = None
     is_ready: bool = False
     generation_time: float | None = None
 
 
-# Request/Response models for API endpoints
+# ============================================
+# REQUEST/RESPONSE MODELS (API communication)
+# ============================================
+
 class CharacterCreateRequest(BaseModel):
-    """Request to create a new character."""
+    """
+    REQUEST MODEL - Request to create a new character.
+    Used for API endpoint input validation.
+    """
     name: str = Field(..., min_length=1, max_length=50)
     gender: Literal["male", "female"]
     portrait_id: str  # Either preset ID or custom URL
@@ -129,7 +162,10 @@ class CharacterCreateRequest(BaseModel):
 
 
 class CharacterBuildOption(BaseModel):
-    """Character build option during creation."""
+    """
+    API MODEL - Character build option during creation.
+    Temporary model for character creation flow, not stored in DB.
+    """
     id: str
     image_url: str
     build_type: Literal["warrior", "mage", "rogue", "ranger"]
@@ -142,7 +178,10 @@ class CharacterBuildOption(BaseModel):
 
 
 class StoryGenerateRequest(BaseModel):
-    """Request to generate next story scene."""
+    """
+    REQUEST MODEL - Request to generate next story scene.
+    Used for API endpoint input validation.
+    """
     character_id: UUID
     previous_choice: str | None = None
     scene_context: dict[str, Any] | None = None
@@ -152,7 +191,10 @@ class StoryGenerateRequest(BaseModel):
 
 
 class GameStateUpdate(BaseModel):
-    """Update to game state after a choice."""
+    """
+    API MODEL - Update to game state after a choice.
+    Used for updating character/session state, not stored directly.
+    """
     hp_change: int = 0
     xp_gained: int = 0
     items_gained: list[str] = Field(default_factory=list)
@@ -160,20 +202,32 @@ class GameStateUpdate(BaseModel):
     level_up: bool = False
 
 
-# Helper functions for common operations
+# ============================================
+# HELPER FUNCTIONS (Business logic, not models)
+# ============================================
+
 def get_preset_portraits(gender: Literal["male", "female"]) -> list[dict[str, str]]:
-    """Get preset portrait options for a gender."""
+    """
+    HELPER FUNCTION - Get preset portrait options for a gender.
+    Returns hardcoded portrait data from PRESET_PORTRAITS constant.
+    """
     return PRESET_PORTRAITS.get(gender, [])
 
 
 def calculate_level(xp: int) -> int:
-    """Calculate level from XP using simple formula."""
+    """
+    HELPER FUNCTION - Calculate level from XP using simple formula.
+    Business logic: Every 100 XP = 1 level, max level 100.
+    """
     # Every 100 XP = 1 level
     return min(100, max(1, (xp // 100) + 1))
 
 
 def get_max_hp(level: int, build_type: str) -> int:
-    """Calculate max HP based on level and build type."""
+    """
+    HELPER FUNCTION - Calculate max HP based on level and build type.
+    Business logic for HP scaling per character class.
+    """
     base_hp = 100
     hp_per_level = {
         "warrior": 15,
