@@ -1,8 +1,12 @@
 import base64
 import logging
-from typing import Any
+from typing import Any, Dict, Optional, List
+import asyncio
+import io
+from PIL import Image
 
 import google.generativeai as genai  # type: ignore
+from google.genai import types  # type: ignore
 
 from config.settings import settings
 
@@ -10,12 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 class GeminiService:
-    """Service for interacting with Google Gemini API."""
+    """Service for interacting with Google Gemini API including Nano Banana image generation."""
 
     def __init__(self) -> None:
         genai.configure(api_key=settings.gemini_api_key)
         self.story_model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        self.image_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        # Nano Banana model for image generation
+        self.image_model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
+        self.chat_sessions: Dict[str, Any] = {}  # Store chat sessions for consistency
 
     async def generate_story_scene(
         self,
@@ -51,7 +57,7 @@ class GeminiService:
         build_type: str
     ) -> bytes:
         """
-        Generate a full-body character image from portrait.
+        Generate a full-body character image from portrait using Nano Banana.
 
         Args:
             portrait_image: Portrait image bytes
@@ -61,43 +67,187 @@ class GeminiService:
         Returns:
             Generated character image bytes
         """
-        # Convert image to base64
-        base64.b64encode(portrait_image).decode('utf-8')
-
-
         try:
-            # This would use Nano Banana API (Gemini 2.5 Flash Image)
-            # For now, returning placeholder
-            logger.info(f"Generating {build_type} character image")
-            # TODO: Implement actual Nano Banana integration
+            # Open image with PIL
+            portrait_pil = Image.open(io.BytesIO(portrait_image))
+            
+            # Build prompt based on character type
+            build_prompts = {
+                "warrior": f"Create a full-body {gender} warrior character based on this portrait. "
+                          "Heavy armor, sword and shield, muscular build, battle-ready stance. "
+                          "Dark fantasy RPG style, detailed metallic armor.",
+                "mage": f"Create a full-body {gender} mage character based on this portrait. "
+                       "Flowing robes with magical runes, staff with glowing crystal, scholarly build. "
+                       "Dark fantasy RPG style, mystical aura.",
+                "rogue": f"Create a full-body {gender} rogue character based on this portrait. "
+                        "Dark leather armor, dual daggers, agile build, stealthy pose. "
+                        "Dark fantasy RPG style, hooded cloak.",
+                "ranger": f"Create a full-body {gender} ranger character based on this portrait. "
+                         "Leather and cloth armor, bow and quiver, athletic build. "
+                         "Dark fantasy RPG style, nature-themed gear."
+            }
+            
+            prompt = build_prompts.get(build_type, build_prompts["warrior"])
+            prompt += " Maintain exact facial features from the portrait. Full body visible, game-ready character art."
+            
+            # Generate with Nano Banana
+            response = await self.image_model.generate_content_async(
+                [prompt, portrait_pil],
+                generation_config=types.GenerationConfig(
+                    response_modalities=['Image', 'Text']
+                )
+            )
+            
+            # Extract generated image
+            for part in response.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    # Return base64 decoded image bytes
+                    return base64.b64decode(part.inline_data.data)
+            
+            # Fallback if no image generated
+            logger.warning(f"No image generated for {build_type} character, using original portrait")
             return portrait_image
+            
         except Exception as e:
             logger.error(f"Character image generation failed: {e}")
-            raise
+            # Return original portrait as fallback
+            return portrait_image
 
     async def generate_scene_image(
         self,
         character_image: bytes,
-        scene_description: str
+        scene_description: str,
+        session_id: Optional[str] = None
     ) -> bytes:
         """
-        Generate a scene image with character integrated.
+        Generate a scene image with character integrated using Nano Banana.
 
         Args:
             character_image: Character image bytes
             scene_description: Description of the scene
+            session_id: Optional session ID for maintaining consistency
 
         Returns:
             Generated scene image bytes
         """
         try:
-            # This would use Nano Banana API for scene composition
-            logger.info(f"Generating scene image: {scene_description[:50]}...")
-            # TODO: Implement actual scene generation
+            # Open character image
+            character_pil = Image.open(io.BytesIO(character_image))
+            
+            # Build scene prompt
+            prompt = f"""Place this character in the following scene:
+            {scene_description}
+            
+            Requirements:
+            - Maintain character appearance exactly
+            - First-person RPG perspective
+            - Dark fantasy atmosphere
+            - Cinematic composition
+            - Dramatic lighting
+            - Include environmental details"""
+            
+            # Use chat session if available for consistency
+            if session_id and session_id in self.chat_sessions:
+                chat = self.chat_sessions[session_id]
+                response = await chat.send_message_async([prompt, character_pil])
+            else:
+                response = await self.image_model.generate_content_async(
+                    [prompt, character_pil],
+                    generation_config=types.GenerationConfig(
+                        response_modalities=['Image', 'Text']
+                    )
+                )
+            
+            # Extract generated scene
+            for part in response.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    return base64.b64decode(part.inline_data.data)
+            
+            # Fallback if no image generated
+            logger.warning(f"No scene generated for: {scene_description[:50]}...")
             return character_image
+            
         except Exception as e:
             logger.error(f"Scene image generation failed: {e}")
+            # Return original character as fallback
+            return character_image
+    
+    def create_chat_session(self, session_id: str, character_image: bytes) -> str:
+        """
+        Create a chat session for consistent character rendering.
+        
+        Args:
+            session_id: Unique session identifier
+            character_image: Reference character image
+            
+        Returns:
+            Session ID
+        """
+        try:
+            # Create new chat for iterative image generation
+            chat = self.image_model.start_chat(history=[])
+            
+            # Initialize with character reference
+            character_pil = Image.open(io.BytesIO(character_image))
+            initial_prompt = """This is the main character for our RPG story. 
+                              Remember their exact appearance for all future scenes.
+                              They are the protagonist of a dark fantasy adventure."""
+            
+            # Send initial message to establish character
+            chat.send_message([initial_prompt, character_pil])
+            
+            self.chat_sessions[session_id] = chat
+            logger.info(f"Created chat session: {session_id}")
+            
+            return session_id
+            
+        except Exception as e:
+            logger.error(f"Failed to create chat session: {e}")
             raise
+    
+    async def generate_story_branches(
+        self,
+        character_image: bytes,
+        current_scene: str,
+        choices: List[str]
+    ) -> List[Dict[str, Any]]:
+        """
+        Generate multiple story branches in parallel.
+        
+        Args:
+            character_image: Character image bytes
+            current_scene: Current scene description
+            choices: List of choice descriptions
+            
+        Returns:
+            List of branch data with images
+        """
+        async def generate_branch(choice: str) -> Dict[str, Any]:
+            try:
+                scene_prompt = f"After choosing to {choice}: {current_scene}"
+                scene_image = await self.generate_scene_image(
+                    character_image,
+                    scene_prompt
+                )
+                return {
+                    "choice": choice,
+                    "image": base64.b64encode(scene_image).decode('utf-8'),
+                    "status": "success"
+                }
+            except Exception as e:
+                logger.error(f"Branch generation failed for '{choice}': {e}")
+                return {
+                    "choice": choice,
+                    "image": None,
+                    "status": "failed",
+                    "error": str(e)
+                }
+        
+        # Generate all branches concurrently
+        tasks = [generate_branch(choice) for choice in choices]
+        results = await asyncio.gather(*tasks)
+        
+        return results
 
     def _build_story_prompt(
         self,

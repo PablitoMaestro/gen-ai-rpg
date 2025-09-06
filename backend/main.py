@@ -7,6 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from api import characters, health, images, stories
 from config.settings import settings
 
+# Import test endpoints only in development
+if settings.environment == "development":
+    from api import test_endpoints
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO if settings.environment == "development" else logging.WARNING,
@@ -46,6 +50,11 @@ app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(characters.router, prefix="/api/characters", tags=["characters"])
 app.include_router(stories.router, prefix="/api/stories", tags=["stories"])
 app.include_router(images.router, prefix="/api/images", tags=["images"])
+
+# Include test endpoints in development mode
+if settings.environment == "development":
+    app.include_router(test_endpoints.router, tags=["testing"])
+    logger.info("Test endpoints enabled at /api/test")
 
 
 @app.get("/")

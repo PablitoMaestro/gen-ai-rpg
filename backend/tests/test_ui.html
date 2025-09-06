@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana API Test UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .test-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .test-card p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .image-result {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .status-item {
+            display: inline-block;
+            margin-right: 20px;
+            font-size: 0.9em;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-indicator.online {
+            background: #28a745;
+        }
+        
+        .status-indicator.offline {
+            background: #dc3545;
+        }
+        
+        .choices-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .choices-list li {
+            background: #f0f0f0;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Nano Banana API Test Suite</h1>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-indicator" id="api-status"></span>
+                <span id="api-status-text">Checking API...</span>
+            </div>
+            <div class="status-item">
+                <span>Backend URL:</span>
+                <input type="text" id="backend-url" value="http://localhost:8000" style="width: 150px;">
+            </div>
+        </div>
+        
+        <div class="test-grid">
+            <!-- Story Generation Test -->
+            <div class="test-card">
+                <h2>📝 Story Generation</h2>
+                <p>Test Gemini text generation for story narration and choices.</p>
+                <button onclick="testStory()">Generate Story</button>
+                <div id="story-result" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- Character Generation Test -->
+            <div class="test-card">
+                <h2>🎨 Character Generation</h2>
+                <p>Generate a full-body character from a test portrait.</p>
+                <select id="build-type" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                    <option value="warrior">Warrior</option>
+                    <option value="mage">Mage</option>
+                    <option value="rogue">Rogue</option>
+                    <option value="ranger">Ranger</option>
+                </select>
+                <button onclick="testCharacter()">Generate Character</button>
+                <div id="character-result" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- Scene Generation Test -->
+            <div class="test-card">
+                <h2>🏞️ Scene Generation</h2>
+                <p>Generate a scene with character integrated.</p>
+                <input type="text" id="scene-desc" placeholder="Scene description..." 
+                       value="A dark dungeon with torches" 
+                       style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                <button onclick="testScene()">Generate Scene</button>
+                <div id="scene-result" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- Story Branches Test -->
+            <div class="test-card">
+                <h2>🌳 Story Branches</h2>
+                <p>Generate 4 parallel story branches with images.</p>
+                <button onclick="testBranches()">Generate Branches</button>
+                <div id="branches-result" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- TTS Test -->
+            <div class="test-card">
+                <h2>🔊 Text-to-Speech</h2>
+                <p>Test ElevenLabs voice narration.</p>
+                <input type="text" id="tts-text" placeholder="Text to speak..." 
+                       value="Welcome, brave adventurer!" 
+                       style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                <button onclick="testTTS()">Generate Speech</button>
+                <div id="tts-result" class="result" style="display:none;"></div>
+            </div>
+            
+            <!-- All Character Builds -->
+            <div class="test-card">
+                <h2>⚔️ All Character Builds</h2>
+                <p>Generate all 4 character builds in parallel.</p>
+                <button onclick="testAllBuilds()">Generate All Builds</button>
+                <div id="builds-result" class="result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const getBackendUrl = () => document.getElementById('backend-url').value;
+        
+        // Check API status on load
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/health`);
+                const data = await response.json();
+                
+                document.getElementById('api-status').className = 'status-indicator online';
+                document.getElementById('api-status-text').textContent = 'API Online';
+            } catch (error) {
+                document.getElementById('api-status').className = 'status-indicator offline';
+                document.getElementById('api-status-text').textContent = 'API Offline';
+            }
+        }
+        
+        // Test story generation
+        async function testStory() {
+            const resultDiv = document.getElementById('story-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = 'Generating story...';
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/story`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        character_description: "A brave warrior with glowing eyes",
+                        scene_context: "Standing at the entrance of a dark dungeon"
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br><br>
+                        <strong>Narration (${data.narration_length} chars):</strong><br>
+                        ${data.narration}<br><br>
+                        <strong>Choices (${data.choice_count}):</strong>
+                        <ul class="choices-list">
+                            ${data.choices.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    `;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test character generation
+        async function testCharacter() {
+            const resultDiv = document.getElementById('character-result');
+            const buildType = document.getElementById('build-type').value;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = `Generating ${buildType} character...`;
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/character`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gender: "male",
+                        build_type: buildType,
+                        use_test_image: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Character Generated!</strong><br>
+                        Type: ${data.build_type}<br>
+                        Size: ${data.size} bytes<br>
+                        <img src="data:image/png;base64,${data.image}" class="image-result" alt="Generated character">
+                    `;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test scene generation
+        async function testScene() {
+            const resultDiv = document.getElementById('scene-result');
+            const sceneDesc = document.getElementById('scene-desc').value;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = 'Generating scene...';
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/scene`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        scene_description: sceneDesc,
+                        use_test_character: true
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Scene Generated!</strong><br>
+                        Scene: ${data.scene}<br>
+                        Size: ${data.size} bytes<br>
+                        <img src="data:image/png;base64,${data.image}" class="image-result" alt="Generated scene">
+                    `;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test story branches
+        async function testBranches() {
+            const resultDiv = document.getElementById('branches-result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = 'Generating 4 story branches...';
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/branches`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let html = `<strong>✅ Branches Generated!</strong><br>`;
+                    html += `Successful: ${data.successful}/${data.total}<br><br>`;
+                    
+                    data.branches.forEach((branch, i) => {
+                        html += `<strong>Branch ${i+1}: ${branch.choice}</strong><br>`;
+                        if (branch.status === 'success' && branch.image) {
+                            html += `<img src="data:image/png;base64,${branch.image}" class="image-result" style="max-height: 150px;"><br>`;
+                        } else {
+                            html += `Status: ${branch.status}<br>`;
+                        }
+                    });
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test TTS
+        async function testTTS() {
+            const resultDiv = document.getElementById('tts-result');
+            const text = document.getElementById('tts-text').value;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = 'Generating speech...';
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Speech Generated!</strong><br>
+                        Text length: ${data.text_length} chars<br>
+                        Audio size: ${data.size} bytes<br><br>
+                        <audio controls>
+                            <source src="data:audio/mp3;base64,${data.audio}" type="audio/mp3">
+                        </audio>
+                    `;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Test all builds
+        async function testAllBuilds() {
+            const resultDiv = document.getElementById('builds-result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.innerHTML = 'Generating all 4 character builds...';
+            
+            try {
+                const response = await fetch(`${getBackendUrl()}/api/test/character-builds`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    let html = `<strong>✅ All Builds Generated!</strong><br>`;
+                    html += `Successful: ${data.successful}/${data.total}<br><br>`;
+                    
+                    html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">';
+                    data.builds.forEach(build => {
+                        html += '<div style="text-align: center;">';
+                        html += `<strong>${build.type.toUpperCase()}</strong><br>`;
+                        if (build.status === 'success' && build.image) {
+                            html += `<img src="data:image/png;base64,${build.image}" style="width: 100%; max-height: 200px; object-fit: contain;">`;
+                        } else {
+                            html += `<div style="padding: 20px; background: #f0f0f0;">Failed: ${build.error}</div>`;
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        }
+        
+        // Check status on load
+        checkAPIStatus();
+        setInterval(checkAPIStatus, 5000);
+    </script>
+</body>
+</html>
