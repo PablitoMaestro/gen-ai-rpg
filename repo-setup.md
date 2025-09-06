@@ -10,7 +10,7 @@ For the backend, we will be using FastAPI and Pydantic. We must write with an as
 - services
 - scripts  Also, the other folders as per recommended best practices.
 
-Frontend should be running on TypeScript with React and Next.js. We will deploy it on Vercel. We should start from running the official starter template of Next.js inside the frontend folder. Also, we should use Zod for validation. We should have strict typecheck and lint rules. We should follow best practices and simplistic architecture. We should call backend whenever actions involving external APIs are needed. We should use Tailwind CSS, by the way.
+Frontend should be running on TypeScript with React and Next.js. We will deploy it on Vercel. We should start from running the official starter template of Next.js inside the frontend folder. Also, we should use Zod for validation and Zustand for client state management. We should have strict typecheck and lint rules. We should follow best practices and simplistic architecture. We should call backend whenever actions involving external APIs are needed. We should use Tailwind CSS, by the way.
 
 In the supabase folder, we should handle the seed, we should handle migrations and so on. We should simply start the new project init supabase following their official CLI documentation within the supabase folder. 
 
