@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import React from "react";
 
+import { AudioManager } from "@/components/AudioManager";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { MuteToggle } from "@/components/ui/MuteToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +33,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
         <ThemeProvider>
+          <AudioManager />
+          <MuteToggle />
           {children}
         </ThemeProvider>
       </body>

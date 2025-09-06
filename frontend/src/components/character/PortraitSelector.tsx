@@ -70,10 +70,10 @@ export function PortraitSelector({
             disabled={isLoading}
             className={`
               relative aspect-square rounded-lg overflow-hidden
-              fantasy-border transition-all duration-300
-              hover:shadow-glow hover:scale-105
+              border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
+              hover:shadow-golden hover:scale-105
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${selectedPortrait === portrait.id ? 'ring-4 ring-primary-400 shadow-glow-lg' : ''}
+              ${selectedPortrait === portrait.id ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
             `}
           >
             <Image
@@ -84,8 +84,8 @@ export function PortraitSelector({
               sizes="(max-width: 768px) 50vw, 33vw"
             />
             {selectedPortrait === portrait.id && (
-              <div className="absolute inset-0 bg-primary-400/20 flex items-center justify-center">
-                <div className="bg-primary-600 text-white rounded-full p-2">
+              <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -101,10 +101,10 @@ export function PortraitSelector({
           disabled={isLoading}
           className={`
             relative aspect-square rounded-lg overflow-hidden
-            fantasy-border transition-all duration-300
-            hover:shadow-glow hover:scale-105
+            border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
+            hover:shadow-golden hover:scale-105
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${selectedPortrait === 'custom' ? 'ring-4 ring-primary-400 shadow-glow-lg' : ''}
+            ${selectedPortrait === 'custom' ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
           `}
         >
           {customPreview ? (
@@ -117,8 +117,8 @@ export function PortraitSelector({
                 sizes="(max-width: 768px) 50vw, 33vw"
               />
               {selectedPortrait === 'custom' && (
-                <div className="absolute inset-0 bg-primary-400/20 flex items-center justify-center">
-                  <div className="bg-primary-600 text-white rounded-full p-2">
+                <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                  <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -127,12 +127,12 @@ export function PortraitSelector({
               )}
             </>
           ) : (
-            <div className="absolute inset-0 bg-gray-800/50 flex flex-col items-center justify-center p-4">
-              <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
+              <svg className="w-12 h-12 text-amber-400/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="text-sm text-gray-300 text-center">Upload Custom Portrait</span>
-              <span className="text-xs text-gray-500 mt-1">Max 5MB</span>
+              <span className="text-sm text-amber-100 text-center font-fantasy">Upload Custom Portrait</span>
+              <span className="text-xs text-amber-400/70 mt-1">Max 5MB</span>
             </div>
           )}
         </button>
@@ -147,13 +147,13 @@ export function PortraitSelector({
       </div>
 
       {isLoading && (
-        <div className="mt-4 text-center text-gray-400">
+        <div className="mt-4 text-center text-amber-400/80">
           <div className="inline-flex items-center">
             <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            Uploading portrait...
+            <span className="font-fantasy">Uploading portrait...</span>
           </div>
         </div>
       )}

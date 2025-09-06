@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 import { PortraitSelector } from '@/components/character/PortraitSelector';
 import { Button } from '@/components/ui/Button';
+import { BackgroundLayout } from '@/components/layout/BackgroundLayout';
 import { characterService } from '@/services/characterService';
 
 type Gender = 'male' | 'female';
@@ -116,36 +117,50 @@ export default function CreateCharacterPage(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8">
+    <>
+      {/* Exit Button - Top Left Corner of Screen */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.push('/')}
+          className="backdrop-blur-sm bg-black/20 border border-amber-500/30 hover:shadow-golden-sm font-fantasy"
+        >
+          Exit
+        </Button>
+      </div>
+      
+      <BackgroundLayout>
+      
       <div className="max-w-4xl w-full mx-auto">
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
-            <div className={`flex items-center ${currentStep === 'gender' ? 'text-ancient' : 'text-amber-600/60'}`}>
+            <div className={`flex items-center ${currentStep === 'gender' ? 'text-ancient' : 'text-amber-300/80'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 font-bold ${
-                currentStep === 'gender' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-600/50 text-amber-600/60'
+                currentStep === 'gender' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-400/70 bg-amber-600/20 text-amber-200'
               }`}>
                 1
               </div>
               <span className="ml-2 hidden sm:inline font-fantasy">Origin</span>
             </div>
             
-            <div className="w-12 h-0.5 bg-amber-600/40" />
+            <div className="w-12 h-0.5 bg-amber-500/60" />
             
-            <div className={`flex items-center ${currentStep === 'portrait' ? 'text-ancient' : 'text-amber-600/60'}`}>
+            <div className={`flex items-center ${currentStep === 'portrait' ? 'text-ancient' : 'text-amber-300/80'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 font-bold ${
-                currentStep === 'portrait' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-600/50 text-amber-600/60'
+                currentStep === 'portrait' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-400/70 bg-amber-600/20 text-amber-200'
               }`}>
                 2
               </div>
               <span className="ml-2 hidden sm:inline font-fantasy">Visage</span>
             </div>
             
-            <div className="w-12 h-0.5 bg-amber-600/40" />
+            <div className="w-12 h-0.5 bg-amber-500/60" />
             
-            <div className={`flex items-center ${currentStep === 'name' ? 'text-ancient' : 'text-amber-600/60'}`}>
+            <div className={`flex items-center ${currentStep === 'name' ? 'text-ancient' : 'text-amber-300/80'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 font-bold ${
-                currentStep === 'name' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-600/50 text-amber-600/60'
+                currentStep === 'name' ? 'border-amber-400 bg-amber-600 shadow-golden-sm text-dark-900' : 'border-amber-400/70 bg-amber-600/20 text-amber-200'
               }`}>
                 3
               </div>
@@ -155,7 +170,7 @@ export default function CreateCharacterPage(): React.ReactElement {
         </div>
 
         {/* Step Content */}
-        <div className="fantasy-border p-8 space-y-6">
+        <div className="backdrop-blur-sm bg-black/10 p-8 rounded-2xl border border-amber-500/20 space-y-6">
           {/* Gender Selection */}
           {currentStep === 'gender' && (
             <>
@@ -166,20 +181,20 @@ export default function CreateCharacterPage(): React.ReactElement {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 <button
                   onClick={() => handleGenderSelect('male')}
-                  className="p-8 hero-border rounded-lg hover:shadow-golden transition-all duration-300 hover:scale-105 group"
+                  className="p-8 border border-amber-500/20 bg-black/10 backdrop-blur-sm rounded-lg hover:shadow-golden transition-all duration-300 hover:scale-105 group"
                 >
-                  <div className="text-6xl mb-4 animate-float-gentle">🗡️</div>
-                  <h3 className="text-xl font-semibold text-ancient group-hover:animate-glow-warm">Warrior</h3>
-                  <p className="text-amber-200/80 mt-2">Forge your legend as a mighty champion</p>
+                  <div className="text-6xl mb-4 animate-float-gentle text-amber-300">♂</div>
+                  <h3 className="text-xl font-semibold text-ancient group-hover:animate-glow-warm">Male</h3>
+                  <p className="text-amber-200/80 mt-2">Begin your journey as a noble hero</p>
                 </button>
                 
                 <button
                   onClick={() => handleGenderSelect('female')}
-                  className="p-8 hero-border rounded-lg hover:shadow-golden transition-all duration-300 hover:scale-105 group"
+                  className="p-8 border border-amber-500/20 bg-black/10 backdrop-blur-sm rounded-lg hover:shadow-golden transition-all duration-300 hover:scale-105 group"
                 >
-                  <div className="text-6xl mb-4 animate-float-gentle animation-delay-200">🏹</div>
-                  <h3 className="text-xl font-semibold text-ancient group-hover:animate-glow-warm">Ranger</h3>
-                  <p className="text-amber-200/80 mt-2">Carve your path with grace and precision</p>
+                  <div className="text-6xl mb-4 animate-float-gentle animation-delay-200 text-amber-300">♀</div>
+                  <h3 className="text-xl font-semibold text-ancient group-hover:animate-glow-warm">Female</h3>
+                  <p className="text-amber-200/80 mt-2">Forge your destiny as a legendary champion</p>
                 </button>
               </div>
             </>
@@ -277,13 +292,7 @@ export default function CreateCharacterPage(): React.ReactElement {
           )}
         </div>
       </div>
-
-      {/* Background Effects */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/8 rounded-full blur-3xl animate-pulse-gentle" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-500/6 rounded-full blur-3xl animate-pulse-gentle animation-delay-1000" />
-        <div className="absolute top-1/3 right-1/3 w-48 h-48 bg-celestial-500/4 rounded-full blur-3xl animate-float-gentle animation-delay-400" />
-      </div>
-    </div>
+      </BackgroundLayout>
+    </>
   );
 }

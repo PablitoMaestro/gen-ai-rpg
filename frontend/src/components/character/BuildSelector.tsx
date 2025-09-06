@@ -62,8 +62,8 @@ export function BuildSelector({
           `}
         >
           <div className={`
-            fantasy-border rounded-lg overflow-hidden
-            ${selectedBuild === build.id ? 'ring-4 ring-primary-400 shadow-glow-lg' : 'hover:shadow-glow'}
+            border border-amber-500/20 bg-black/10 backdrop-blur-sm rounded-lg overflow-hidden
+            ${selectedBuild === build.id ? 'ring-4 ring-amber-400 shadow-golden-lg' : 'hover:shadow-golden'}
           `}>
             {/* Character Image */}
             <div className="relative aspect-[3/4] bg-gray-900">
@@ -88,8 +88,8 @@ export function BuildSelector({
 
               {/* Selected overlay */}
               {selectedBuild === build.id && (
-                <div className="absolute inset-0 bg-primary-400/20 flex items-center justify-center">
-                  <div className="bg-primary-600 text-white rounded-full p-3">
+                <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                  <div className="bg-amber-600 text-dark-900 rounded-full p-3 shadow-golden-sm">
                     <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -99,45 +99,45 @@ export function BuildSelector({
             </div>
 
             {/* Build Info */}
-            <div className="p-4 bg-gray-800/50">
-              <h3 className="text-lg font-bold text-primary-400 capitalize mb-2">
+            <div className="p-4 bg-black/20 backdrop-blur-sm">
+              <h3 className="text-lg font-bold text-ancient capitalize mb-2 font-fantasy">
                 {build.build_type}
               </h3>
-              <p className="text-sm text-gray-300 mb-3">
+              <p className="text-sm text-amber-100/90 mb-3">
                 {build.description}
               </p>
 
               {/* Stats Preview */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">STR</span>
-                  <div className="flex-1 mx-2 bg-gray-700 rounded-full h-3 relative overflow-hidden">
+                  <span className="text-amber-400/70 font-fantasy">STR</span>
+                  <div className="flex-1 mx-2 bg-dark-800/60 rounded-full h-3 relative overflow-hidden">
                     <div 
-                      className="absolute inset-y-0 left-0 bg-red-500 rounded-full"
+                      className="absolute inset-y-0 left-0 bg-red-600 rounded-full shadow-sm"
                       style={{ width: `${(build.stats_preview.strength / 15) * 100}%` }}
                     />
                   </div>
-                  <span className="text-gray-300">{build.stats_preview.strength}</span>
+                  <span className="text-amber-200">{build.stats_preview.strength}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">INT</span>
-                  <div className="flex-1 mx-2 bg-gray-700 rounded-full h-3 relative overflow-hidden">
+                  <span className="text-amber-400/70 font-fantasy">INT</span>
+                  <div className="flex-1 mx-2 bg-dark-800/60 rounded-full h-3 relative overflow-hidden">
                     <div 
-                      className="absolute inset-y-0 left-0 bg-blue-500 rounded-full"
+                      className="absolute inset-y-0 left-0 bg-blue-600 rounded-full shadow-sm"
                       style={{ width: `${(build.stats_preview.intelligence / 15) * 100}%` }}
                     />
                   </div>
-                  <span className="text-gray-300">{build.stats_preview.intelligence}</span>
+                  <span className="text-amber-200">{build.stats_preview.intelligence}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">AGI</span>
-                  <div className="flex-1 mx-2 bg-gray-700 rounded-full h-3 relative overflow-hidden">
+                  <span className="text-amber-400/70 font-fantasy">AGI</span>
+                  <div className="flex-1 mx-2 bg-dark-800/60 rounded-full h-3 relative overflow-hidden">
                     <div 
-                      className="absolute inset-y-0 left-0 bg-green-500 rounded-full"
+                      className="absolute inset-y-0 left-0 bg-green-600 rounded-full shadow-sm"
                       style={{ width: `${(build.stats_preview.agility / 15) * 100}%` }}
                     />
                   </div>
-                  <span className="text-gray-300">{build.stats_preview.agility}</span>
+                  <span className="text-amber-200">{build.stats_preview.agility}</span>
                 </div>
               </div>
             </div>
