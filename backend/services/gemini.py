@@ -10,7 +10,6 @@ except ImportError:
     Image = None
 
 import google.generativeai as genai  # type: ignore
-from google.genai import types  # type: ignore
 
 from config.settings import settings
 
@@ -100,21 +99,11 @@ class GeminiService:
             
             # Generate with Nano Banana
             response = await self.image_model.generate_content_async(
-                [prompt, portrait_pil],
-                generation_config=types.GenerationConfig(
-                    response_modalities=['Image', 'Text']
-                )
+                [prompt, portrait_pil]
             )
             
-            # Extract generated image
-            for part in response.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    # Return base64 decoded image bytes
-                    return base64.b64decode(part.inline_data.data)
-            
-            # Fallback if no image generated
-            logger.warning(f"No image generated for {build_type} character, using original portrait")
-            return portrait_image
+            # Extract generated image using common method
+            return self._extract_image_from_response(response)
             
         except Exception as e:
             logger.error(f"Character image generation failed: {e}")
@@ -164,25 +153,39 @@ class GeminiService:
                 response = await chat.send_message_async([prompt, character_pil])
             else:
                 response = await self.image_model.generate_content_async(
-                    [prompt, character_pil],
-                    generation_config=types.GenerationConfig(
-                        response_modalities=['Image', 'Text']
-                    )
+                    [prompt, character_pil]
                 )
             
-            # Extract generated scene
-            for part in response.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    return base64.b64decode(part.inline_data.data)
-            
-            # Fallback if no image generated
-            logger.warning(f"No scene generated for: {scene_description[:50]}...")
-            return character_image
+            # Extract generated scene using common method
+            return self._extract_image_from_response(response)
             
         except Exception as e:
             logger.error(f"Scene image generation failed: {e}")
             # Return original character as fallback
             return character_image
+    
+    def _extract_image_from_response(self, response) -> bytes:
+        """
+        Extract image bytes from Gemini API response.
+        
+        Args:
+            response: Gemini API response object
+            
+        Returns:
+            Image data as bytes
+            
+        Raises:
+            ValueError: If no image found in response
+        """
+        if hasattr(response, 'candidates') and response.candidates:
+            for candidate in response.candidates:
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            # The data is already in bytes format, not base64
+                            return part.inline_data.data
+        
+        raise ValueError("No image found in response")
     
     def create_chat_session(self, session_id: str, character_image: bytes) -> str:
         """
@@ -221,6 +224,29 @@ class GeminiService:
             logger.error(f"Failed to create chat session: {e}")
             raise
     
+    async def generate_portrait(
+        self,
+        prompt: str
+    ) -> bytes:
+        """
+        Generate a portrait image from a text prompt using Nano Banana.
+        
+        Args:
+            prompt: Text description for the portrait
+            
+        Returns:
+            Generated portrait image as bytes
+        """
+        try:
+            response = await self.image_model.generate_content_async(prompt)
+            
+            # Extract generated image using common method
+            return self._extract_image_from_response(response)
+            
+        except Exception as e:
+            logger.error(f"Portrait generation failed: {e}")
+            raise
+
     async def generate_story_branches(
         self,
         character_image: bytes,
