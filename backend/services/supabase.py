@@ -308,19 +308,27 @@ class SupabaseService:
             # Create path: user_id/filename
             path = f"{user_id}/{filename}"
 
+            # Try to remove existing file first (in case of overwrite)
+            try:
+                self.storage.from_("character-images").remove([path])
+            except Exception:
+                pass  # File might not exist, that's ok
+
             # Upload to storage
-            response = self.storage.from_("character-images").upload(
-                path, file_data
+            self.storage.from_("character-images").upload(
+                path, file_data,
+                file_options={"content-type": "image/png", "upsert": "true"}
             )
 
-            if response:
-                # Get public URL
-                url = self.storage.from_("character-images").get_public_url(path)
-                return url  # type: ignore
-            return None
+            # Get public URL
+            url = self.storage.from_("character-images").get_public_url(path)
+            logger.info(f"Successfully uploaded image to: {url}")
+            return url  # type: ignore
 
         except Exception as e:
             logger.error(f"Failed to upload image: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return None
 
 

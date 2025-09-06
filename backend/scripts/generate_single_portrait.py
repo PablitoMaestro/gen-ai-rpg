@@ -17,16 +17,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def generate_single_portrait(prompt: str, output_filename: str = None):
+async def generate_single_portrait(prompt: str, output_filename: str | None = None) -> None:
     """
     Generate a single portrait from a custom prompt.
-    
+
     Args:
         prompt: Text description for the portrait
         output_filename: Optional custom filename (with extension)
     """
     # Create output directory
-    output_dir = Path(__file__).parent.parent.parent / "frontend" / "public" / "portraits" / "custom"
+    output_dir = (Path(__file__).parent.parent.parent / "frontend" / "public" /
+                  "portraits" / "custom")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate filename if not provided
@@ -54,8 +55,10 @@ async def generate_single_portrait(prompt: str, output_filename: str = None):
         raise
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate a single medieval portrait from a text prompt")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate a single medieval portrait from a text prompt"
+    )
     parser.add_argument("prompt", help="Text description for the portrait")
     parser.add_argument("-o", "--output", help="Output filename (optional)")
 

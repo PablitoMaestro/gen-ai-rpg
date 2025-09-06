@@ -1,33 +1,27 @@
 export interface Character {
   id: string;
-  userId: string;
+  user_id: string;
   name: string;
   gender: 'male' | 'female';
-  portraitUrl: string;
-  fullBodyUrl: string;
-  stats: CharacterStats;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CharacterStats {
+  portrait_url: string;
+  full_body_url: string;
+  build_type: 'warrior' | 'mage' | 'rogue' | 'ranger';
   hp: number;
-  maxHp: number;
   xp: number;
   level: number;
-  strength: number;
-  dexterity: number;
-  intelligence: number;
-  charisma: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GameSession {
   id: string;
-  characterId: string;
-  currentScene: Scene;
-  choicesMade: Choice[];
-  createdAt: Date;
-  updatedAt: Date;
+  character_id: string;
+  current_scene: Record<string, unknown>;
+  choices_made: Array<Record<string, unknown>>;
+  inventory: string[];
+  created_at: string;
+  updated_at: string;
+  play_time_seconds?: number;
 }
 
 export interface Scene {
@@ -50,9 +44,3 @@ export interface Choice {
   timestamp: Date;
 }
 
-export interface CharacterPortrait {
-  id: string;
-  gender: 'male' | 'female';
-  portraitUrl: string;
-  isPreset: boolean;
-}

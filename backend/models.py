@@ -13,18 +13,19 @@ from pydantic import BaseModel, Field
 # ============================================
 
 # Preset character portraits (stored in Supabase storage)
+BASE_URL = "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets"
 PRESET_PORTRAITS = {
     "male": [
-        {"id": "m1", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_01.png"},
-        {"id": "m2", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_02.png"},
-        {"id": "m3", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_03.png"},
-        {"id": "m4", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_04.png"},
+        {"id": "m1", "url": f"{BASE_URL}/male/male_portrait_01.png"},
+        {"id": "m2", "url": f"{BASE_URL}/male/male_portrait_02.png"},
+        {"id": "m3", "url": f"{BASE_URL}/male/male_portrait_03.png"},
+        {"id": "m4", "url": f"{BASE_URL}/male/male_portrait_04.png"},
     ],
     "female": [
-        {"id": "f1", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_01.png"},
-        {"id": "f2", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_02.png"},
-        {"id": "f3", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_03.png"},
-        {"id": "f4", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_04.png"},
+        {"id": "f1", "url": f"{BASE_URL}/female/female_portrait_01.png"},
+        {"id": "f2", "url": f"{BASE_URL}/female/female_portrait_02.png"},
+        {"id": "f3", "url": f"{BASE_URL}/female/female_portrait_03.png"},
+        {"id": "f4", "url": f"{BASE_URL}/female/female_portrait_04.png"},
     ]
 }
 

@@ -24,7 +24,7 @@ def get_supabase_client() -> Client:
     )
 
 
-async def upload_portraits():
+async def upload_portraits() -> None:
     """Upload all preset portraits to Supabase storage."""
     client = get_supabase_client()
     storage = client.storage
@@ -64,12 +64,12 @@ async def upload_portraits():
     except Exception as e:
         print(f"Note: Could not check/create bucket (may already exist): {e}")
 
-    uploaded_urls = {"male": [], "female": []}
+    uploaded_urls: dict[str, list[str]] = {"male": [], "female": []}
 
     for gender, files in portrait_files.items():
         print(f"\nUploading {gender} portraits...")
 
-        for i, filename in enumerate(files, 1):
+        for _i, filename in enumerate(files, 1):
             file_path = portraits_dir / gender / filename
 
             if not file_path.exists():
@@ -88,11 +88,11 @@ async def upload_portraits():
                 # First try to remove if exists (update)
                 try:
                     storage.from_("character-images").remove([storage_path])
-                except:
+                except Exception:
                     pass  # File might not exist
 
                 # Upload file
-                response = storage.from_("character-images").upload(
+                storage.from_("character-images").upload(
                     storage_path,
                     file_data,
                     file_options={"content-type": "image/png"}
@@ -100,10 +100,7 @@ async def upload_portraits():
 
                 # Get public URL
                 url = storage.from_("character-images").get_public_url(storage_path)
-                uploaded_urls[gender].append({
-                    "id": f"{gender[0]}{i}",  # m1, m2, f1, f2, etc.
-                    "url": url
-                })
+                uploaded_urls[gender].append(url)
 
                 print(f"  ✅ Uploaded: {filename}")
                 print(f"     URL: {url}")
@@ -117,16 +114,15 @@ async def upload_portraits():
     print("="*60)
     print("\nPRESET_PORTRAITS = {")
 
-    for gender, portraits in uploaded_urls.items():
+    for gender, urls in uploaded_urls.items():
         print(f'    "{gender}": [')
-        for portrait in portraits:
-            print(f'        {{"id": "{portrait["id"]}", "url": "{portrait["url"]}"}},' )
+        for i, url in enumerate(urls, 1):
+            print(f'        {{"id": "{gender[0]}{i}", "url": "{url}"}},' )
         print('    ],')
 
     print("}")
 
     print("\n✨ Portrait upload complete!")
-    return uploaded_urls
 
 
 if __name__ == "__main__":

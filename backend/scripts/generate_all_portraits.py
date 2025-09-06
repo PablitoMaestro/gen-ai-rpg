@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def generate_all_portraits():
+async def generate_all_portraits() -> None:
     """Generate all 16 medieval portraits (8 male + 8 female)."""
     logger.info("🚀 Starting generation of all 16 medieval portraits...")
 

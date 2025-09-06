@@ -7,9 +7,9 @@ from typing import Any
 try:
     from PIL import Image
 except ImportError:
-    Image = None
+    Image = None  # type: ignore[assignment]
 
-import google.generativeai as genai  # type: ignore
+import google.generativeai as genai
 
 from config.settings import settings
 
@@ -138,7 +138,7 @@ class GeminiService:
             # Build scene prompt
             prompt = f"""Place this character in the following scene:
             {scene_description}
-            
+
             Requirements:
             - Maintain character appearance exactly
             - First-person RPG perspective
@@ -164,16 +164,16 @@ class GeminiService:
             # Return original character as fallback
             return character_image
 
-    def _extract_image_from_response(self, response) -> bytes:
+    def _extract_image_from_response(self, response: Any) -> bytes:
         """
         Extract image bytes from Gemini API response.
-        
+
         Args:
             response: Gemini API response object
-            
+
         Returns:
             Image data as bytes
-            
+
         Raises:
             ValueError: If no image found in response
         """
@@ -183,18 +183,22 @@ class GeminiService:
                     for part in candidate.content.parts:
                         if hasattr(part, 'inline_data') and part.inline_data:
                             # The data is already in bytes format, not base64
-                            return part.inline_data.data
+                            data = part.inline_data.data
+                            if isinstance(data, bytes):
+                                return data
+                            # Fallback if data is not bytes (shouldn't happen)
+                            return bytes(data)
 
         raise ValueError("No image found in response")
 
     def create_chat_session(self, session_id: str, character_image: bytes) -> str:
         """
         Create a chat session for consistent character rendering.
-        
+
         Args:
             session_id: Unique session identifier
             character_image: Reference character image
-            
+
         Returns:
             Session ID
         """
@@ -208,7 +212,7 @@ class GeminiService:
 
             # Initialize with character reference
             character_pil = Image.open(io.BytesIO(character_image))
-            initial_prompt = """This is the main character for our RPG story. 
+            initial_prompt = """This is the main character for our RPG story.
                               Remember their exact appearance for all future scenes.
                               They are the protagonist of a dark fantasy adventure."""
 
@@ -230,10 +234,10 @@ class GeminiService:
     ) -> bytes:
         """
         Generate a portrait image from a text prompt using Nano Banana.
-        
+
         Args:
             prompt: Text description for the portrait
-            
+
         Returns:
             Generated portrait image as bytes
         """
@@ -255,12 +259,12 @@ class GeminiService:
     ) -> list[dict[str, Any]]:
         """
         Generate multiple story branches in parallel.
-        
+
         Args:
             character_image: Character image bytes
             current_scene: Current scene description
             choices: List of choice descriptions
-            
+
         Returns:
             List of branch data with images
         """

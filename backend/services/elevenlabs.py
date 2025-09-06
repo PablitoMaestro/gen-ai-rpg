@@ -93,6 +93,16 @@ class ElevenLabsService:
             logger.error(f"Failed to fetch voices: {e}")
             return {"voices": []}
 
+    # Alias for backward compatibility
+    async def generate_speech(
+        self,
+        text: str,
+        voice_id: str | None = None,
+        model_id: str = "eleven_monolingual_v1"
+    ) -> bytes:
+        """Alias for generate_narration for backward compatibility."""
+        return await self.generate_narration(text, voice_id, model_id)
+
 
 # Singleton instance
 elevenlabs_service = ElevenLabsService()

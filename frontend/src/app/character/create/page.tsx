@@ -5,46 +5,66 @@ import React, { useState } from 'react';
 
 import { PortraitSelector } from '@/components/character/PortraitSelector';
 import { Button } from '@/components/ui/Button';
+import { characterService } from '@/services/characterService';
 
 type Gender = 'male' | 'female';
 type Step = 'gender' | 'portrait' | 'name';
-
-// Temporary portrait data - will be fetched from API
-const PRESET_PORTRAITS = {
-  male: [
-    { id: 'm1', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_01.png' },
-    { id: 'm2', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_02.png' },
-    { id: 'm3', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_03.png' },
-    { id: 'm4', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_04.png' },
-  ],
-  female: [
-    { id: 'f1', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_01.png' },
-    { id: 'f2', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_02.png' },
-    { id: 'f3', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_03.png' },
-    { id: 'f4', url: 'http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_04.png' },
-  ],
-};
+type Portrait = { id: string; url: string };
 
 export default function CreateCharacterPage(): React.ReactElement {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<Step>('gender');
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [selectedPortrait, setSelectedPortrait] = useState<string | null>(null);
+  const [selectedPortraitUrl, setSelectedPortraitUrl] = useState<string | null>(null);
   const [characterName, setCharacterName] = useState('');
-  const [customPortraitFile, setCustomPortraitFile] = useState<File | null>(null);
+  const [_customPortraitFile, setCustomPortraitFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [portraits, setPortraits] = useState<Portrait[]>([]);
+  const [isLoadingPortraits, setIsLoadingPortraits] = useState(false);
 
-  const handleGenderSelect = (gender: Gender): void => {
+  const handleGenderSelect = async (gender: Gender): Promise<void> => {
     setSelectedGender(gender);
     setCurrentStep('portrait');
+    
+    // Fetch portraits for selected gender
+    setIsLoadingPortraits(true);
+    try {
+      const fetchedPortraits = await characterService.getPresetPortraits(gender);
+      setPortraits(fetchedPortraits);
+    } catch (error) {
+      console.error('Failed to fetch portraits:', error);
+      // Fallback to default portraits if API fails
+      setPortraits([]);
+    } finally {
+      setIsLoadingPortraits(false);
+    }
   };
 
   const handlePortraitSelect = (portraitId: string): void => {
     setSelectedPortrait(portraitId);
+    // Find and store the URL for the selected portrait
+    const portrait = portraits.find(p => p.id === portraitId);
+    if (portrait) {
+      setSelectedPortraitUrl(portrait.url);
+    }
   };
 
-  const handleCustomUpload = (file: File): void => {
+  const handleCustomUpload = async (file: File): Promise<void> => {
     setCustomPortraitFile(file);
+    setIsLoading(true);
+    
+    try {
+      // Upload custom portrait to backend
+      const result = await characterService.uploadCustomPortrait(file);
+      setSelectedPortraitUrl(result.url);
+      setSelectedPortrait('custom');
+    } catch (error) {
+      console.error('Failed to upload custom portrait:', error);
+      alert('Failed to upload portrait. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleContinueFromPortrait = (): void => {
@@ -54,23 +74,26 @@ export default function CreateCharacterPage(): React.ReactElement {
   };
 
   const handleCreateCharacter = async (): Promise<void> => {
-    if (!selectedGender || !selectedPortrait || !characterName.trim()) {
+    if (!selectedGender || !selectedPortrait || !characterName.trim() || !selectedPortraitUrl) {
       return;
     }
 
     setIsLoading(true);
     
     try {
-      // TODO: Call API to create character
-      console.warn('Creating character:', {
-        gender: selectedGender,
-        portrait: selectedPortrait,
+      // Create character via API
+      const character = await characterService.createCharacter({
         name: characterName,
-        customFile: customPortraitFile
+        gender: selectedGender,
+        portrait_id: selectedPortrait === 'custom' ? selectedPortraitUrl : selectedPortrait,
+        build_id: 'default', // Will be selected in next step
+        build_type: 'warrior' // Default, will be updated
       });
       
+      console.warn('Character created:', character);
+      
       // Navigate to character build selection
-      router.push('/character/build');
+      router.push(`/character/${character.id}/build`);
     } catch (error) {
       console.error('Failed to create character:', error);
       alert('Failed to create character. Please try again.');
@@ -164,13 +187,25 @@ export default function CreateCharacterPage(): React.ReactElement {
                 Select Your Portrait
               </h2>
               
-              <PortraitSelector
-                portraits={PRESET_PORTRAITS[selectedGender]}
-                selectedPortrait={selectedPortrait}
-                onSelectPortrait={handlePortraitSelect}
-                onUploadCustom={handleCustomUpload}
-                isLoading={isLoading}
-              />
+              {isLoadingPortraits ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="text-gray-400">
+                    <svg className="animate-spin h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Loading portraits...
+                  </div>
+                </div>
+              ) : (
+                <PortraitSelector
+                  portraits={portraits}
+                  selectedPortrait={selectedPortrait}
+                  onSelectPortrait={handlePortraitSelect}
+                  onUploadCustom={handleCustomUpload}
+                  isLoading={isLoading}
+                />
+              )}
               
               <div className="flex justify-between mt-8">
                 <Button

@@ -59,7 +59,8 @@ try:
     assert 'id' not in update_dict
     assert 'user_id' not in update_dict
 
-    print(f"✓ Character model works: {character.name} (Level {character.level} {character.build_type})")
+    print(f"✓ Character model works: {character.name} "
+          f"(Level {character.level} {character.build_type})")
 except Exception as e:
     print(f"✗ Character model error: {e}")
 
@@ -84,7 +85,8 @@ try:
     db_dict = session.dict_for_db()
     assert 'play_time_seconds' not in db_dict
 
-    print(f"✓ GameSession model works: {len(session.inventory)} items, {session.play_time_seconds}s playtime")
+    print(f"✓ GameSession model works: {len(session.inventory)} items, "
+          f"{session.play_time_seconds}s playtime")
 except Exception as e:
     print(f"✗ GameSession model error: {e}")
 
@@ -92,15 +94,21 @@ except Exception as e:
 print("\nTesting StoryScene model...")
 try:
     choices = [
-        StoryChoice(id="c1", text="Go left", preview="Left path", consequence_hint="Safe"),
-        StoryChoice(id="c2", text="Go right", preview="Right path", consequence_hint="Danger"),
-        StoryChoice(id="c3", text="Go forward", preview="Main path", consequence_hint="Unknown"),
-        StoryChoice(id="c4", text="Go back", preview="Return", consequence_hint="Retreat")
+        StoryChoice(id="c1", text="Go left", preview="Left path",
+                    consequence_hint="Safe"),
+        StoryChoice(id="c2", text="Go right", preview="Right path",
+                    consequence_hint="Danger"),
+        StoryChoice(id="c3", text="Go forward", preview="Main path",
+                    consequence_hint="Unknown"),
+        StoryChoice(id="c4", text="Go back", preview="Return",
+                    consequence_hint="Retreat")
     ]
 
     scene = StoryScene(
         scene_id="forest_1",
-        narration="You stand at a crossroads in the dark forest. The ancient trees loom overhead, their branches creating a canopy that blocks most of the moonlight.",
+        narration=("You stand at a crossroads in the dark forest. The ancient trees "
+                   "loom overhead, their branches creating a canopy that blocks most "
+                   "of the moonlight."),
         image_url="https://example.com/forest.jpg",
         choices=choices,
         is_combat=False,
@@ -108,7 +116,8 @@ try:
     )
 
     assert len(scene.choices) == 4
-    print(f"✓ StoryScene model works: {scene.scene_id} with {len(scene.choices)} choices")
+    print(f"✓ StoryScene model works: {scene.scene_id} with "
+          f"{len(scene.choices)} choices")
 except Exception as e:
     print(f"✗ StoryScene model error: {e}")
 
@@ -120,7 +129,8 @@ try:
     female_portraits = get_preset_portraits("female")
     assert len(male_portraits) == 4
     assert len(female_portraits) == 4
-    print(f"✓ get_preset_portraits works: {len(male_portraits)} male, {len(female_portraits)} female")
+    print(f"✓ get_preset_portraits works: {len(male_portraits)} male, "
+          f"{len(female_portraits)} female")
 
     # Test calculate_level
     assert calculate_level(0) == 1
@@ -182,14 +192,20 @@ try:
 
     # Scene to JSON (need to recreate scene since it failed earlier)
     choices = [
-        StoryChoice(id="c1", text="Go left", preview="Left path", consequence_hint="Safe"),
-        StoryChoice(id="c2", text="Go right", preview="Right path", consequence_hint="Danger"),
-        StoryChoice(id="c3", text="Go forward", preview="Main path", consequence_hint="Unknown"),
-        StoryChoice(id="c4", text="Go back", preview="Return", consequence_hint="Retreat")
+        StoryChoice(id="c1", text="Go left", preview="Left path",
+                    consequence_hint="Safe"),
+        StoryChoice(id="c2", text="Go right", preview="Right path",
+                    consequence_hint="Danger"),
+        StoryChoice(id="c3", text="Go forward", preview="Main path",
+                    consequence_hint="Unknown"),
+        StoryChoice(id="c4", text="Go back", preview="Return",
+                    consequence_hint="Retreat")
     ]
     scene = StoryScene(
         scene_id="forest_1",
-        narration="You stand at a crossroads in the dark forest. The ancient trees loom overhead, their branches creating a canopy that blocks most of the moonlight.",
+        narration=("You stand at a crossroads in the dark forest. The ancient trees "
+                   "loom overhead, their branches creating a canopy that blocks most "
+                   "of the moonlight."),
         image_url="https://example.com/forest.jpg",
         choices=choices,
         is_combat=False,

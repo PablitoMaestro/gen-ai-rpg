@@ -12,14 +12,15 @@ import google.generativeai as genai
 from config.settings import settings
 
 
-async def test_portrait_generation():
+async def test_portrait_generation() -> None:
     """Test portrait generation with debug output."""
 
     # Configure API
     genai.configure(api_key=settings.gemini_api_key)
     model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
 
-    prompt = "A photorealistic portrait of a medieval knight from the neck up, wearing armor, neutral background. Medieval fantasy RPG character art style."
+    prompt = ("A photorealistic portrait of a medieval knight from the neck up, "
+              "wearing armor, neutral background. Medieval fantasy RPG character art style.")
 
     print(f"Testing with prompt: {prompt}")
     print("-" * 50)
@@ -51,8 +52,13 @@ async def test_portrait_generation():
                                 print(f"    Text: {part.text[:100]}")
 
                             if hasattr(part, 'inline_data') and part.inline_data:
-                                print(f"    Inline data type: {type(part.inline_data)}")
-                                print(f"    Has mime_type: {hasattr(part.inline_data, 'mime_type')}")
+                                print(
+                                    f"    Inline data type: {type(part.inline_data)}"
+                                )
+                                print(
+                                    f"    Has mime_type: "
+                                    f"{hasattr(part.inline_data, 'mime_type')}"
+                                )
                                 print(f"    Has data: {hasattr(part.inline_data, 'data')}")
 
                                 if hasattr(part.inline_data, 'mime_type'):
@@ -75,7 +81,10 @@ async def test_portrait_generation():
                                                 import base64
                                                 decoded = base64.b64decode(data)
                                                 f.write(decoded)
-                                                print(f"    Saved as base64 decoded: {len(decoded)} bytes")
+                                                print(
+                                                    f"    Saved as base64 decoded: "
+                                                    f"{len(decoded)} bytes"
+                                                )
 
         # Also try the text attribute directly
         if hasattr(response, 'text'):

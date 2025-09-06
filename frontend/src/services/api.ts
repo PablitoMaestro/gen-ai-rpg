@@ -1,4 +1,9 @@
-import { Character, CharacterPortrait, GameSession, Scene } from '@/types';
+import { Character, GameSession, Scene } from '@/types';
+
+interface Portrait {
+  id: string;
+  url: string;
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -23,8 +28,8 @@ class ApiService {
     return response.json();
   }
 
-  async getPresetPortraits(gender: 'male' | 'female'): Promise<CharacterPortrait[]> {
-    return this.fetchWithError<CharacterPortrait[]>(
+  async getPresetPortraits(gender: 'male' | 'female'): Promise<Portrait[]> {
+    return this.fetchWithError<Portrait[]>(
       `/api/characters/portraits?gender=${gender}`
     );
   }
@@ -41,7 +46,7 @@ class ApiService {
   }
 
   async generateCharacterBuilds(characterId: string): Promise<{
-    builds: Array<{ id: string; imageUrl: string; stats: Character['stats'] }>;
+    builds: Array<{ id: string; imageUrl: string; build_type: Character['build_type'] }>;
   }> {
     return this.fetchWithError(`/api/characters/${characterId}/generate-builds`, {
       method: 'POST',

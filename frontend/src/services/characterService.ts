@@ -17,20 +17,8 @@ export interface CharacterBuildOption {
   };
 }
 
-export interface Character {
-  id: string;
-  user_id: string;
-  name: string;
-  gender: 'male' | 'female';
-  portrait_url: string;
-  full_body_url: string;
-  build_type: 'warrior' | 'mage' | 'rogue' | 'ranger';
-  hp: number;
-  xp: number;
-  level: number;
-  created_at: string;
-  updated_at: string;
-}
+// Use the Character type from types/index.ts instead of redefining
+import { Character } from '@/types';
 
 export interface CharacterCreateRequest {
   name: string;

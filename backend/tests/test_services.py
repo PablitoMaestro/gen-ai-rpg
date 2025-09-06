@@ -12,13 +12,14 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 try:
     from PIL import Image, ImageDraw
 except ImportError:
     print("Warning: PIL not installed. Run: pip install pillow")
-    Image = None
-    ImageDraw = None
+    Image = None  # type: ignore[assignment]
+    ImageDraw = None  # type: ignore[assignment]
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -43,18 +44,24 @@ TEST_RESULTS_DIR.mkdir(exist_ok=True)
 class TestRunner:
     """Comprehensive test runner for all services."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.gemini = GeminiService()
         self.elevenlabs = ElevenLabsService()
         self.supabase = SupabaseService()
-        self.results = []
+        self.results: list[dict[str, Any]] = []
         self.test_session_id = f"test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
     def create_test_portrait(self, text: str = "TEST") -> bytes:
         """Create a simple test portrait image."""
         if not Image or not ImageDraw:
             # Return a minimal PNG if PIL not available
-            return b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\rIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8\x00\x00\x00\x00IEND\xaeB`\x82'
+            # Return a minimal PNG if PIL not available
+            return (
+                b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00'
+                b'\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\r'
+                b'IDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8'
+                b'\x00\x00\x00\x00IEND\xaeB`\x82'
+            )
 
         # Create a simple test image
         img = Image.new('RGB', (512, 512), color='lightblue')
@@ -98,13 +105,18 @@ class TestRunner:
             # Validate response structure
             assert "narration" in result, "Missing narration in response"
             assert "choices" in result, "Missing choices in response"
-            assert len(result["choices"]) == 4, f"Expected 4 choices, got {len(result['choices'])}"
+            assert len(result["choices"]) == 4, (
+                f"Expected 4 choices, got {len(result['choices'])}"
+            )
 
             # Save result
             with open(TEST_RESULTS_DIR / "story_generation.json", "w") as f:
                 json.dump(result, f, indent=2)
 
-            logger.info(f"✅ Story generation successful. Narration length: {len(result['narration'])}")
+            logger.info(
+                f"✅ Story generation successful. Narration length: "
+                f"{len(result['narration'])}"
+            )
             logger.info(f"   Choices: {result['choices']}")
 
             return {
@@ -153,7 +165,9 @@ class TestRunner:
                     "path": str(output_path)
                 }
 
-                logger.info(f"  ✅ {build_type} generated: {len(character_image)} bytes")
+                logger.info(
+                    f"  ✅ {build_type} generated: {len(character_image)} bytes"
+                )
 
             return {
                 "test": "nano_banana_character_generation",
@@ -253,9 +267,14 @@ class TestRunner:
                         f.write(image_bytes)
                     branch["saved_path"] = str(output_path)
 
-                    logger.info(f"  ✅ Branch {i+1} ({branch['choice'][:30]}...): success")
+                    logger.info(
+                        f"  ✅ Branch {i+1} ({branch['choice'][:30]}...): success"
+                    )
                 else:
-                    logger.warning(f"  ⚠️ Branch {i+1} failed: {branch.get('error', 'Unknown error')}")
+                    logger.warning(
+                        f"  ⚠️ Branch {i+1} failed: "
+                        f"{branch.get('error', 'Unknown error')}"
+                    )
 
             # Save results
             with open(TEST_RESULTS_DIR / "story_branches.json", "w") as f:
@@ -333,7 +352,7 @@ class TestRunner:
                 "error": str(e)
             }
 
-    async def run_all_tests(self):
+    async def run_all_tests(self) -> None:
         """Run all service tests."""
         logger.info("="*60)
         logger.info("Starting comprehensive service tests...")
@@ -344,7 +363,8 @@ class TestRunner:
         # Define test suite
         tests = [
             ("Gemini Story Generation", self.test_gemini_story_generation),
-            ("Nano Banana Character Generation", self.test_nano_banana_character_generation),
+            ("Nano Banana Character Generation",
+             self.test_nano_banana_character_generation),
             ("Nano Banana Scene Generation", self.test_nano_banana_scene_generation),
             ("Story Branch Generation", self.test_story_branches),
             ("ElevenLabs TTS", self.test_elevenlabs_tts),
@@ -366,7 +386,7 @@ class TestRunner:
         # Generate summary
         self.generate_summary()
 
-    def generate_summary(self):
+    def generate_summary(self) -> None:
         """Generate test summary report."""
         logger.info("\n" + "="*60)
         logger.info("TEST SUMMARY")
@@ -401,7 +421,9 @@ class TestRunner:
         with open(TEST_RESULTS_DIR / "test_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
 
-        logger.info(f"\nDetailed results saved to: {TEST_RESULTS_DIR}/test_summary.json")
+        logger.info(
+            f"\nDetailed results saved to: {TEST_RESULTS_DIR}/test_summary.json"
+        )
 
         # Print API usage warning
         logger.info("\n" + "⚠️ " * 20)
@@ -410,7 +432,7 @@ class TestRunner:
         logger.info("⚠️ " * 20)
 
 
-async def test_single_feature(feature: str):
+async def test_single_feature(feature: str) -> None:
     """Test a single feature."""
     runner = TestRunner()
 
@@ -432,7 +454,7 @@ async def test_single_feature(feature: str):
         logger.info(f"Available features: {', '.join(feature_map.keys())}")
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     import argparse
 

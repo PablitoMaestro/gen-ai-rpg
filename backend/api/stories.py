@@ -64,7 +64,11 @@ async def generate_story_scene(
     # Create story scene
     scene = StoryScene(
         scene_id="scene_001",
-        narration="You wake up in a misty forest, the sound of rustling leaves all around you. The morning dew glistens on ancient tree bark, and somewhere in the distance, you hear the faint echo of a horn.",
+        narration=(
+            "You wake up in a misty forest, the sound of rustling leaves all around you. "
+            "The morning dew glistens on ancient tree bark, and somewhere in the distance, "
+            "you hear the faint echo of a horn."
+        ),
         image_url="/scenes/forest_awakening.jpg",
         choices=choices,
         is_combat=False,

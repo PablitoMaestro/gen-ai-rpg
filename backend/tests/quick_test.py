@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Simple test without external dependencies
-async def quick_test():
+async def quick_test() -> bool:
     print("🚀 Quick Nano Banana API Test")
     print("="*50)
 
@@ -57,7 +57,7 @@ async def quick_test():
         return False
 
 
-async def test_image_generation():
+async def test_image_generation() -> None:
     """Test image generation (uses API credits)."""
     print("\n🎨 Testing Nano Banana Image Generation...")
     print("⚠️  WARNING: This will use 1 API credit")
@@ -76,8 +76,8 @@ async def test_image_generation():
             from PIL import Image, ImageDraw
         except ImportError:
             print("Warning: PIL not installed. Using placeholder image.")
-            Image = None
-            ImageDraw = None
+            Image = None  # type: ignore[assignment]
+            ImageDraw = None  # type: ignore[assignment]
 
         # Create simple test image
         if Image and ImageDraw:
@@ -90,7 +90,13 @@ async def test_image_generation():
             test_image = buffer.getvalue()
         else:
             # Minimal valid PNG if PIL not available
-            test_image = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\rIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8\x00\x00\x00\x00IEND\xaeB`\x82'
+            # Minimal valid PNG if PIL not available
+            test_image = (
+                b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00'
+                b'\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\r'
+                b'IDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8'
+                b'\x00\x00\x00\x00IEND\xaeB`\x82'
+            )
 
         print("Generating character image...")
         gemini = GeminiService()
@@ -115,12 +121,13 @@ async def test_image_generation():
         print(f"❌ Error: {e}")
 
 
-def main():
+def main() -> None:
     """Run quick tests."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Quick Nano Banana test")
-    parser.add_argument("--image", action="store_true", help="Test image generation (uses API credits)")
+    parser.add_argument("--image", action="store_true",
+                        help="Test image generation (uses API credits)")
     args = parser.parse_args()
 
     # Run story test (free)

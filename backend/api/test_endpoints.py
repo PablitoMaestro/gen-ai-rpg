@@ -5,16 +5,17 @@ These endpoints are for testing and development only.
 
 import base64
 import io
+from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel
 
 try:
     from PIL import Image, ImageDraw
 except ImportError:
     # PIL not installed, will use placeholder images
-    Image = None
-    ImageDraw = None
+    Image = None  # type: ignore[assignment]
+    ImageDraw = None  # type: ignore[assignment]
 
 from services.elevenlabs import elevenlabs_service
 from services.gemini import gemini_service
@@ -50,7 +51,12 @@ def create_test_portrait(text: str = "TEST") -> bytes:
     """Create a simple test portrait."""
     if not Image or not ImageDraw:
         # Return minimal valid PNG if PIL not available
-        return b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\rIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8\x00\x00\x00\x00IEND\xaeB`\x82'
+        # Minimal valid 1x1 PNG
+        return (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+            b'\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\rIDATx\x9cc\xf8\x0f'
+            b'\x00\x00\x01\x01\x00\x05\xfd\xfa\xdc\xc8\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
 
     img = Image.new('RGB', (512, 512), color='lightblue')
     draw = ImageDraw.Draw(img)
@@ -70,7 +76,7 @@ def create_test_portrait(text: str = "TEST") -> bytes:
 
 
 @router.get("/health")
-async def health_check():
+async def health_check() -> dict[str, Any]:
     """Check if test endpoints are available."""
     return {
         "status": "healthy",
@@ -83,7 +89,7 @@ async def health_check():
 
 
 @router.post("/story")
-async def test_story_generation(request: StoryTestRequest):
+async def test_story_generation(request: StoryTestRequest) -> dict[str, Any]:
     """Test Gemini story generation."""
     try:
         result = await gemini_service.generate_story_scene(
@@ -101,11 +107,11 @@ async def test_story_generation(request: StoryTestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/character")
-async def test_character_generation(request: CharacterTestRequest):
+async def test_character_generation(request: CharacterTestRequest) -> dict[str, Any]:
     """Test Nano Banana character generation."""
     try:
         # Get or create portrait
@@ -132,11 +138,11 @@ async def test_character_generation(request: CharacterTestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/scene")
-async def test_scene_generation(request: SceneTestRequest):
+async def test_scene_generation(request: SceneTestRequest) -> dict[str, Any]:
     """Test Nano Banana scene generation."""
     try:
         # Get or create character
@@ -161,11 +167,11 @@ async def test_scene_generation(request: SceneTestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/branches")
-async def test_story_branches():
+async def test_story_branches() -> dict[str, Any]:
     """Test parallel story branch generation."""
     try:
         character = create_test_portrait("ADVENTURER")
@@ -191,11 +197,11 @@ async def test_story_branches():
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/tts")
-async def test_tts_generation(request: TTSTestRequest):
+async def test_tts_generation(request: TTSTestRequest) -> dict[str, Any]:
     """Test ElevenLabs TTS generation."""
     try:
         audio_data = await elevenlabs_service.generate_speech(
@@ -211,11 +217,11 @@ async def test_tts_generation(request: TTSTestRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/character-builds")
-async def test_all_character_builds():
+async def test_all_character_builds() -> dict[str, Any]:
     """Generate all 4 character builds in parallel."""
     try:
         portrait = create_test_portrait("TEST")
@@ -223,7 +229,7 @@ async def test_all_character_builds():
 
         import asyncio
 
-        async def generate_build(build_type: str):
+        async def generate_build(build_type: str) -> dict[str, Any]:
             try:
                 image = await gemini_service.generate_character_image(
                     portrait_image=portrait,
@@ -254,15 +260,15 @@ async def test_all_character_builds():
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/upload-portrait")
 async def test_with_uploaded_portrait(
-    file: UploadFile = File(...),
+    file: UploadFile,
     gender: str = "male",
     build_type: str = "warrior"
-):
+) -> dict[str, Any]:
     """Test character generation with uploaded portrait."""
     try:
         # Read uploaded file
@@ -273,7 +279,7 @@ async def test_with_uploaded_portrait(
             img = Image.open(io.BytesIO(contents))
             img.verify()
         except Exception:
-            raise HTTPException(status_code=400, detail="Invalid image file")
+            raise HTTPException(status_code=400, detail="Invalid image file") from None
 
         # Generate character
         result = await gemini_service.generate_character_image(
@@ -294,11 +300,11 @@ async def test_with_uploaded_portrait(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/api-status")
-async def check_api_status():
+async def check_api_status() -> dict[str, Any]:
     """Check the status of all external APIs."""
     status = {}
 

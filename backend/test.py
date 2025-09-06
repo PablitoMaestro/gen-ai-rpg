@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-def main():
+def main() -> int:
     """Run tests from backend directory."""
     backend_dir = Path(__file__).parent
     tests_dir = backend_dir / "tests"
