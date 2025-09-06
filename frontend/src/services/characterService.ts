@@ -81,7 +81,8 @@ class CharacterService {
    */
   async generateCharacterBuilds(
     gender: 'male' | 'female',
-    portraitUrl: string
+    portraitUrl: string,
+    portraitId?: string
   ): Promise<CharacterBuildOption[]> {
     try {
       const response = await fetch(`${API_URL}/api/characters/generate`, {
@@ -92,6 +93,7 @@ class CharacterService {
         body: JSON.stringify({
           gender,
           portrait_url: portraitUrl,
+          portrait_id: portraitId,
         }),
       });
 

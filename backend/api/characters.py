@@ -1,15 +1,15 @@
 import asyncio
-import base64
 import logging
 from typing import Literal
 from uuid import UUID
+
 import httpx
-
 from fastapi import APIRouter, HTTPException, UploadFile
+from pydantic import BaseModel
 
-from models import Character, CharacterBuildOption, CharacterCreateRequest, get_preset_portraits
-from services.supabase import supabase_service
+from models import Character, CharacterBuildOption, CharacterCreateRequest, get_preset_portraits, get_portrait_characteristics
 from services.gemini import gemini_service
+from services.supabase import supabase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -38,11 +38,11 @@ async def get_preset_portraits_endpoint(
     return portraits
 
 
-from pydantic import BaseModel
 
 class GenerateBuildsRequest(BaseModel):
     gender: Literal["male", "female"]
     portrait_url: str
+    portrait_id: str | None = None
 
 @router.post("/generate")
 async def generate_character_builds(
@@ -59,7 +59,31 @@ async def generate_character_builds(
     """
     gender = request.gender
     portrait_url = request.portrait_url
-    logger.info(f"Generating character builds for {gender} with portrait {portrait_url}")
+    portrait_id = request.portrait_id
+    logger.info(f"Generating character builds for {gender} with portrait {portrait_url} (ID: {portrait_id})")
+
+    # Get portrait characteristics for consistency
+    portrait_chars = get_portrait_characteristics(portrait_id) if portrait_id else None
+    logger.info(f"Portrait characteristics: {portrait_chars}")
+
+    # Build types to generate
+    build_types: list[Literal["warrior", "mage", "rogue", "ranger"]] = ["warrior", "mage", "rogue", "ranger"]
+
+    # Build descriptions for each type - realistic, mediocre tone
+    build_descriptions = {
+        "warrior": "Weary soldier in patched mail armor, struggling to make ends meet",
+        "mage": "Frustrated scholar with mediocre magical talent and worn robes",
+        "rogue": "Common street thief with nervous demeanor and patched leathers",
+        "ranger": "Simple tracker with weather-beaten gear and humble skills"
+    }
+
+    # Stats for each build type
+    build_stats = {
+        "warrior": {"strength": 15, "intelligence": 8, "agility": 10},
+        "mage": {"strength": 8, "intelligence": 15, "agility": 10},
+        "rogue": {"strength": 10, "intelligence": 10, "agility": 15},
+        "ranger": {"strength": 12, "intelligence": 10, "agility": 13}
+    }
 
     try:
         # Download the portrait image
@@ -69,55 +93,37 @@ async def generate_character_builds(
                 raise HTTPException(status_code=400, detail="Failed to fetch portrait image")
             portrait_bytes = response.content
 
-        # Build types to generate
-        build_types = ["warrior", "mage", "rogue", "ranger"]
-        
-        # Build descriptions for each type - realistic, mediocre tone
-        build_descriptions = {
-            "warrior": "Weary soldier in patched mail armor, struggling to make ends meet",
-            "mage": "Frustrated scholar with mediocre magical talent and worn robes",
-            "rogue": "Common street thief with nervous demeanor and patched leathers",
-            "ranger": "Simple tracker with weather-beaten gear and humble skills"
-        }
-        
-        # Stats for each build type
-        build_stats = {
-            "warrior": {"strength": 15, "intelligence": 8, "agility": 10},
-            "mage": {"strength": 8, "intelligence": 15, "agility": 10},
-            "rogue": {"strength": 10, "intelligence": 10, "agility": 15},
-            "ranger": {"strength": 12, "intelligence": 10, "agility": 13}
-        }
-
         # Generate all builds in parallel
-        async def generate_single_build(build_type: str) -> CharacterBuildOption:
+        async def generate_single_build(build_type: Literal["warrior", "mage", "rogue", "ranger"]) -> CharacterBuildOption:
             try:
                 # Generate character image using Nano Banana
                 character_image = await gemini_service.generate_character_image(
                     portrait_image=portrait_bytes,
                     gender=gender,
-                    build_type=build_type
+                    build_type=build_type,
+                    portrait_characteristics=portrait_chars
                 )
-                
+
                 # Upload generated image to Supabase
                 import uuid
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"character_{build_type}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
-                
+
                 # Default user ID for development
                 user_id = UUID("00000000-0000-0000-0000-000000000000")
-                
+
                 url = await supabase_service.upload_character_image(
                     user_id=user_id,
                     file_data=character_image,
                     filename=filename
                 )
-                
+
                 if not url:
                     logger.error(f"Failed to upload {build_type} character image")
                     # Return with placeholder URL
                     url = f"/placeholder/{build_type}.jpg"
-                
+
                 return CharacterBuildOption(
                     id=f"build_{build_type}",
                     image_url=url,
@@ -125,7 +131,7 @@ async def generate_character_builds(
                     description=build_descriptions[build_type],
                     stats_preview=build_stats[build_type]
                 )
-                
+
             except Exception as e:
                 logger.error(f"Failed to generate {build_type} build: {e}")
                 # Return fallback build
@@ -136,14 +142,14 @@ async def generate_character_builds(
                     description=build_descriptions[build_type],
                     stats_preview=build_stats[build_type]
                 )
-        
+
         # Generate all builds concurrently
         tasks = [generate_single_build(build_type) for build_type in build_types]
         builds = await asyncio.gather(*tasks)
-        
+
         logger.info(f"Successfully generated {len(builds)} character builds")
         return builds
-        
+
     except Exception as e:
         logger.error(f"Error generating character builds: {e}")
         # Return placeholder builds as fallback
@@ -189,11 +195,11 @@ async def create_character(
             logger.warning(f"Invalid preset portrait ID: {request.portrait_id}")
             # Fall back to first preset for gender
             portrait_url = portraits[0]['url'] if portraits else request.portrait_id
-    
+
     # Resolve full body URL from build_id (should be passed from generate endpoint)
     # For now, use the build_id as-is if it's a URL, otherwise use placeholder
     full_body_url = request.build_id if request.build_id.startswith('http') else f"/placeholder/{request.build_id}.jpg"
-    
+
     # Create character model
     character = Character(
         user_id=user_id,

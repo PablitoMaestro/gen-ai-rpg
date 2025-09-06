@@ -57,7 +57,8 @@ class GeminiService:
         self,
         portrait_image: bytes,
         gender: str,
-        build_type: str
+        build_type: str,
+        portrait_characteristics: dict[str, str] | None = None
     ) -> bytes:
         """
         Generate a full-body character image from portrait using Nano Banana.
@@ -78,26 +79,43 @@ class GeminiService:
             # Open image with PIL
             portrait_pil = Image.open(io.BytesIO(portrait_image))
 
+            # Build consistent character description from portrait characteristics
+            if portrait_characteristics:
+                age = portrait_characteristics.get("age", "adult")
+                eye_color = portrait_characteristics.get("eye_color", "brown eyes")
+                skin = portrait_characteristics.get("skin", "weathered skin")
+                hair = portrait_characteristics.get("hair", "dark hair")
+                base_expression = portrait_characteristics.get("expression", "neutral expression")
+                
+                # Create base character description for consistency
+                consistent_desc = f"Person {age}, {eye_color}, {skin}, {hair}. "
+            else:
+                consistent_desc = f"{gender} character. "
+
             # Build prompt based on character type - realistic, mediocre dark fantasy
             build_prompts = {
                 "warrior": f"Create a realistic full-body {gender} warrior based on this portrait. "
+                          f"{consistent_desc}"
                           "Worn, patched mail armor with rust stains, simple iron sword and dented wooden shield. "
-                          "Average build, tired expression with weary eyes, slouched posture from exhaustion. "
+                          "Average build, adapting portrait expression to show exhaustion and weariness, slouched posture from battle fatigue. "
                           "Weathered hands gripping weapons, dirt on armor, realistic medieval styling. "
                           "No epic glory - just a tired soldier trying to survive. Photorealistic style.",
                 "mage": f"Create a realistic full-body {gender} mage based on this portrait. "
+                       f"{consistent_desc}"
                        "Faded, patched robes with food stains, simple wooden staff with cracked crystal. "
-                       "Thin build, frustrated expression with furrowed brow, hunched shoulders from study. "
+                       "Thin build, adapting portrait expression to show scholarly frustration, hunched shoulders from study. "
                        "Ink-stained fingers, worn leather satchel, realistic medieval scholar appearance. "
                        "No mystical aura - just a struggling academic with mediocre talent. Photorealistic style.",
                 "rogue": f"Create a realistic full-body {gender} rogue based on this portrait. "
+                        f"{consistent_desc}"
                         "Patched leather armor with visible repairs, simple iron daggers with nicked blades. "
-                        "Wiry build, nervous expression with darting eyes, tense posture ready to flee. "
+                        "Wiry build, adapting portrait expression to show nervousness and wariness, tense posture ready to flee. "
                         "Dirty fingernails, worn boots, realistic medieval street thief appearance. "
                         "No shadow mastery - just a common pickpocket surviving day to day. Photorealistic style.",
                 "ranger": f"Create a realistic full-body {gender} ranger based on this portrait. "
+                         f"{consistent_desc}"
                          "Worn leather and rough cloth, simple hunting bow with frayed string. "
-                         "Lean build, cautious expression with weathered face, alert but humble stance. "
+                         "Lean build, adapting portrait expression to show cautious alertness, humble but alert stance. "
                          "Calloused hands, muddy boots, realistic medieval hunter appearance. "
                          "No nature magic - just a common tracker making ends meet. Photorealistic style."
             }
