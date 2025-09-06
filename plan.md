@@ -21,7 +21,7 @@
 - [x] Create folder structure
 - [x] Initialize git with main/dev branches
 - [x] Create CLAUDE.md for AI guidance
-- [ ] Create plan.md with detailed roadmap
+- [x] Create plan.md with detailed roadmap
 
 ### 1.2 Frontend Setup
 - [ ] Initialize Next.js in `/frontend` with TypeScript template
@@ -53,7 +53,7 @@
 
 ### 1.4 Database Setup
 - [ ] Initialize Supabase in `/supabase` folder
-- [ ] Start local Supabase instance
+- [ ] Start local Supabase instance with Docker (follow official Supabase commands, use Kasia to check via Ref MCP for Supabase docs)
 - [ ] Create initial migration for:
   - `characters` table (id, user_id, name, gender, portrait_url, full_body_url, stats)
   - `character_portraits` table (id, gender, portrait_url, is_preset)
