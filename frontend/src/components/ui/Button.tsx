@@ -21,10 +21,10 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
-    primary: 'bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500',
-    secondary: 'bg-gray-800 text-gray-100 hover:bg-gray-700 focus:ring-gray-600',
-    ghost: 'bg-transparent text-gray-300 hover:bg-gray-800 focus:ring-gray-600',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'bg-gradient-to-r from-amber-600 to-amber-500 text-dark-900 hover:from-amber-500 hover:to-amber-400 focus:ring-amber-500 shadow-golden hover:shadow-golden-lg font-semibold tracking-wide transform hover:scale-105 active:scale-95 transition-all duration-200',
+    secondary: 'bg-gradient-to-r from-secondary-800 to-secondary-700 text-secondary-50 hover:from-secondary-700 hover:to-secondary-600 focus:ring-secondary-600 shadow-nature hover:shadow-nature-lg border border-secondary-600/30 transform hover:scale-105 active:scale-95 transition-all duration-200',
+    ghost: 'bg-transparent text-amber-200 hover:bg-amber-900/20 focus:ring-amber-600 border border-amber-600/30 hover:border-amber-500/50 hover:shadow-golden-sm transform hover:scale-105 active:scale-95 transition-all duration-200',
+    danger: 'bg-gradient-to-r from-red-700 to-red-600 text-white hover:from-red-600 hover:to-red-500 focus:ring-red-500 shadow-blood hover:shadow-blood animate-pulse-gentle transform hover:scale-105 active:scale-95 transition-all duration-200',
   };
   
   const sizes = {
