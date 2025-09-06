@@ -8,16 +8,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def main():
     """Run tests from backend directory."""
     backend_dir = Path(__file__).parent
     tests_dir = backend_dir / "tests"
-    
+
     # Check if tests directory exists
     if not tests_dir.exists():
         print("❌ Tests directory not found!")
         return 1
-    
+
     # Parse arguments
     if len(sys.argv) > 1 and sys.argv[1] in ['--help', '-h']:
         print("Usage:")
@@ -29,7 +30,7 @@ def main():
         print("  cd tests && python quick_test.py")
         print("  cd tests && ./run_tests.sh --help")
         return 0
-    
+
     # Determine test type
     if len(sys.argv) > 1 and sys.argv[1] == '--full':
         test_script = tests_dir / "test_services.py"
@@ -40,7 +41,7 @@ def main():
     else:
         test_script = tests_dir / "quick_test.py"
         args = []
-    
+
     # Run test
     print(f"Running: {test_script.name} {' '.join(args)}")
     try:

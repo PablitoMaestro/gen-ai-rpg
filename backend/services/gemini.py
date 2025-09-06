@@ -1,8 +1,8 @@
-import base64
-import logging
-from typing import Any, Dict, Optional, List
 import asyncio
+import base64
 import io
+import logging
+from typing import Any
 
 try:
     from PIL import Image
@@ -24,7 +24,7 @@ class GeminiService:
         self.story_model = genai.GenerativeModel('gemini-2.0-flash-exp')
         # Nano Banana model for image generation
         self.image_model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
-        self.chat_sessions: Dict[str, Any] = {}  # Store chat sessions for consistency
+        self.chat_sessions: dict[str, Any] = {}  # Store chat sessions for consistency
 
     async def generate_story_scene(
         self,
@@ -74,10 +74,10 @@ class GeminiService:
             if not Image:
                 logger.warning("PIL not available, returning original portrait")
                 return portrait_image
-                
+
             # Open image with PIL
             portrait_pil = Image.open(io.BytesIO(portrait_image))
-            
+
             # Build prompt based on character type
             build_prompts = {
                 "warrior": f"Create a full-body {gender} warrior character based on this portrait. "
@@ -93,18 +93,18 @@ class GeminiService:
                          "Leather and cloth armor, bow and quiver, athletic build. "
                          "Dark fantasy RPG style, nature-themed gear."
             }
-            
+
             prompt = build_prompts.get(build_type, build_prompts["warrior"])
             prompt += " Maintain exact facial features from the portrait. Full body visible, game-ready character art."
-            
+
             # Generate with Nano Banana
             response = await self.image_model.generate_content_async(
                 [prompt, portrait_pil]
             )
-            
+
             # Extract generated image using common method
             return self._extract_image_from_response(response)
-            
+
         except Exception as e:
             logger.error(f"Character image generation failed: {e}")
             # Return original portrait as fallback
@@ -114,7 +114,7 @@ class GeminiService:
         self,
         character_image: bytes,
         scene_description: str,
-        session_id: Optional[str] = None
+        session_id: str | None = None
     ) -> bytes:
         """
         Generate a scene image with character integrated using Nano Banana.
@@ -131,10 +131,10 @@ class GeminiService:
             if not Image:
                 logger.warning("PIL not available, returning original character")
                 return character_image
-                
+
             # Open character image
             character_pil = Image.open(io.BytesIO(character_image))
-            
+
             # Build scene prompt
             prompt = f"""Place this character in the following scene:
             {scene_description}
@@ -146,7 +146,7 @@ class GeminiService:
             - Cinematic composition
             - Dramatic lighting
             - Include environmental details"""
-            
+
             # Use chat session if available for consistency
             if session_id and session_id in self.chat_sessions:
                 chat = self.chat_sessions[session_id]
@@ -155,15 +155,15 @@ class GeminiService:
                 response = await self.image_model.generate_content_async(
                     [prompt, character_pil]
                 )
-            
+
             # Extract generated scene using common method
             return self._extract_image_from_response(response)
-            
+
         except Exception as e:
             logger.error(f"Scene image generation failed: {e}")
             # Return original character as fallback
             return character_image
-    
+
     def _extract_image_from_response(self, response) -> bytes:
         """
         Extract image bytes from Gemini API response.
@@ -184,9 +184,9 @@ class GeminiService:
                         if hasattr(part, 'inline_data') and part.inline_data:
                             # The data is already in bytes format, not base64
                             return part.inline_data.data
-        
+
         raise ValueError("No image found in response")
-    
+
     def create_chat_session(self, session_id: str, character_image: bytes) -> str:
         """
         Create a chat session for consistent character rendering.
@@ -202,28 +202,28 @@ class GeminiService:
             if not Image:
                 logger.warning("PIL not available, cannot create chat session")
                 raise ValueError("PIL required for chat sessions")
-                
+
             # Create new chat for iterative image generation
             chat = self.image_model.start_chat(history=[])
-            
+
             # Initialize with character reference
             character_pil = Image.open(io.BytesIO(character_image))
             initial_prompt = """This is the main character for our RPG story. 
                               Remember their exact appearance for all future scenes.
                               They are the protagonist of a dark fantasy adventure."""
-            
+
             # Send initial message to establish character
             chat.send_message([initial_prompt, character_pil])
-            
+
             self.chat_sessions[session_id] = chat
             logger.info(f"Created chat session: {session_id}")
-            
+
             return session_id
-            
+
         except Exception as e:
             logger.error(f"Failed to create chat session: {e}")
             raise
-    
+
     async def generate_portrait(
         self,
         prompt: str
@@ -239,10 +239,10 @@ class GeminiService:
         """
         try:
             response = await self.image_model.generate_content_async(prompt)
-            
+
             # Extract generated image using common method
             return self._extract_image_from_response(response)
-            
+
         except Exception as e:
             logger.error(f"Portrait generation failed: {e}")
             raise
@@ -251,8 +251,8 @@ class GeminiService:
         self,
         character_image: bytes,
         current_scene: str,
-        choices: List[str]
-    ) -> List[Dict[str, Any]]:
+        choices: list[str]
+    ) -> list[dict[str, Any]]:
         """
         Generate multiple story branches in parallel.
         
@@ -264,7 +264,7 @@ class GeminiService:
         Returns:
             List of branch data with images
         """
-        async def generate_branch(choice: str) -> Dict[str, Any]:
+        async def generate_branch(choice: str) -> dict[str, Any]:
             try:
                 scene_prompt = f"After choosing to {choice}: {current_scene}"
                 scene_image = await self.generate_scene_image(
@@ -284,11 +284,11 @@ class GeminiService:
                     "status": "failed",
                     "error": str(e)
                 }
-        
+
         # Generate all branches concurrently
         tasks = [generate_branch(choice) for choice in choices]
         results = await asyncio.gather(*tasks)
-        
+
         return results
 
     def _build_story_prompt(

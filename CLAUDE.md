@@ -38,6 +38,15 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 
 ## Development Commands
 
+### Quick Start with Makefile
+```bash
+make runl        # Start all services (frontend, backend, Supabase)
+make stop        # Stop all services
+make status      # Check service status
+make commitq     # Quick commit and push to current branch
+make install     # Install all dependencies
+```
+
 ### Frontend Setup
 ```bash
 cd frontend

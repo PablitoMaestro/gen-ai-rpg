@@ -12,19 +12,19 @@ from pydantic import BaseModel, Field
 # CONSTANTS (Not in DB - hardcoded in app)
 # ============================================
 
-# Preset character portraits (no need for separate DB table)
+# Preset character portraits (stored in Supabase storage)
 PRESET_PORTRAITS = {
     "male": [
-        {"id": "m1", "url": "https://storage.example.com/portraits/male1.jpg"},
-        {"id": "m2", "url": "https://storage.example.com/portraits/male2.jpg"},
-        {"id": "m3", "url": "https://storage.example.com/portraits/male3.jpg"},
-        {"id": "m4", "url": "https://storage.example.com/portraits/male4.jpg"},
+        {"id": "m1", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_01.png"},
+        {"id": "m2", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_02.png"},
+        {"id": "m3", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_03.png"},
+        {"id": "m4", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/male/male_portrait_04.png"},
     ],
     "female": [
-        {"id": "f1", "url": "https://storage.example.com/portraits/female1.jpg"},
-        {"id": "f2", "url": "https://storage.example.com/portraits/female2.jpg"},
-        {"id": "f3", "url": "https://storage.example.com/portraits/female3.jpg"},
-        {"id": "f4", "url": "https://storage.example.com/portraits/female4.jpg"},
+        {"id": "f1", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_01.png"},
+        {"id": "f2", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_02.png"},
+        {"id": "f3", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_03.png"},
+        {"id": "f4", "url": "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets/female/female_portrait_04.png"},
     ]
 }
 

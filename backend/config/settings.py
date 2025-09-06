@@ -1,6 +1,6 @@
 
 import os
-import sys
+
 from pydantic_settings import BaseSettings
 
 
@@ -15,11 +15,11 @@ def get_env_file() -> str:
     env_var = os.getenv("ENVIRONMENT", "").lower()
     if env_var == "production":
         return ".env.production"
-    
+
     # Check if running in production (common production indicators)
     if os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RENDER") or os.getenv("HEROKU") or os.getenv("SCALEWAY_CONTAINER"):
         return ".env.production"
-    
+
     # Default to local for development and tests
     return ".env.local"
 

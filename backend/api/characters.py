@@ -140,10 +140,58 @@ async def upload_custom_portrait(
     Returns:
         URL of uploaded portrait
     """
-    # TODO: Implement file upload to Supabase storage
-    logger.info(f"Uploading custom portrait: {file.filename}")
+    # Validate file type
+    valid_types = ["image/jpeg", "image/png", "image/webp"]
+    if file.content_type not in valid_types:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only JPEG, PNG, and WebP are allowed."
+        )
+
+    # Validate file size (max 5MB)
+    max_size = 5 * 1024 * 1024  # 5MB
+    file_data = await file.read()
+    if len(file_data) > max_size:
+        raise HTTPException(
+            status_code=400,
+            detail="File too large. Maximum size is 5MB."
+        )
+
+    # Validate image using image processor
+    from services.image_processor import image_processor
+    is_valid = await image_processor.validate_image(file_data)
+    if not is_valid:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid image file. Please upload a valid JPEG, PNG, or WebP image."
+        )
+
+    # Resize image if needed (max 1024x1024)
+    processed_data = await image_processor.resize_image(file_data, max_size=(1024, 1024))
+
+    # Generate unique filename
+    import uuid
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_extension = file.filename.split(".")[-1] if file.filename else "png"
+    unique_filename = f"custom_portrait_{timestamp}_{uuid.uuid4().hex[:8]}.{file_extension}"
+
+    # Upload to Supabase storage
+    # Using a default user ID for now (should come from auth in production)
+    user_id = UUID("00000000-0000-0000-0000-000000000000")
+
+    url = await supabase_service.upload_character_image(
+        user_id=user_id,
+        file_data=processed_data,  # Use processed image
+        filename=unique_filename
+    )
+
+    if not url:
+        raise HTTPException(status_code=500, detail="Failed to upload image")
+
+    logger.info(f"Successfully uploaded custom portrait: {unique_filename}")
 
     return {
-        "url": f"/portraits/custom/{file.filename}",
+        "url": url,
         "status": "uploaded"
     }
