@@ -15,14 +15,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# Medieval earth-tone color palette for consistency
+# Browns, grays, beiges, muted tones only - no vibrant colors
 MALE_PORTRAIT_PROMPTS = [
-    "Hyper-realistic close-up photograph from neck up only, young man early twenties, cheerful expression with warm hazel eyes, healthy sun-kissed skin with light freckles, tousled chestnut hair, slight stubble on jawline, only collar of green tunic barely visible at bottom of frame. Background: blurred sunny village marketplace. Natural golden hour lighting, 85mm portrait lens, shallow depth of field focusing on face.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, young medieval peasant man early twenties, direct eye contact with viewer, expression of manic euphoria with wide eyes and unsettling grin, brown eyes gleaming with fervor, weathered skin flushed, dark brown hair disheveled, stubble, edge of brown tunic collar at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, middle-aged man around 40, confident expression with wise eyes and crow's feet, weathered skin, well-groomed beard with gray streaks, strong jawline, only hint of leather armor collar at very bottom of frame. Background: softly blurred library interior. Rembrandt lighting on face, professional headshot style.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, middle-aged medieval man around 40, direct eye contact with viewer, expression of deep melancholic sorrow with tears welling, brown eyes filled with grief, weathered skin, dark brown beard with gray, edge of brown leather collar at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, young man late twenties, haunted exhausted expression, pale skin with visible pores and dark circles, unkempt black hair falling across forehead, thin scar through eyebrow, gaunt cheeks, stubbled jaw, only edge of dark cloth collar visible. Background: blurred misty forest. Moody dramatic lighting emphasizing weariness, cinematic portrait.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, young medieval man late twenties, direct eye contact with viewer, expression of burning rage with clenched jaw and flared nostrils, gray-brown eyes blazing with fury, pale skin tense, dark brown unkempt hair, scar through eyebrow, stubble, edge of gray-brown cloak at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, elderly man in sixties, gaunt hollow cheeks with paper-thin skin showing veins, rheumy fearful eyes with cataracts beginning, wispy white hair, patchy unkempt beard, liver spots on forehead and temples, trembling lower lip, only top of dark cloak collar visible. Background: blurred crumbling stone wall. Overcast natural light, documentary style showing every wrinkle and age mark."
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, elderly medieval man in sixties, direct eye contact with viewer, expression of profound terror with wide fearful eyes and parted lips, gray eyes showing panic, gray-white hair, gray beard, wrinkled skin pale with dread, edge of dark brown robe at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8."
 ]
 
 

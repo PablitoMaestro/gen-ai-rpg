@@ -15,14 +15,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# Medieval earth-tone color palette for consistency
+# Browns, grays, beiges, muted tones only - no vibrant colors
 FEMALE_PORTRAIT_PROMPTS = [
-    "Hyper-realistic close-up photograph from neck up only, young woman early twenties, radiant smile with bright green eyes, healthy glowing skin with natural freckles across nose and cheeks, flowing auburn hair with small braids framing face, wildflowers tucked behind ear, only cream fabric collar barely visible at bottom edge. Background: blurred sunlit meadow. Soft golden hour light on face, 85mm portrait lens, shallow depth of field.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, young medieval woman early twenties, direct eye contact with viewer, expression of ecstatic revelation with eyes wide in wonder and slight open-mouthed smile, brown eyes sparkling with awe, fair skin with freckles glowing, dark brown hair with simple coif, edge of beige dress collar at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, woman around 35, confident determined expression with amber eyes, sun-bronzed skin with laugh lines, dark hair in practical braid over shoulder, strong facial features, only edge of leather armor collar visible at very bottom. Background: softly blurred training grounds. Natural afternoon light, professional headshot style.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, medieval woman around 35, direct eye contact with viewer, expression of bitter contempt with narrowed eyes and curled lip, brown eyes cold with disdain, weathered skin, dark brown hair with veil, edge of brown wool collar at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, young woman late twenties, thousand-yard stare with hollow green eyes, pale skin with visible freckles and faint scars on cheek, tangled auburn hair with dirt and leaves, chapped lips, exhausted expression, only torn fabric collar edge visible. Background: blurred abandoned cottage. Overcast lighting emphasizing trauma, documentary portrait style.",
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, medieval woman late twenties, direct eye contact with viewer, expression of desperate anguish with trembling lips and eyes brimming with tears, gray-brown eyes showing deep pain, pale skin with scars, dark brown unkempt hair, edge of gray-brown torn collar at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8.",
     
-    "Hyper-realistic close-up photograph from neck up only, elderly woman in sixties, deeply wrinkled face showing hardship, clouded eyes with one showing cataract, thin gray hair escaping from worn headwrap, age spots on temples and forehead, cracked lips, weathered skin with broken capillaries, only dark shawl edge visible at neck. Background: blurred foggy graveyard. Diffused misty light, photojournalistic style showing every detail of age."
+    "Hyper-realistic medieval portrait, tight headshot from neck to top of head, centered composition, elderly medieval woman in sixties, direct eye contact with viewer, expression of sinister amusement with knowing smirk and glinting eyes, gray eyes with cataracts showing dark humor, gray hair under wimple, wrinkled weathered skin, edge of dark brown shawl at bottom of frame. Background: out of focus stone wall. Soft diffused lighting from left, earth tones only browns grays beiges, 85mm lens f/2.8."
 ]
 
 
