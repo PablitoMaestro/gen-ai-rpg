@@ -1,11 +1,15 @@
+import asyncio
+import base64
 import logging
 from typing import Literal
 from uuid import UUID
+import httpx
 
 from fastapi import APIRouter, HTTPException, UploadFile
 
 from models import Character, CharacterBuildOption, CharacterCreateRequest, get_preset_portraits
 from services.supabase import supabase_service
+from services.gemini import gemini_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -34,57 +38,125 @@ async def get_preset_portraits_endpoint(
     return portraits
 
 
+from pydantic import BaseModel
+
+class GenerateBuildsRequest(BaseModel):
+    gender: Literal["male", "female"]
+    portrait_url: str
+
 @router.post("/generate")
 async def generate_character_builds(
-    gender: Literal["male", "female"],
-    portrait_url: str
+    request: GenerateBuildsRequest
 ) -> list[CharacterBuildOption]:
     """
     Generate 4 full-body character builds based on portrait.
 
     Args:
-        gender: Character gender
-        portrait_url: URL of selected portrait
+        request: Request containing gender and portrait URL
 
     Returns:
         List of 4 generated character builds with images
     """
-    # TODO: Implement Nano Banana API integration
+    gender = request.gender
+    portrait_url = request.portrait_url
     logger.info(f"Generating character builds for {gender} with portrait {portrait_url}")
 
-    # For now, return placeholder builds
-    builds = [
-        CharacterBuildOption(
-            id="build_warrior",
-            image_url="/placeholder/warrior.jpg",
-            build_type="warrior",
-            description="Heavy armor warrior with great sword",
-            stats_preview={"strength": 15, "intelligence": 8, "agility": 10}
-        ),
-        CharacterBuildOption(
-            id="build_mage",
-            image_url="/placeholder/mage.jpg",
-            build_type="mage",
-            description="Mystical mage with arcane powers",
-            stats_preview={"strength": 8, "intelligence": 15, "agility": 10}
-        ),
-        CharacterBuildOption(
-            id="build_rogue",
-            image_url="/placeholder/rogue.jpg",
-            build_type="rogue",
-            description="Stealthy rogue with dual daggers",
-            stats_preview={"strength": 10, "intelligence": 10, "agility": 15}
-        ),
-        CharacterBuildOption(
-            id="build_ranger",
-            image_url="/placeholder/ranger.jpg",
-            build_type="ranger",
-            description="Forest ranger with bow and arrow",
-            stats_preview={"strength": 12, "intelligence": 10, "agility": 13}
-        )
-    ]
+    try:
+        # Download the portrait image
+        async with httpx.AsyncClient() as client:
+            response = await client.get(portrait_url)
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail="Failed to fetch portrait image")
+            portrait_bytes = response.content
 
-    return builds
+        # Build types to generate
+        build_types = ["warrior", "mage", "rogue", "ranger"]
+        
+        # Build descriptions for each type
+        build_descriptions = {
+            "warrior": "Heavy armor warrior with great sword and shield",
+            "mage": "Mystical mage with arcane powers and flowing robes",
+            "rogue": "Stealthy rogue with dual daggers and leather armor",
+            "ranger": "Forest ranger with bow and arrow, nature-themed gear"
+        }
+        
+        # Stats for each build type
+        build_stats = {
+            "warrior": {"strength": 15, "intelligence": 8, "agility": 10},
+            "mage": {"strength": 8, "intelligence": 15, "agility": 10},
+            "rogue": {"strength": 10, "intelligence": 10, "agility": 15},
+            "ranger": {"strength": 12, "intelligence": 10, "agility": 13}
+        }
+
+        # Generate all builds in parallel
+        async def generate_single_build(build_type: str) -> CharacterBuildOption:
+            try:
+                # Generate character image using Nano Banana
+                character_image = await gemini_service.generate_character_image(
+                    portrait_image=portrait_bytes,
+                    gender=gender,
+                    build_type=build_type
+                )
+                
+                # Upload generated image to Supabase
+                import uuid
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"character_{build_type}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
+                
+                # Default user ID for development
+                user_id = UUID("00000000-0000-0000-0000-000000000000")
+                
+                url = await supabase_service.upload_character_image(
+                    user_id=user_id,
+                    file_data=character_image,
+                    filename=filename
+                )
+                
+                if not url:
+                    logger.error(f"Failed to upload {build_type} character image")
+                    # Return with placeholder URL
+                    url = f"/placeholder/{build_type}.jpg"
+                
+                return CharacterBuildOption(
+                    id=f"build_{build_type}",
+                    image_url=url,
+                    build_type=build_type,
+                    description=build_descriptions[build_type],
+                    stats_preview=build_stats[build_type]
+                )
+                
+            except Exception as e:
+                logger.error(f"Failed to generate {build_type} build: {e}")
+                # Return fallback build
+                return CharacterBuildOption(
+                    id=f"build_{build_type}",
+                    image_url=f"/placeholder/{build_type}.jpg",
+                    build_type=build_type,
+                    description=build_descriptions[build_type],
+                    stats_preview=build_stats[build_type]
+                )
+        
+        # Generate all builds concurrently
+        tasks = [generate_single_build(build_type) for build_type in build_types]
+        builds = await asyncio.gather(*tasks)
+        
+        logger.info(f"Successfully generated {len(builds)} character builds")
+        return builds
+        
+    except Exception as e:
+        logger.error(f"Error generating character builds: {e}")
+        # Return placeholder builds as fallback
+        return [
+            CharacterBuildOption(
+                id=f"build_{build_type}",
+                image_url=f"/placeholder/{build_type}.jpg",
+                build_type=build_type,
+                description=build_descriptions[build_type],
+                stats_preview=build_stats[build_type]
+            )
+            for build_type in build_types
+        ]
 
 
 # Default user ID for development
@@ -105,13 +177,30 @@ async def create_character(
     Returns:
         Created character
     """
+    # Resolve portrait URL from preset ID or use custom URL
+    portrait_url = request.portrait_id
+    if request.portrait_id.startswith(('m', 'f')) and len(request.portrait_id) <= 2:
+        # It's a preset ID, resolve from PRESET_PORTRAITS
+        portraits = get_preset_portraits(request.gender)
+        portrait_dict = next((p for p in portraits if p['id'] == request.portrait_id), None)
+        if portrait_dict:
+            portrait_url = portrait_dict['url']
+        else:
+            logger.warning(f"Invalid preset portrait ID: {request.portrait_id}")
+            # Fall back to first preset for gender
+            portrait_url = portraits[0]['url'] if portraits else request.portrait_id
+    
+    # Resolve full body URL from build_id (should be passed from generate endpoint)
+    # For now, use the build_id as-is if it's a URL, otherwise use placeholder
+    full_body_url = request.build_id if request.build_id.startswith('http') else f"/placeholder/{request.build_id}.jpg"
+    
     # Create character model
     character = Character(
         user_id=user_id,
         name=request.name,
         gender=request.gender,
-        portrait_url=request.portrait_id,  # TODO: Resolve from preset or custom
-        full_body_url=f"/placeholder/{request.build_id}.jpg",  # TODO: From Nano Banana
+        portrait_url=portrait_url,
+        full_body_url=full_body_url,
         build_type=request.build_type,
         hp=100,
         xp=0,

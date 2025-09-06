@@ -2,6 +2,7 @@
 Simplified unified models for the AI-powered RPG game.
 Single source of truth for all data models - used for both API and database.
 """
+import os
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
@@ -12,8 +13,13 @@ from pydantic import BaseModel, Field
 # CONSTANTS (Not in DB - hardcoded in app)
 # ============================================
 
+# Get Supabase URL from environment or use local default
+SUPABASE_URL = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
+# For local dev, use port 54331 for storage, for production use main URL
+STORAGE_URL = SUPABASE_URL.replace(":54321", ":54331") if ":54321" in SUPABASE_URL else SUPABASE_URL
+BASE_URL = f"{STORAGE_URL}/storage/v1/object/public/character-images/presets"
+
 # Preset character portraits (stored in Supabase storage)
-BASE_URL = "http://127.0.0.1:54331/storage/v1/object/public/character-images/presets"
 PRESET_PORTRAITS = {
     "male": [
         {"id": "m1", "url": f"{BASE_URL}/male/male_portrait_01.png"},

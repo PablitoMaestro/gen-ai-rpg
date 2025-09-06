@@ -81,19 +81,24 @@ export default function CreateCharacterPage(): React.ReactElement {
     setIsLoading(true);
     
     try {
-      // Create character via API
-      const character = await characterService.createCharacter({
+      // For MVP, we'll store character data temporarily and navigate to build selection
+      // In production, this would create a character in the database
+      const characterData = {
+        id: `char_${Date.now()}`, // Temporary ID
         name: characterName,
         gender: selectedGender,
+        portrait_url: selectedPortraitUrl,
         portrait_id: selectedPortrait === 'custom' ? selectedPortraitUrl : selectedPortrait,
-        build_id: 'default', // Will be selected in next step
-        build_type: 'warrior' // Default, will be updated
-      });
+        created_at: new Date().toISOString()
+      };
       
-      console.warn('Character created:', character);
+      // Store in localStorage temporarily
+      localStorage.setItem('current_character', JSON.stringify(characterData));
+      
+      console.warn('Character data prepared:', characterData);
       
       // Navigate to character build selection
-      router.push(`/character/${character.id}/build`);
+      router.push(`/character/${characterData.id}/build`);
     } catch (error) {
       console.error('Failed to create character:', error);
       alert('Failed to create character. Please try again.');

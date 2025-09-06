@@ -30,7 +30,7 @@ class ApiService {
 
   async getPresetPortraits(gender: 'male' | 'female'): Promise<Portrait[]> {
     return this.fetchWithError<Portrait[]>(
-      `/api/characters/portraits?gender=${gender}`
+      `/api/characters/presets/${gender}`
     );
   }
 

@@ -26,10 +26,12 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 
 ### Database (Supabase) ✅
 - **Local Development**: Local Supabase instance running with Docker
+- **Production**: Deployed to Supabase Cloud (mvwotulkyowfuqoounix)
 - **Schema**: Flattened tables with direct columns (no JSONB stats)
 - **Tables**: `characters`, `game_sessions` (character_portraits removed)
 - **Management**: Use Supabase CLI for all database operations
-- **Status**: Migration applied, simplified schema active
+- **MCP Integration**: Supabase MCP available for read operations (search_docs working)
+- **Status**: Migration applied to both local and production, simplified schema active
 
 ### External APIs
 - **Gemini 2.5 Pro**: Story generation and narration
