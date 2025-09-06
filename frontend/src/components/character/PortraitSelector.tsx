@@ -8,6 +8,12 @@ interface Portrait {
   url: string;
 }
 
+interface CustomPortrait {
+  id: string;
+  url: string;
+  file: File;
+}
+
 interface PortraitSelectorProps {
   portraits: Portrait[];
   selectedPortrait: string | null;
@@ -23,7 +29,7 @@ export function PortraitSelector({
   onUploadCustom,
   isLoading = false
 }: PortraitSelectorProps): React.ReactElement {
-  const [customPreview, setCustomPreview] = useState<string | null>(null);
+  const [customPortraits, setCustomPortraits] = useState<CustomPortrait[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -45,11 +51,18 @@ export function PortraitSelector({
       return;
     }
 
-    // Create preview
+    // Create preview and add to custom portraits
     const reader = new FileReader();
     reader.onloadend = () => {
-      setCustomPreview(reader.result as string);
-      onSelectPortrait('custom');
+      const customId = `custom_${Date.now()}`;
+      const newCustomPortrait: CustomPortrait = {
+        id: customId,
+        url: reader.result as string,
+        file
+      };
+      
+      setCustomPortraits(prev => [...prev, newCustomPortrait]);
+      onSelectPortrait(customId);
     };
     reader.readAsDataURL(file);
 
@@ -57,6 +70,9 @@ export function PortraitSelector({
     if (onUploadCustom) {
       onUploadCustom(file);
     }
+
+    // Clear the file input so the same file can be selected again if needed
+    event.target.value = '';
   };
 
   return (
@@ -95,46 +111,59 @@ export function PortraitSelector({
           </button>
         ))}
 
-        {/* Custom Upload Option */}
+        {/* Custom Uploaded Portraits */}
+        {customPortraits.map((customPortrait) => (
+          <button
+            key={customPortrait.id}
+            onClick={() => onSelectPortrait(customPortrait.id)}
+            disabled={isLoading}
+            className={`
+              relative aspect-square rounded-lg overflow-hidden
+              border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
+              hover:shadow-golden hover:scale-105
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${selectedPortrait === customPortrait.id ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
+            `}
+          >
+            <Image
+              src={customPortrait.url}
+              alt="Custom portrait"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, 33vw"
+            />
+            {selectedPortrait === customPortrait.id && (
+              <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
+                <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            )}
+          </button>
+        ))}
+
+        {/* Upload New Custom Portrait Button */}
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isLoading}
-          className={`
+          className="
             relative aspect-square rounded-lg overflow-hidden
             border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
             hover:shadow-golden hover:scale-105
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${selectedPortrait === 'custom' ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
-          `}
+          "
         >
-          {customPreview ? (
-            <>
-              <Image
-                src={customPreview}
-                alt="Custom portrait"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 33vw"
-              />
-              {selectedPortrait === 'custom' && (
-                <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
-                  <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
-              <svg className="w-12 h-12 text-amber-400/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              <span className="text-sm text-amber-100 text-center font-fantasy">Upload Custom Portrait</span>
-              <span className="text-xs text-amber-400/70 mt-1">Max 5MB</span>
-            </div>
-          )}
+          <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
+            <svg className="w-12 h-12 text-amber-400/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="text-sm text-amber-100 text-center font-fantasy">
+              {customPortraits.length === 0 ? 'Upload Custom Portrait' : 'Upload Another'}
+            </span>
+            <span className="text-xs text-amber-400/70 mt-1">Max 5MB</span>
+          </div>
         </button>
 
         <input
