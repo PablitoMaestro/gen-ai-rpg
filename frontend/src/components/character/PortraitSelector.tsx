@@ -157,7 +157,7 @@ export function PortraitSelector({
         ))}
 
         {/* Preset Portraits */}
-        {portraits.map((portrait, _index) => (
+        {portraits.map((portrait) => (
           <button
             key={portrait.id}
             onClick={() => onSelectPortrait(portrait.id, portrait.url)}
