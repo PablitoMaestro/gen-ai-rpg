@@ -2,7 +2,7 @@
 
 ## Summary
 **Project**: AI-powered first-person RPG with dynamic story generation and character imagery  
-**Status**: 🔴 Not Started  
+**Status**: 🟡 In Progress  
 **Current Phase**: Project Setup  
 **Last Updated**: 2025-01-06  
 
@@ -23,43 +23,45 @@
 - [x] Create CLAUDE.md for AI guidance
 - [x] Create plan.md with detailed roadmap
 
-### 1.2 Frontend Setup
-- [ ] Initialize Next.js in `/frontend` with TypeScript template
-- [ ] Install core dependencies (zod, zustand, tailwind)
-- [ ] Configure strict TypeScript settings
-- [ ] Set up ESLint with strict rules
-- [ ] Create base folder structure:
+### 1.2 Frontend Setup ✅
+- [x] Initialize Next.js in `/frontend` with TypeScript template
+- [x] Install core dependencies (zod, zustand, tailwind)
+- [x] Configure strict TypeScript settings
+- [x] Set up ESLint with strict rules
+- [x] Create base folder structure:
   - `/components` - Reusable UI components
   - `/services` - API communication layer
   - `/store` - Zustand state management
   - `/types` - TypeScript definitions
   - `/utils` - Helper functions
   - `/hooks` - Custom React hooks
-- [ ] Configure Tailwind for dark fantasy theme
-- [ ] Set up environment variables structure
+- [x] Configure Tailwind for dark fantasy theme
+- [x] Set up environment variables structure
 
-### 1.3 Backend Setup
-- [ ] Initialize FastAPI project in `/backend`
-- [ ] Create folder structure:
+### 1.3 Backend Setup ✅
+- [x] Initialize FastAPI project in `/backend`
+- [x] Create folder structure:
   - `/services` - Business logic
   - `/models` - Pydantic models
   - `/api` - Route handlers
   - `/scripts` - Utility scripts
   - `/config` - Configuration management
-- [ ] Set up async support throughout
-- [ ] Configure CORS for frontend communication
-- [ ] Set up environment variables handling
-- [ ] Create health check endpoint
+- [x] Set up async support throughout
+- [x] Configure CORS for frontend communication
+- [x] Set up environment variables handling
+- [x] Create health check endpoint
 
-### 1.4 Database Setup
-- [ ] Initialize Supabase in `/supabase` folder
-- [ ] Start local Supabase instance with Docker (follow official Supabase commands, use Kasia to check via Ref MCP for Supabase docs)
-- [ ] Create initial migration for:
+### 1.4 Database Setup ✅
+- [x] Initialize Supabase in `/supabase` folder
+- [x] Start local Supabase instance with Docker
+- [x] Create initial migration for:
   - `characters` table (id, user_id, name, gender, portrait_url, full_body_url, stats)
   - `character_portraits` table (id, gender, portrait_url, is_preset)
   - `game_sessions` table (id, character_id, current_scene, choices_made, created_at)
-- [ ] Set up storage bucket for character images
-- [ ] Configure RLS policies
+- [x] Set up storage bucket for character images
+- [x] Configure RLS policies
+- [x] Create seed data with 8 preset portraits (4 male, 4 female)
+- [x] Set up environment variables (.env.example and .env.local)
 
 ### 1.5 Development Environment
 - [ ] Create `.env.example` files for all services

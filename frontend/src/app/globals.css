@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: 220 20% 5%;
+  --foreground: 210 40% 98%;
+  
+  --primary: 271 91% 65%;
+  --primary-foreground: 210 40% 98%;
+  
+  --secondary: 327 73% 45%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --accent: 0 84% 60%;
+  --accent-foreground: 210 40% 98%;
+  
+  --muted: 217 19% 27%;
+  --muted-foreground: 215 20% 65%;
+  
+  --border: 217 19% 27%;
+  --ring: 271 91% 65%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  @apply border-border;
+}
+
+html {
+  @apply scroll-smooth;
+}
+
+body {
+  @apply bg-dark-950 text-gray-100;
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a0f1f 50%, #2e1065 100%);
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
+
+.fantasy-border {
+  @apply border-2 border-primary-700 rounded-lg shadow-glow;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent;
+}
+
+.shimmer-effect {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.3),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
