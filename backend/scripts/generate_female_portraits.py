@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 FEMALE_PORTRAIT_PROMPTS = [
-    "A photorealistic portrait of a young female medieval commoner from the neck up, early twenties, simple braided hair, plain cream-colored dress, neutral expression without distinct characteristics, standing in front of a generic medieval cottage background. Natural sunlight, medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, young woman early twenties, radiant smile with bright green eyes, healthy glowing skin with natural freckles across nose and cheeks, flowing auburn hair with small braids framing face, wildflowers tucked behind ear, only cream fabric collar barely visible at bottom edge. Background: blurred sunlit meadow. Soft golden hour light on face, 85mm portrait lens, shallow depth of field.",
     
-    "A photorealistic portrait of a middle-aged female medieval townswoman from the neck up, 40 years old, hair in a simple bun, plain brown wool dress, neutral expression without specific traits, standing in front of a stone building with simple architecture. Medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, woman around 35, confident determined expression with amber eyes, sun-bronzed skin with laugh lines, dark hair in practical braid over shoulder, strong facial features, only edge of leather armor collar visible at very bottom. Background: softly blurred training grounds. Natural afternoon light, professional headshot style.",
     
-    "A photorealistic portrait of an elderly female medieval villager from the neck up, 60+ years old, gray hair under a simple coif, weathered features, plain gray dress, generic appearance without defining characteristics, standing in front of a medieval street scene. Medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, young woman late twenties, thousand-yard stare with hollow green eyes, pale skin with visible freckles and faint scars on cheek, tangled auburn hair with dirt and leaves, chapped lips, exhausted expression, only torn fabric collar edge visible. Background: blurred abandoned cottage. Overcast lighting emphasizing trauma, documentary portrait style.",
     
-    "A photorealistic portrait of a young adult female medieval citizen from the neck up, late twenties, brown hair partially covered, simple but neat clothing in earth tones, neutral demeanor without specific profession indicators, standing in front of a medieval market square. Medieval fantasy RPG character art style."
+    "Hyper-realistic close-up photograph from neck up only, elderly woman in sixties, deeply wrinkled face showing hardship, clouded eyes with one showing cataract, thin gray hair escaping from worn headwrap, age spots on temples and forehead, cracked lips, weathered skin with broken capillaries, only dark shawl edge visible at neck. Background: blurred foggy graveyard. Diffused misty light, photojournalistic style showing every detail of age."
 ]
 
 

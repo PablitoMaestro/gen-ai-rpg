@@ -135,11 +135,50 @@ supabase migration new <name>  # Create new migration
 - Use free tier API key for hackathon
 - Paid keys will incur charges for all usage
 
+## Visual Development & Testing
+
+### MCP Playwright Integration
+- **Purpose**: Visual feedback and frontend development verification
+- **Usage**: ALWAYS use Playwright when working on frontend components or UI
+- **Workflow**: 
+  1. Make frontend changes
+  2. Use `mcp__playwright__playwright_navigate` to open http://localhost:3000
+  3. Use `mcp__playwright__playwright_screenshot` to capture current state
+  4. Analyze screenshot for UI correctness, layout, and styling
+  5. Iterate based on visual feedback
+- **Benefits**: Immediate visual validation of changes, catch UI regressions, verify responsive design
+
+### Frontend Development Protocol
+1. **Before Changes**: Take baseline screenshot of current UI
+2. **After Changes**: Take updated screenshot to compare
+3. **Analysis**: Review both screenshots to ensure improvements
+4. **Testing**: Use Playwright to interact with UI elements and verify functionality
+
 ## Specialized Agents
+
+### Agent Usage Guidelines
+- **Frequency**: Use specialized agents OFTEN - they are optimized for specific tasks
+- **Parallel Execution**: Launch multiple agents simultaneously when tasks are independent
+- **Proactive Usage**: Don't wait for explicit requests - use agents whenever their expertise applies
+- **Examples of Parallel Usage**:
+  - Launch Robert for DB queries + Chuck Norris for code debugging simultaneously
+  - Run Babcia for DevOps checks + Kasia for API docs in parallel
+  - Deploy Sun Tzu for planning while Robert checks database schema
 
 ### Available Agents (call by name):
 - **Babcia/Babcia Stasia**: DevOps agent for verifying configurations, service connections, API keys, and environment setups
+  - Use for: Environment variables, API key validation, deployment issues, service connections
 - **Chuck Norris**: Complex coding challenges, debugging, and elegant refactoring solutions
+  - Use for: Difficult bugs, performance optimization, complex algorithms, DRY refactoring
 - **Robert**: Database operations specialist for Supabase queries, migrations, and schema management
+  - Use for: All database operations, migrations, schema validation, data consistency checks
 - **Kasia**: API documentation collector for external API integration docs
+  - Use for: Gemini API, Nano Banana API, ElevenLabs integration, any external service docs
 - **Sun Tzu**: Strategic planning for code changes, refactoring, and architectural decisions
+  - Use for: Major features, complex refactoring, architectural changes, implementation strategies
+
+### When to Use Agents in Parallel
+1. **Multi-aspect debugging**: Chuck Norris (code) + Robert (database) + Babcia (environment)
+2. **Feature implementation**: Sun Tzu (planning) + Kasia (API docs) simultaneously
+3. **System verification**: Babcia (configs) + Robert (DB health) in parallel
+4. **Documentation gathering**: Multiple Kasia instances for different APIs

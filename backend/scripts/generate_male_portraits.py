@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 MALE_PORTRAIT_PROMPTS = [
-    "A photorealistic portrait of a young male medieval commoner from the neck up, early twenties, weathered face, simple brown tunic, neutral expression without distinct characteristics, standing in front of a generic medieval village background. Natural daylight, soft shadows. Medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, young man early twenties, cheerful expression with warm hazel eyes, healthy sun-kissed skin with light freckles, tousled chestnut hair, slight stubble on jawline, only collar of green tunic barely visible at bottom of frame. Background: blurred sunny village marketplace. Natural golden hour lighting, 85mm portrait lens, shallow depth of field focusing on face.",
     
-    "A photorealistic portrait of a middle-aged male medieval townsman from the neck up, around 40 years old, well-groomed beard, plain wool clothing in earth tones, neutral expression without specific traits, standing in front of a stone building with simple architecture. Medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, middle-aged man around 40, confident expression with wise eyes and crow's feet, weathered skin, well-groomed beard with gray streaks, strong jawline, only hint of leather armor collar at very bottom of frame. Background: softly blurred library interior. Rembrandt lighting on face, professional headshot style.",
     
-    "A photorealistic portrait of an elderly male medieval villager from the neck up, 60+ years old, grey beard, weathered features, simple brown robes, generic appearance without defining characteristics, standing in front of a medieval street scene. Medieval fantasy RPG character art style.",
+    "Hyper-realistic close-up photograph from neck up only, young man late twenties, haunted exhausted expression, pale skin with visible pores and dark circles, unkempt black hair falling across forehead, thin scar through eyebrow, gaunt cheeks, stubbled jaw, only edge of dark cloth collar visible. Background: blurred misty forest. Moody dramatic lighting emphasizing weariness, cinematic portrait.",
     
-    "A photorealistic portrait of a young adult male medieval citizen from the neck up, late twenties, clean-shaven, average features, simple but neat clothing in grey and brown, neutral demeanor without specific profession indicators, standing in front of a medieval town square. Medieval fantasy RPG character art style."
+    "Hyper-realistic close-up photograph from neck up only, elderly man in sixties, gaunt hollow cheeks with paper-thin skin showing veins, rheumy fearful eyes with cataracts beginning, wispy white hair, patchy unkempt beard, liver spots on forehead and temples, trembling lower lip, only top of dark cloak collar visible. Background: blurred crumbling stone wall. Overcast natural light, documentary style showing every wrinkle and age mark."
 ]
 
 
