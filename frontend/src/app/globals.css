@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Metamorphous&display=swap');
 
 :root {
   --background: 24 12% 8%;
@@ -101,8 +103,12 @@ body::before {
   }
 
   .text-hero {
-    @apply bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent;
-    text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    @apply bg-gradient-to-r from-gold-300 via-gold-400 to-gold-500 bg-clip-text text-transparent;
+    text-shadow: 
+      0 0 10px rgba(255, 184, 0, 0.8),
+      0 0 20px rgba(255, 184, 0, 0.6),
+      0 0 40px rgba(255, 184, 0, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.8);
   }
 
   .text-quest {
@@ -116,11 +122,12 @@ body::before {
   }
 
   .text-ancient {
-    @apply text-amber-300;
+    @apply text-gold-300;
     text-shadow: 
-      0 0 5px rgba(252, 211, 77, 0.5),
-      0 0 10px rgba(245, 158, 11, 0.3),
-      0 0 15px rgba(245, 158, 11, 0.2);
+      0 0 5px rgba(255, 184, 0, 0.7),
+      0 0 10px rgba(204, 146, 0, 0.5),
+      0 0 15px rgba(168, 133, 247, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.9);
   }
 
   .text-blood {
@@ -136,6 +143,14 @@ body::before {
   .text-celestial {
     @apply text-blue-400;
     text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+  }
+
+  .text-royal {
+    @apply text-royal-300;
+    text-shadow: 
+      0 0 8px rgba(168, 85, 247, 0.6),
+      0 0 15px rgba(124, 58, 237, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.8);
   }
 
   .animation-delay-200 {

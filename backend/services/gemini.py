@@ -78,20 +78,28 @@ class GeminiService:
             # Open image with PIL
             portrait_pil = Image.open(io.BytesIO(portrait_image))
 
-            # Build prompt based on character type
+            # Build prompt based on character type - realistic, mediocre dark fantasy
             build_prompts = {
-                "warrior": f"Create a full-body {gender} warrior character based on this portrait. "
-                          "Heavy armor, sword and shield, muscular build, battle-ready stance. "
-                          "Dark fantasy RPG style, detailed metallic armor.",
-                "mage": f"Create a full-body {gender} mage character based on this portrait. "
-                       "Flowing robes with magical runes, staff with glowing crystal, scholarly build. "
-                       "Dark fantasy RPG style, mystical aura.",
-                "rogue": f"Create a full-body {gender} rogue character based on this portrait. "
-                        "Dark leather armor, dual daggers, agile build, stealthy pose. "
-                        "Dark fantasy RPG style, hooded cloak.",
-                "ranger": f"Create a full-body {gender} ranger character based on this portrait. "
-                         "Leather and cloth armor, bow and quiver, athletic build. "
-                         "Dark fantasy RPG style, nature-themed gear."
+                "warrior": f"Create a realistic full-body {gender} warrior based on this portrait. "
+                          "Worn, patched mail armor with rust stains, simple iron sword and dented wooden shield. "
+                          "Average build, tired expression with weary eyes, slouched posture from exhaustion. "
+                          "Weathered hands gripping weapons, dirt on armor, realistic medieval styling. "
+                          "No epic glory - just a tired soldier trying to survive. Photorealistic style.",
+                "mage": f"Create a realistic full-body {gender} mage based on this portrait. "
+                       "Faded, patched robes with food stains, simple wooden staff with cracked crystal. "
+                       "Thin build, frustrated expression with furrowed brow, hunched shoulders from study. "
+                       "Ink-stained fingers, worn leather satchel, realistic medieval scholar appearance. "
+                       "No mystical aura - just a struggling academic with mediocre talent. Photorealistic style.",
+                "rogue": f"Create a realistic full-body {gender} rogue based on this portrait. "
+                        "Patched leather armor with visible repairs, simple iron daggers with nicked blades. "
+                        "Wiry build, nervous expression with darting eyes, tense posture ready to flee. "
+                        "Dirty fingernails, worn boots, realistic medieval street thief appearance. "
+                        "No shadow mastery - just a common pickpocket surviving day to day. Photorealistic style.",
+                "ranger": f"Create a realistic full-body {gender} ranger based on this portrait. "
+                         "Worn leather and rough cloth, simple hunting bow with frayed string. "
+                         "Lean build, cautious expression with weathered face, alert but humble stance. "
+                         "Calloused hands, muddy boots, realistic medieval hunter appearance. "
+                         "No nature magic - just a common tracker making ends meet. Photorealistic style."
             }
 
             prompt = build_prompts.get(build_type, build_prompts["warrior"])

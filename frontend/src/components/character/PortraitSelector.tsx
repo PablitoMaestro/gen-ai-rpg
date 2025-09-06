@@ -14,12 +14,16 @@ interface CustomPortrait {
   file: File;
 }
 
+type Gender = 'male' | 'female';
+
 interface PortraitSelectorProps {
   portraits: Portrait[];
   selectedPortrait: string | null;
-  onSelectPortrait: (portraitId: string) => void;
+  onSelectPortrait: (portraitId: string, portraitUrl: string) => void;
   onUploadCustom?: (file: File) => void;
   isLoading?: boolean;
+  selectedGender?: Gender;
+  isFiltering?: boolean;
 }
 
 export function PortraitSelector({
@@ -27,7 +31,9 @@ export function PortraitSelector({
   selectedPortrait,
   onSelectPortrait,
   onUploadCustom,
-  isLoading = false
+  isLoading = false,
+  selectedGender: _selectedGender,
+  isFiltering = false
 }: PortraitSelectorProps): React.ReactElement {
   const [customPortraits, setCustomPortraits] = useState<CustomPortrait[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +68,7 @@ export function PortraitSelector({
       };
       
       setCustomPortraits(prev => [...prev, newCustomPortrait]);
-      onSelectPortrait(customId);
+      onSelectPortrait(customId, reader.result as string);
     };
     reader.readAsDataURL(file);
 
@@ -77,65 +83,71 @@ export function PortraitSelector({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {/* Preset Portraits */}
-        {portraits.map((portrait) => (
-          <button
-            key={portrait.id}
-            onClick={() => onSelectPortrait(portrait.id)}
-            disabled={isLoading}
-            className={`
-              relative aspect-square rounded-lg overflow-hidden
-              border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
-              hover:shadow-golden hover:scale-105
-              disabled:opacity-50 disabled:cursor-not-allowed
-              ${selectedPortrait === portrait.id ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
-            `}
-          >
-            <Image
-              src={portrait.url}
-              alt={`Portrait ${portrait.id}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 50vw, 33vw"
-            />
-            {selectedPortrait === portrait.id && (
-              <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
-                <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </button>
-        ))}
+      {isFiltering && (
+        <div className="flex justify-center items-center mb-4">
+          <div className="text-amber-400/80 font-fantasy text-sm flex items-center space-x-2">
+            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span>Filtering portraits...</span>
+          </div>
+        </div>
+      )}
+      
+      <div className={`flex gap-4 overflow-x-auto transition-all duration-500 pb-4 ${
+        isFiltering ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
+      }`} style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'smooth' }}>
+        
+        {/* Upload New Custom Portrait Button - FIRST */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoading || isFiltering}
+          className="
+            relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden
+            border-2 border-gold-500/40 bg-black/20 backdrop-blur-sm transition-all duration-300
+            hover:shadow-golden-lg hover:scale-105 transform hover:border-gold-400/70
+            disabled:opacity-50 disabled:cursor-not-allowed
+          "
+          style={{ scrollSnapAlign: 'start' }}
+        >
+          <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
+            <svg className="w-8 h-8 text-gold-400/70 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="text-xs text-gold-100 text-center font-fantasy">
+              Upload
+            </span>
+            <span className="text-xs text-gold-400/60">Custom</span>
+          </div>
+        </button>
 
         {/* Custom Uploaded Portraits */}
-        {customPortraits.map((customPortrait) => (
+        {customPortraits.map((customPortrait, _index) => (
           <button
             key={customPortrait.id}
-            onClick={() => onSelectPortrait(customPortrait.id)}
-            disabled={isLoading}
+            onClick={() => onSelectPortrait(customPortrait.id, customPortrait.url)}
+            disabled={isLoading || isFiltering}
             className={`
-              relative aspect-square rounded-lg overflow-hidden
-              border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
-              hover:shadow-golden hover:scale-105
+              relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden
+              border-2 border-gold-500/30 bg-black/10 backdrop-blur-sm transition-all duration-300
+              hover:shadow-golden-lg hover:scale-105 transform hover:border-gold-400/60
               disabled:opacity-50 disabled:cursor-not-allowed
-              ${selectedPortrait === customPortrait.id ? 'ring-4 ring-amber-400 shadow-golden-lg' : ''}
+              ${selectedPortrait === customPortrait.id ? 'ring-4 ring-gold-400 shadow-golden-lg scale-105 border-gold-400' : ''}
             `}
+            style={{ scrollSnapAlign: 'start' }}
           >
             <Image
               src={customPortrait.url}
               alt="Custom portrait"
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 50vw, 33vw"
+              sizes="128px"
             />
             {selectedPortrait === customPortrait.id && (
-              <div className="absolute inset-0 bg-amber-400/20 flex items-center justify-center">
-                <div className="bg-amber-600 text-dark-900 rounded-full p-2 shadow-golden-sm">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <div className="absolute inset-0 bg-gold-400/20 flex items-center justify-center">
+                <div className="bg-gold-600 text-dark-900 rounded-full p-2 shadow-golden">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -144,45 +156,57 @@ export function PortraitSelector({
           </button>
         ))}
 
-        {/* Upload New Custom Portrait Button */}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isLoading}
-          className="
-            relative aspect-square rounded-lg overflow-hidden
-            border border-amber-500/20 bg-black/10 backdrop-blur-sm transition-all duration-300
-            hover:shadow-golden hover:scale-105
-            disabled:opacity-50 disabled:cursor-not-allowed
-          "
-        >
-          <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4">
-            <svg className="w-12 h-12 text-amber-400/60 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span className="text-sm text-amber-100 text-center font-fantasy">
-              {customPortraits.length === 0 ? 'Upload Custom Portrait' : 'Upload Another'}
-            </span>
-            <span className="text-xs text-amber-400/70 mt-1">Max 5MB</span>
-          </div>
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
+        {/* Preset Portraits */}
+        {portraits.map((portrait, _index) => (
+          <button
+            key={portrait.id}
+            onClick={() => onSelectPortrait(portrait.id, portrait.url)}
+            disabled={isLoading || isFiltering}
+            className={`
+              relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden
+              border-2 border-gold-500/30 bg-black/10 backdrop-blur-sm transition-all duration-300
+              hover:shadow-golden-lg hover:scale-105 transform hover:border-gold-400/60
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${selectedPortrait === portrait.id ? 'ring-4 ring-gold-400 shadow-golden-lg scale-105 border-gold-400' : ''}
+            `}
+            style={{ scrollSnapAlign: 'start' }}
+          >
+            <Image
+              src={portrait.url}
+              alt={`Portrait ${portrait.id}`}
+              fill
+              className="object-cover"
+              sizes="128px"
+            />
+            {selectedPortrait === portrait.id && (
+              <div className="absolute inset-0 bg-gold-400/20 flex items-center justify-center">
+                <div className="bg-gold-600 text-dark-900 rounded-full p-2 shadow-golden">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            )}
+          </button>
+        ))}
       </div>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       {isLoading && (
-        <div className="mt-4 text-center text-amber-400/80">
+        <div className="mt-4 text-center text-gold-400/80">
           <div className="inline-flex items-center">
-            <svg className="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            <span className="font-fantasy">Uploading portrait...</span>
+            <span className="font-fantasy text-lg">Uploading portrait...</span>
           </div>
         </div>
       )}

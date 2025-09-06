@@ -25,13 +25,12 @@ export default function Home(): React.ReactElement {
       <div className="absolute inset-0 bg-black/40 z-10" />
       
       <div className="max-w-4xl mx-auto text-center space-y-8 relative z-20 backdrop-blur-sm bg-black/10 p-8 rounded-2xl border border-amber-500/20">
-        <h1 className="text-6xl md:text-8xl font-fantasy font-bold text-hero animate-fade-in drop-shadow-2xl">
-          Forge Your Legend
+        <h1 className="text-3xl md:text-4xl font-manuscript font-semibold text-hero">
+          Aethermoor Awaits
         </h1>
         
-        <p className="text-xl md:text-2xl text-quest max-w-2xl mx-auto animate-fade-in animation-delay-200 drop-shadow-lg">
-          Rise as a hero in a realm where courage conquers darkness. Every choice illuminates your path, 
-          every victory strengthens your legend. Your destiny awaits, champion.
+        <p className="text-base md:text-lg text-quest max-w-2xl mx-auto">
+          Forge your legend in a realm where magic and steel determine destiny.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animation-delay-400">
@@ -41,7 +40,7 @@ export default function Home(): React.ReactElement {
             onClick={() => router.push('/character/create')}
             className="hope-effect"
           >
-            ⚔️ Begin Your Quest
+Begin Your Quest
           </Button>
           
           <Button
@@ -49,38 +48,35 @@ export default function Home(): React.ReactElement {
             size="lg"
             onClick={() => router.push('/continue')}
           >
-            🔥 Resume Adventure
+Resume Adventure
           </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-left">
-          <div className="fantasy-border p-6 space-y-3 hover:shadow-golden transition-all duration-300 animate-glow-warm">
-            <h3 className="text-xl font-fantasy font-semibold text-ancient">
-              📖 Living Chronicles
+          <div className="fantasy-border p-4 space-y-2 hover:shadow-golden transition-all duration-300">
+            <h3 className="text-lg font-fantasy font-semibold text-ancient">
+              Dynamic Stories
             </h3>
-            <p className="text-amber-100/90">
-              Each tale unfolds uniquely through divine wisdom. Your choices echo through realms, 
-              weaving destinies that have never been told before.
+            <p className="text-amber-100/80 text-sm">
+              Every choice shapes your unique adventure through an ever-changing world.
             </p>
           </div>
           
-          <div className="fantasy-border p-6 space-y-3 hover:shadow-golden transition-all duration-300 animation-delay-200">
-            <h3 className="text-xl font-fantasy font-semibold text-ancient">
-              🎨 Mystic Visions
+          <div className="fantasy-border p-4 space-y-2 hover:shadow-golden transition-all duration-300">
+            <h3 className="text-lg font-fantasy font-semibold text-ancient">
+              AI Imagery
             </h3>
-            <p className="text-amber-100/90">
-              Witness your legend through enchanted imagery. Behold yourself standing victorious 
-              in realms crafted by ancient magic and divine artistry.
+            <p className="text-amber-100/80 text-sm">
+              Watch your story come to life with generated visuals for every scene.
             </p>
           </div>
           
-          <div className="fantasy-border p-6 space-y-3 hover:shadow-golden transition-all duration-300 animation-delay-400">
-            <h3 className="text-xl font-fantasy font-semibold text-ancient">
-              🎭 Bardic Voices
+          <div className="fantasy-border p-4 space-y-2 hover:shadow-golden transition-all duration-300">
+            <h3 className="text-lg font-fantasy font-semibold text-ancient">
+              Voice Narration
             </h3>
-            <p className="text-amber-100/90">
-              Let master storytellers guide your journey. Their voices carry the weight of ages, 
-              breathing life into every triumph and trial you face.
+            <p className="text-amber-100/80 text-sm">
+              Immerse yourself with AI-powered voice acting for your adventure.
             </p>
           </div>
         </div>

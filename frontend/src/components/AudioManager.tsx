@@ -19,31 +19,31 @@ export function AudioManager(): null {
     const audio = audioRef.current;
 
     // Handle audio events
-    const handlePlay = () => setPlaying(true);
-    const handlePause = () => setPlaying(false);
-    const handleEnded = () => setPlaying(false);
+    const handlePlay = (): void => setPlaying(true);
+    const handlePause = (): void => setPlaying(false);
+    const handleEnded = (): void => setPlaying(false);
 
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
 
     // Auto-play with user interaction handling
-    const startAudio = async () => {
+    const startAudio = async (): Promise<void> => {
       try {
         await audio.play();
-      } catch (error) {
+      } catch {
         // Browser blocked autoplay - will be handled by user interaction
-        console.log('Autoplay blocked, waiting for user interaction');
+        console.warn('Autoplay blocked, waiting for user interaction');
         
         // Add one-time click listener to start audio
-        const handleFirstInteraction = async () => {
+        const handleFirstInteraction = async (): Promise<void> => {
           try {
             await audio.play();
             document.removeEventListener('click', handleFirstInteraction);
             document.removeEventListener('keydown', handleFirstInteraction);
             document.removeEventListener('touchstart', handleFirstInteraction);
           } catch (err) {
-            console.log('Failed to start audio:', err);
+            console.error('Failed to start audio:', err);
           }
         };
 

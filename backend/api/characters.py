@@ -72,12 +72,12 @@ async def generate_character_builds(
         # Build types to generate
         build_types = ["warrior", "mage", "rogue", "ranger"]
         
-        # Build descriptions for each type
+        # Build descriptions for each type - realistic, mediocre tone
         build_descriptions = {
-            "warrior": "Heavy armor warrior with great sword and shield",
-            "mage": "Mystical mage with arcane powers and flowing robes",
-            "rogue": "Stealthy rogue with dual daggers and leather armor",
-            "ranger": "Forest ranger with bow and arrow, nature-themed gear"
+            "warrior": "Weary soldier in patched mail armor, struggling to make ends meet",
+            "mage": "Frustrated scholar with mediocre magical talent and worn robes",
+            "rogue": "Common street thief with nervous demeanor and patched leathers",
+            "ranger": "Simple tracker with weather-beaten gear and humble skills"
         }
         
         # Stats for each build type

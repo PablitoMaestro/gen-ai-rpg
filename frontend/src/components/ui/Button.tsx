@@ -18,13 +18,13 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'inline-flex items-center justify-center rounded-lg font-fantasy font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden';
   
   const variants = {
-    primary: 'bg-gradient-to-r from-amber-600 to-amber-500 text-dark-900 hover:from-amber-500 hover:to-amber-400 focus:ring-amber-500 shadow-golden hover:shadow-golden-lg font-semibold tracking-wide transform hover:scale-105 active:scale-95 transition-all duration-200',
-    secondary: 'bg-gradient-to-r from-secondary-800 to-secondary-700 text-secondary-50 hover:from-secondary-700 hover:to-secondary-600 focus:ring-secondary-600 shadow-nature hover:shadow-nature-lg border border-secondary-600/30 transform hover:scale-105 active:scale-95 transition-all duration-200',
-    ghost: 'bg-transparent text-amber-200 hover:bg-amber-900/20 focus:ring-amber-600 border border-amber-600/30 hover:border-amber-500/50 hover:shadow-golden-sm transform hover:scale-105 active:scale-95 transition-all duration-200',
-    danger: 'bg-gradient-to-r from-red-700 to-red-600 text-white hover:from-red-600 hover:to-red-500 focus:ring-red-500 shadow-blood hover:shadow-blood animate-pulse-gentle transform hover:scale-105 active:scale-95 transition-all duration-200',
+    primary: 'bg-medieval-gradient text-dark-900 hover:bg-gradient-to-r hover:from-gold-500 hover:to-gold-400 focus:ring-gold-500 shadow-golden hover:shadow-golden-lg font-semibold tracking-wide transform hover:scale-105 active:scale-95 transition-all duration-300 border border-gold-600/40 hover:border-gold-400/60',
+    secondary: 'bg-royal-gradient text-royal-50 hover:from-royal-700 hover:to-royal-600 focus:ring-royal-600 shadow-lg hover:shadow-2xl border border-royal-600/40 hover:border-royal-400/60 transform hover:scale-105 active:scale-95 transition-all duration-300',
+    ghost: 'bg-transparent text-gold-200 hover:bg-gradient-to-r hover:from-gold-900/30 hover:to-royal-900/30 focus:ring-gold-600 border-2 border-gold-600/40 hover:border-gold-400/70 hover:shadow-golden-sm transform hover:scale-105 active:scale-95 transition-all duration-300',
+    danger: 'bg-gradient-to-r from-red-800 to-red-700 text-white hover:from-red-700 hover:to-red-600 focus:ring-red-500 shadow-blood hover:shadow-blood border border-red-600/40 animate-pulse-gentle transform hover:scale-105 active:scale-95 transition-all duration-300',
   };
   
   const sizes = {
