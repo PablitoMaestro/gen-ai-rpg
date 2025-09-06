@@ -95,7 +95,7 @@ export function PortraitSelector({
         </div>
       )}
       
-      <div className={`flex gap-4 overflow-x-auto transition-all duration-500 p-2 ${
+      <div className={`flex gap-4 overflow-x-auto transition-all duration-500 p-2 justify-center ${
         isFiltering ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
       }`} style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'smooth' }}>
         

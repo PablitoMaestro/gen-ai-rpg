@@ -308,11 +308,7 @@ class SupabaseService:
             # Create path: user_id/filename
             path = f"{user_id}/{filename}"
 
-            # Try to remove existing file first (in case of overwrite)
-            try:
-                self.storage.from_("character-images").remove([path])
-            except Exception:
-                pass  # File might not exist, that's ok
+            # Don't remove existing files - just let upsert handle duplicates
 
             # Upload to storage
             self.storage.from_("character-images").upload(

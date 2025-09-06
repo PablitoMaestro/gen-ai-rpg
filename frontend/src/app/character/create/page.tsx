@@ -79,6 +79,18 @@ export default function CreateCharacterPage(): React.ReactElement {
         
         setAllPortraits({ male: malePortraits, female: femalePortraits });
         setPortraits(femalePortraits);
+        
+        // Auto-select first portrait as default
+        if (femalePortraits.length > 0) {
+          const firstPortrait = femalePortraits[0];
+          setSelectedPortrait(firstPortrait.id);
+          setSelectedPortraitUrl(firstPortrait.url);
+          
+          // Set preset name and description for first character
+          const character = presetCharacters.female[0];
+          setCharacterName(character.name);
+          setCharacterDescription(character.story);
+        }
       } catch (error) {
         console.error('Failed to fetch portraits:', error);
         setPortraits([]);
@@ -102,6 +114,19 @@ export default function CreateCharacterPage(): React.ReactElement {
     setTimeout(() => {
       setSelectedGender(gender);
       setPortraits(allPortraits[gender]);
+      
+      // Auto-select first portrait of the new gender
+      if (allPortraits[gender].length > 0) {
+        const firstPortrait = allPortraits[gender][0];
+        setSelectedPortrait(firstPortrait.id);
+        setSelectedPortraitUrl(firstPortrait.url);
+        
+        // Set preset name and description for first character
+        const character = presetCharacters[gender][0];
+        setCharacterName(character.name);
+        setCharacterDescription(character.story);
+      }
+      
       setIsFiltering(false);
     }, 300);
   };

@@ -17,8 +17,7 @@ export function BackgroundLayout({
       <div 
         className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
         style={{
-          backgroundImage: 'url(/intro-background-final.jpg)',
-          backgroundSize: '100% auto'
+          backgroundImage: 'url(/intro-background-final.jpg)'
         }}
       />
       
