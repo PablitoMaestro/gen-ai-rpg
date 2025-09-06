@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
-from typing import Dict, Any
-import httpx
 import logging
+from typing import Any
+
+import httpx
+from fastapi import APIRouter, HTTPException
 
 from config.settings import settings
 
@@ -10,11 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/health")
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Health check endpoint to verify service status and dependencies.
     """
-    health_status = {
+    health_status: dict[str, Any] = {
         "status": "healthy",
         "version": settings.api_version,
         "environment": settings.environment,
@@ -24,7 +25,7 @@ async def health_check() -> Dict[str, Any]:
             "gemini": "unknown"
         }
     }
-    
+
     # Check Supabase connectivity (non-blocking)
     try:
         async with httpx.AsyncClient() as client:
@@ -39,35 +40,35 @@ async def health_check() -> Dict[str, Any]:
     except Exception as e:
         logger.warning(f"Supabase health check failed: {e}")
         health_status["services"]["supabase"] = "unreachable"
-    
+
     # Check if Gemini API key is configured
     if settings.gemini_api_key and settings.gemini_api_key != "your_gemini_api_key_here":
         health_status["services"]["gemini"] = "configured"
     else:
         health_status["services"]["gemini"] = "not_configured"
-    
+
     # Determine overall health
     if health_status["services"]["supabase"] == "unreachable":
         health_status["status"] = "degraded"
-    
+
     return health_status
 
 
 @router.get("/ready")
-async def readiness_check() -> Dict[str, bool]:
+async def readiness_check() -> dict[str, bool]:
     """
     Readiness check to determine if the service is ready to accept traffic.
     """
     is_ready = True
-    
+
     # Check if required environment variables are set
     if not settings.gemini_api_key or settings.gemini_api_key == "your_gemini_api_key_here":
         is_ready = False
-    
+
     if not settings.supabase_url or not settings.supabase_anon_key:
         is_ready = False
-    
+
     if not is_ready:
         raise HTTPException(status_code=503, detail="Service not ready")
-    
+
     return {"ready": is_ready}

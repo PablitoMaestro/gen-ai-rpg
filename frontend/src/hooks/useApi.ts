@@ -5,7 +5,13 @@ interface UseApiOptions {
   onError?: (error: Error) => void;
 }
 
-export function useApi<T>() {
+export function useApi<T>(): {
+  isLoading: boolean;
+  error: Error | null;
+  data: T | null;
+  execute: (apiCall: () => Promise<T>, options?: UseApiOptions) => Promise<T | null>;
+  reset: () => void;
+} {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<T | null>(null);

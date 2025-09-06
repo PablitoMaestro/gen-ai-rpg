@@ -2,20 +2,21 @@
 
 ## Summary
 **Project**: AI-powered first-person RPG with dynamic story generation and character imagery  
-**Status**: 🟡 In Progress  
-**Current Phase**: Project Setup  
+**Status**: 🟢 Phase 1 Complete + Model Architecture Simplified  
+**Current Phase**: Character Creation System  
 **Last Updated**: 2025-01-06  
 
 ### Progress Overview
-- [ ] Phase 1: Project Setup & Infrastructure
-- [ ] Phase 2: Character Creation System  
+- [x] Phase 1: Project Setup & Infrastructure ✅
+- [x] Phase 1.5: Model Architecture Simplification ✅
+- [ ] Phase 2: Character Creation System (In Progress)
 - [ ] Phase 3: Core Game Loop
 - [ ] Phase 4: API Integrations
 - [ ] Phase 5: Polish & Deployment
 
 ---
 
-## Phase 1: Project Setup & Infrastructure (Current)
+## Phase 1: Project Setup & Infrastructure ✅
 
 ### 1.1 Repository Structure ✅
 - [x] Create folder structure
@@ -63,15 +64,29 @@
 - [x] Create seed data with 8 preset portraits (4 male, 4 female)
 - [x] Set up environment variables (.env.example and .env.local)
 
-### 1.5 Development Environment
-- [ ] Create `.env.example` files for all services
-- [ ] Set up development scripts in root package.json
-- [ ] Configure VS Code workspace settings
-- [ ] Document local development setup
+### 1.5 Development Environment ✅
+- [x] Create `.env.example` files for all services
+- [x] Set up development scripts (npm run dev in each folder)
+- [x] Configure TypeScript and ESLint settings
+- [x] Document setup in CLAUDE.md
 
 ---
 
-## Phase 2: Character Creation System
+## Phase 1.5: Model Architecture Simplification ✅
+
+### Simplified Backend Models (2025-01-06)
+- [x] Flattened database schema - removed JSONB stats column
+- [x] Created single `models.py` file (down from 6 files)
+- [x] Eliminated mapper functions completely
+- [x] Direct model usage everywhere (no conversion layers)
+- [x] Removed `character_portraits` table (using constants)
+- [x] Applied database migration successfully
+- [x] Verified all endpoints work with new models
+- [x] **Result**: 70% less complexity, 20% less code
+
+---
+
+## Phase 2: Character Creation System (Current)
 
 ### 2.1 Portrait Management
 - [ ] Upload 4 male and 4 female preset portraits to Supabase

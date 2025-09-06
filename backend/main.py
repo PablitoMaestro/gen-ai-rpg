@@ -1,8 +1,10 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import logging
 
+from api import characters, health, images, stories
 from config.settings import settings
 
 # Configure logging
@@ -14,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # type: ignore
     # Startup
     logger.info("Starting up AI RPG Backend...")
     logger.info(f"Environment: {settings.environment}")
@@ -40,9 +42,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Import and include routers
-from api import health, characters, stories, images
-
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(characters.router, prefix="/api/characters", tags=["characters"])
 app.include_router(stories.router, prefix="/api/stories", tags=["stories"])
@@ -50,7 +49,7 @@ app.include_router(images.router, prefix="/api/images", tags=["images"])
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     return {
         "message": "AI RPG Backend API",
         "version": settings.api_version,

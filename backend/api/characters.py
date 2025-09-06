@@ -1,115 +1,148 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
-from typing import List, Dict, Any, Optional
 import logging
+from typing import Literal
+from uuid import UUID
+
+from fastapi import APIRouter, HTTPException, UploadFile
+
+from models import Character, CharacterBuildOption, CharacterCreateRequest, get_preset_portraits
+from services.supabase import supabase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 @router.get("/presets/{gender}")
-async def get_preset_portraits(gender: str) -> List[Dict[str, str]]:
+async def get_preset_portraits_endpoint(
+    gender: Literal["male", "female"]
+) -> list[dict[str, str]]:
     """
     Get preset portrait options for a specific gender.
-    
+
     Args:
         gender: Either "male" or "female"
-    
+
     Returns:
-        List of portrait URLs and IDs
+        List of portrait dictionaries with id and url
     """
-    if gender not in ["male", "female"]:
-        raise HTTPException(status_code=400, detail="Gender must be 'male' or 'female'")
-    
-    # TODO: Implement fetching from Supabase
-    return [
-        {"id": f"{gender}_preset_1", "url": f"/portraits/{gender}/1.jpg"},
-        {"id": f"{gender}_preset_2", "url": f"/portraits/{gender}/2.jpg"},
-        {"id": f"{gender}_preset_3", "url": f"/portraits/{gender}/3.jpg"},
-        {"id": f"{gender}_preset_4", "url": f"/portraits/{gender}/4.jpg"},
-    ]
+    # Use in-memory preset portraits (no DB needed)
+    portraits = get_preset_portraits(gender)
+
+    if not portraits:
+        logger.warning(f"No preset portraits found for gender: {gender}")
+        return []
+
+    return portraits
 
 
 @router.post("/generate")
 async def generate_character_builds(
-    gender: str,
+    gender: Literal["male", "female"],
     portrait_url: str
-) -> List[Dict[str, Any]]:
+) -> list[CharacterBuildOption]:
     """
     Generate 4 full-body character builds based on portrait.
-    
+
     Args:
         gender: Character gender
         portrait_url: URL of selected portrait
-    
+
     Returns:
         List of 4 generated character builds with images
     """
     # TODO: Implement Nano Banana API integration
     logger.info(f"Generating character builds for {gender} with portrait {portrait_url}")
-    
-    return [
-        {
-            "id": f"build_1",
-            "image_url": "/placeholder/build1.jpg",
-            "description": "Warrior build with heavy armor"
-        },
-        {
-            "id": f"build_2",
-            "image_url": "/placeholder/build2.jpg",
-            "description": "Mage build with mystical robes"
-        },
-        {
-            "id": f"build_3",
-            "image_url": "/placeholder/build3.jpg",
-            "description": "Rogue build with leather armor"
-        },
-        {
-            "id": f"build_4",
-            "image_url": "/placeholder/build4.jpg",
-            "description": "Ranger build with forest gear"
-        }
+
+    # For now, return placeholder builds
+    builds = [
+        CharacterBuildOption(
+            id="build_warrior",
+            image_url="/placeholder/warrior.jpg",
+            build_type="warrior",
+            description="Heavy armor warrior with great sword",
+            stats_preview={"strength": 15, "intelligence": 8, "agility": 10}
+        ),
+        CharacterBuildOption(
+            id="build_mage",
+            image_url="/placeholder/mage.jpg",
+            build_type="mage",
+            description="Mystical mage with arcane powers",
+            stats_preview={"strength": 8, "intelligence": 15, "agility": 10}
+        ),
+        CharacterBuildOption(
+            id="build_rogue",
+            image_url="/placeholder/rogue.jpg",
+            build_type="rogue",
+            description="Stealthy rogue with dual daggers",
+            stats_preview={"strength": 10, "intelligence": 10, "agility": 15}
+        ),
+        CharacterBuildOption(
+            id="build_ranger",
+            image_url="/placeholder/ranger.jpg",
+            build_type="ranger",
+            description="Forest ranger with bow and arrow",
+            stats_preview={"strength": 12, "intelligence": 10, "agility": 13}
+        )
     ]
 
+    return builds
 
-@router.post("/save")
-async def save_character(
-    character_data: Dict[str, Any]
-) -> Dict[str, Any]:
+
+# Default user ID for development
+DEFAULT_USER_ID = UUID("00000000-0000-0000-0000-000000000000")
+
+@router.post("/create", response_model=Character)
+async def create_character(
+    request: CharacterCreateRequest,
+    user_id: UUID = DEFAULT_USER_ID  # TODO: Get from auth
+) -> Character:
     """
-    Save selected character to database.
-    
+    Create and save a new character.
+
     Args:
-        character_data: Complete character information
-    
+        request: Character creation data
+        user_id: User ID from authentication
+
     Returns:
-        Saved character with ID
+        Created character
     """
-    # TODO: Implement Supabase save
-    logger.info("Saving character to database")
-    
-    return {
-        "id": "char_123",
-        "status": "saved",
-        **character_data
-    }
+    # Create character model
+    character = Character(
+        user_id=user_id,
+        name=request.name,
+        gender=request.gender,
+        portrait_url=request.portrait_id,  # TODO: Resolve from preset or custom
+        full_body_url=f"/placeholder/{request.build_id}.jpg",  # TODO: From Nano Banana
+        build_type=request.build_type,
+        hp=100,
+        xp=0,
+        level=1
+    )
+
+    # Save to database
+    saved_character = await supabase_service.create_character(character)
+
+    if not saved_character:
+        raise HTTPException(status_code=500, detail="Failed to create character")
+
+    return saved_character
 
 
 @router.post("/portrait/upload")
 async def upload_custom_portrait(
-    file: UploadFile = File(...)
-) -> Dict[str, str]:
+    file: UploadFile
+) -> dict[str, str]:
     """
     Upload a custom portrait image.
-    
+
     Args:
         file: Uploaded image file
-    
+
     Returns:
         URL of uploaded portrait
     """
     # TODO: Implement file upload to Supabase storage
     logger.info(f"Uploading custom portrait: {file.filename}")
-    
+
     return {
         "url": f"/portraits/custom/{file.filename}",
         "status": "uploaded"

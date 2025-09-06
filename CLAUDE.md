@@ -8,24 +8,28 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 
 ## Tech Stack & Architecture
 
-### Frontend (Next.js + TypeScript)
-- **Framework**: Next.js with TypeScript, deployed on Vercel
-- **State Management**: Zustand for client-side state
-- **Validation**: Zod for type validation
-- **Styling**: Tailwind CSS
+### Frontend (Next.js + TypeScript) ✅
+- **Framework**: Next.js 15.5.2 with TypeScript, deployed on Vercel
+- **State Management**: Zustand v5 for client-side state
+- **Validation**: Zod v4 for type validation
+- **Styling**: Tailwind CSS v3.4 (stable, not v4)
 - **Architecture**: Call backend for all external API operations
-- **Standards**: Strict TypeScript and lint rules required
+- **Standards**: Strict TypeScript and ESLint rules configured
+- **Theme**: Dark fantasy with custom colors and animations
 
-### Backend (FastAPI + Python)
+### Backend (FastAPI + Python) ✅
 - **Framework**: FastAPI with Pydantic
-- **Structure**: `/services`, `/scripts` folders following async patterns
+- **Models**: Single `models.py` file with unified models (simplified architecture)
+- **Database Service**: Direct model usage, no mappers needed
 - **Deployment**: Scaleway container
+- **Status**: Fully configured with simplified model architecture
 
-### Database (Supabase)
-- **Local Development**: Local Supabase instance managed via migrations only
-- **Production**: Single main production database
+### Database (Supabase) ✅
+- **Local Development**: Local Supabase instance running with Docker
+- **Schema**: Flattened tables with direct columns (no JSONB stats)
+- **Tables**: `characters`, `game_sessions` (character_portraits removed)
 - **Management**: Use Supabase CLI for all database operations
-- **Image Storage**: Character portraits stored in Supabase
+- **Status**: Migration applied, simplified schema active
 
 ### External APIs
 - **Gemini 2.5 Pro**: Story generation and narration
@@ -37,12 +41,10 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 ### Frontend Setup
 ```bash
 cd frontend
-npx create-next-app@latest . --typescript --tailwind --app
-npm install zod zustand
-npm run dev        # Start development server
+npm install        # Install dependencies
+npm run dev        # Start development server (http://localhost:3000)
 npm run build      # Build for production
-npm run lint       # Run linting
-npm run typecheck  # Run type checking
+npm run lint       # Run ESLint
 ```
 
 ### Backend Setup
@@ -62,6 +64,14 @@ supabase start      # Start local instance
 supabase db push    # Push migrations to remote
 supabase migration new <name>  # Create new migration
 ```
+
+## Project Status
+- **Phase 1**: ✅ Complete (All infrastructure set up)
+- **Phase 1.5**: ✅ Complete (Model architecture simplified - 70% less complexity)
+- **Phase 2**: 🟡 In Progress (Character Creation System)
+- **Frontend**: Running on http://localhost:3000
+- **Backend**: Running on http://localhost:8000
+- **Database**: Local Supabase with simplified schema
 
 ## Git Workflow
 - **Branches**: `main` (production) and `dev` (development)

@@ -1,9 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 
-export default function Home() {
+import { Button } from '@/components/ui/Button';
+
+export default function Home(): React.ReactElement {
   const router = useRouter();
 
   return (
