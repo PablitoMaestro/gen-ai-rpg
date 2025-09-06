@@ -3,7 +3,11 @@ import logging
 from typing import Any, Dict, Optional, List
 import asyncio
 import io
-from PIL import Image
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 import google.generativeai as genai  # type: ignore
 from google.genai import types  # type: ignore
@@ -68,6 +72,10 @@ class GeminiService:
             Generated character image bytes
         """
         try:
+            if not Image:
+                logger.warning("PIL not available, returning original portrait")
+                return portrait_image
+                
             # Open image with PIL
             portrait_pil = Image.open(io.BytesIO(portrait_image))
             
@@ -131,6 +139,10 @@ class GeminiService:
             Generated scene image bytes
         """
         try:
+            if not Image:
+                logger.warning("PIL not available, returning original character")
+                return character_image
+                
             # Open character image
             character_pil = Image.open(io.BytesIO(character_image))
             
@@ -184,6 +196,10 @@ class GeminiService:
             Session ID
         """
         try:
+            if not Image:
+                logger.warning("PIL not available, cannot create chat session")
+                raise ValueError("PIL required for chat sessions")
+                
             # Create new chat for iterative image generation
             chat = self.image_model.start_chat(history=[])
             

@@ -20,6 +20,42 @@ fi
 # Activate virtual environment
 source ../venv/bin/activate
 
+# Parse arguments first (for --help)
+FEATURE=""
+QUICK=false
+IMAGE=false
+SHOW_HELP=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help)
+            SHOW_HELP=true
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+# Show help and exit early if requested
+if [ "$SHOW_HELP" = true ]; then
+    echo "Usage: ./run_tests.sh [options]"
+    echo ""
+    echo "Options:"
+    echo "  --quick         Run quick tests only (no image generation)"
+    echo "  --image         Include image generation test"
+    echo "  --feature NAME  Test specific feature:"
+    echo "                  story, character, scene, branches, tts, db"
+    echo "  --help          Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  ./run_tests.sh --quick           # Quick test without images"
+    echo "  ./run_tests.sh --feature story   # Test story generation only"
+    echo "  ./run_tests.sh --image           # Full test with images"
+    exit 0
+fi
+
 # Install dependencies if needed
 echo -e "${YELLOW}Checking dependencies...${NC}"
 pip install -q pillow 2>/dev/null
@@ -35,11 +71,7 @@ fi
 echo -e "${GREEN}✅ API Key found${NC}"
 echo ""
 
-# Parse arguments
-FEATURE=""
-QUICK=false
-IMAGE=false
-
+# Parse remaining arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --feature)
@@ -54,22 +86,6 @@ while [[ $# -gt 0 ]]; do
         --image)
             IMAGE=true
             shift
-            ;;
-        --help)
-            echo "Usage: ./run_tests.sh [options]"
-            echo ""
-            echo "Options:"
-            echo "  --quick         Run quick tests only (no image generation)"
-            echo "  --image         Include image generation test"
-            echo "  --feature NAME  Test specific feature:"
-            echo "                  story, character, scene, branches, tts, db"
-            echo "  --help          Show this help message"
-            echo ""
-            echo "Examples:"
-            echo "  ./run_tests.sh --quick           # Quick test without images"
-            echo "  ./run_tests.sh --feature story   # Test story generation only"
-            echo "  ./run_tests.sh --image           # Full test with images"
-            exit 0
             ;;
         *)
             echo -e "${RED}Unknown option: $1${NC}"
