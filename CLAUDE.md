@@ -103,9 +103,22 @@ supabase migration new <name>  # Create new migration
 - **Clean Code**: Modular, service-based architecture
 
 ## Planning & Documentation
+
+### plan.md Best Practices
+- **Update Frequency**: Update after completing each task or at end of each work session
+- **Status Tracking**: Use emojis (🔴 Not Started, 🟡 In Progress, 🟢 Complete)
+- **Date Updates**: Always update "Last Updated" date when making changes
+- **Checkboxes**: Use `- [ ]` for tasks, mark with `- [x]` when complete
+- **Phase Management**: Only detail current and next phase, keep future phases high-level
+- **Blockers**: Document any blockers in Notes section immediately
+- **Progress Overview**: Keep summary section current with overall project status
+
+### Planning Guidelines
 - Use `plan.md` for major feature planning with checkpoints
 - Track progress systematically
 - Focus on MVP features first, then stretch goals
+- Break complex tasks into smaller, actionable items
+- Review and adjust priorities daily
 
 ## API Limits & Notes
 - Gemini API: 100 requests per project per day (free tier)
