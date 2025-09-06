@@ -95,7 +95,7 @@ export function PortraitSelector({
         </div>
       )}
       
-      <div className={`flex gap-4 overflow-x-auto transition-all duration-500 pb-4 ${
+      <div className={`flex gap-4 overflow-x-auto transition-all duration-500 p-2 ${
         isFiltering ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
       }`} style={{ scrollSnapType: 'x mandatory', scrollBehavior: 'smooth' }}>
         
@@ -141,7 +141,7 @@ export function PortraitSelector({
               src={customPortrait.url}
               alt="Custom portrait"
               fill
-              className="object-cover"
+              className="object-cover object-center"
               sizes="128px"
             />
             {selectedPortrait === customPortrait.id && (
@@ -175,7 +175,7 @@ export function PortraitSelector({
               src={portrait.url}
               alt={`Portrait ${portrait.id}`}
               fill
-              className="object-cover"
+              className="object-cover object-center"
               sizes="128px"
             />
             {selectedPortrait === portrait.id && (

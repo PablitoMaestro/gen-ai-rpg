@@ -7,18 +7,20 @@ interface HeroPortraitPreviewProps {
   portraitUrl: string | null;
   characterName?: string;
   selectedGender?: 'male' | 'female';
+  isLarge?: boolean;
 }
 
 export function HeroPortraitPreview({ 
   portraitUrl, 
   characterName = '', 
-  selectedGender = 'female' 
+  selectedGender = 'female',
+  isLarge = false
 }: HeroPortraitPreviewProps): React.ReactElement {
   return (
     <div className="flex items-center justify-center">
       <div className="relative">
         {/* Ornate Medieval Frame */}
-        <div className="relative w-80 h-80 rounded-3xl overflow-hidden border-4 border-gold-500/40 bg-black/20 backdrop-blur-sm shadow-golden-lg">
+        <div className={`relative ${isLarge ? 'w-96 h-96' : 'w-64 h-64'} rounded-3xl overflow-hidden border-4 border-gold-500/40 bg-black/20 backdrop-blur-sm shadow-golden-lg`}>
           
           {/* Inner decorative border */}
           <div className="absolute inset-2 rounded-2xl border-2 border-gold-400/30 pointer-events-none" />
@@ -31,7 +33,7 @@ export function HeroPortraitPreview({
                 alt={characterName || `${selectedGender} character portrait`}
                 fill
                 className="object-cover transition-all duration-500"
-                sizes="320px"
+                sizes={isLarge ? "384px" : "256px"}
                 priority
               />
               
