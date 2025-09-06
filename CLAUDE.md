@@ -111,3 +111,12 @@ supabase migration new <name>  # Create new migration
 - Gemini API: 100 requests per project per day (free tier)
 - Use free tier API key for hackathon
 - Paid keys will incur charges for all usage
+
+## Specialized Agents
+
+### Available Agents (call by name):
+- **Babcia/Babcia Stasia**: DevOps agent for verifying configurations, service connections, API keys, and environment setups
+- **Chuck Norris**: Complex coding challenges, debugging, and elegant refactoring solutions
+- **Robert**: Database operations specialist for Supabase queries, migrations, and schema management
+- **Kasia**: API documentation collector for external API integration docs
+- **Sun Tzu**: Strategic planning for code changes, refactoring, and architectural decisions
