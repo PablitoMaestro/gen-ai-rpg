@@ -67,19 +67,43 @@ class PortraitDialogueService:
             }
         }
         
+        # Build-specific dialogue lines for each character build type
+        self.build_dialogue_lines = {
+            "warrior": {
+                "text": "My sword is yours, and with it, victory is assured!",
+                "emotion": "determined_loyalty",
+                "duration_estimate": 4.0
+            },
+            "mage": {
+                "text": "My spells will crush every enemy that dares oppose us!",
+                "emotion": "confident_power",
+                "duration_estimate": 4.2
+            },
+            "rogue": {
+                "text": "From shadows I strike, silent and deadly as the night!",
+                "emotion": "stealthy_menace",
+                "duration_estimate": 4.5
+            },
+            "ranger": {
+                "text": "My arrows never miss, and nature itself fights beside me!",
+                "emotion": "wild_confidence",
+                "duration_estimate": 4.8
+            }
+        }
+        
         # Voice ID mappings - using existing ElevenLabs voices that match character archetypes
         self.voice_mappings: Dict[str, str] = {
             # Male Characters
-            "m1": "21m00Tcm4TlvDq8ikWAM",  # Brian - energetic young male (Young Rogue)
+            "m1": "TxGEqnHWrfWFTfGW9XjX",  # Josh - energetic young male (Young Rogue)
             "m2": "D38z5RcWu1voky8WS1ja",  # Ethan - mature, emotional depth (Weary Warrior)  
             "m3": "IKne3meq5aSn9XLyUdCD",  # Charlie - strong, assertive (Fierce Fighter)
-            "m4": "SOYHLrjzK2X1ezoPC6cr",  # Harry - wise, older (Wise Elder)
+            "m4": "onwK4e9ZLuTAKqWW03F9",  # Daniel - epic deep old male voice (Wise Elder)
             
             # Female Characters
             "f1": "AZnzlk1XvdvUeBnXmlld",  # Domi - young, hopeful (Young Hope)
             "f2": "EXAVITQu4vr4xnSDxMaL",  # Sarah - strong, serious (Hardened Survivor)
             "f3": "oWAxZDx7w5VEj9dCyTzz",  # Grace - soft, emotional (Sorrowful Soul)
-            "f4": "CYw3kZ02Hs0563khs1fj",  # Matilda - warm, maternal (Elder Sage)
+            "f4": "XB0fDUnXU5powFXDhCwa",  # Charlotte - epic grandmother voice (Elder Sage)
         }
         
     def get_dialogue_line(self, portrait_id: str) -> Optional[Dict[str, Any]]:
@@ -97,6 +121,22 @@ class PortraitDialogueService:
     def get_all_dialogue_lines(self) -> Dict[str, Dict[str, Any]]:
         """Get all dialogue lines."""
         return self.dialogue_lines
+    
+    def get_build_dialogue_line(self, build_type: str) -> Optional[Dict[str, Any]]:
+        """
+        Get build-specific dialogue line information.
+        
+        Args:
+            build_type: Build type (warrior, mage, rogue, ranger)
+            
+        Returns:
+            Dictionary containing build dialogue information or None if not found
+        """
+        return self.build_dialogue_lines.get(build_type)
+    
+    def get_all_build_dialogue_lines(self) -> Dict[str, Dict[str, Any]]:
+        """Get all build-specific dialogue lines."""
+        return self.build_dialogue_lines
     
     async def generate_dialogue_audio(
         self, 
