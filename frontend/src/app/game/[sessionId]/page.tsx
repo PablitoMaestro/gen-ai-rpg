@@ -265,8 +265,8 @@ export default function GamePage(): React.ReactElement {
           </div>
         )}
 
-        {/* End of Story - dramatic overlay */}
-        {(!currentScene.choices || currentScene.choices.length === 0) && !isGeneratingScene && (
+        {/* End of Story - dramatic overlay - ONLY when explicitly at story end */}
+        {currentScene && currentScene.is_final && !isGeneratingScene && (
           <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="text-center space-y-8 max-w-2xl mx-auto p-8">
               {/* Dramatic ending visual */}
