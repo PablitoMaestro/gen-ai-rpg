@@ -13,42 +13,42 @@ import { characterService } from '@/services/characterService';
 type Gender = 'male' | 'female';
 type Portrait = { id: string; url: string };
 
-// Preset names and life stories based on gender and portrait
+// Preset names and personality descriptions based on gender and portrait
 const PRESET_CHARACTERS = {
   female: [
     {
       name: "Lyralei Thornwick",
-      story: "You speak to ravens in the old tongue, and they whisper secrets of the dead. A childhood curse left you able to see the final moments of anyone whose bones you touch. Your laughter sounds like wind chimes, but your enemies hear funeral bells."
+      story: "Obsessively cheerful even in mortal danger, you collect cursed trinkets and name them like pets. You giggle when threatened and have heated arguments with your reflection. Ravens follow you because you share gossip with them about the living and the dead."
     },
     {
       name: "Seraphine Nightwhisper",
-      story: "Your dreams bleed into reality when you sleep, painting impossible colors that shouldn't exist. You've never cast a shadow since the day you accidentally traded it for your sister's life. The library moths follow you everywhere, carrying messages from books that have never been written."
+      story: "A dreamy perfectionist who sees beauty in chaos and poetry in destruction. You hum funeral dirges when happy and paint with your own tears. You're convinced colors have feelings and apologize to shadows when you step on them."
     },
     {
       name: "Kira Shadowveil",
-      story: "Once a temple assassin, you carry 99 cursed daggers in your soul, each one a life you've taken. Your reflection ages backward, and mirrors shatter when you smile. You can taste lies on the wind and your tears turn to black pearls at midnight."
+      story: "Sarcastically polite and lethally precise, you count everything obsessively - steps, heartbeats, lies people tell. You never break eye contact and smile like you know everyone's deepest secret. Mirrors fascinate and terrify you equally."
     },
     {
       name: "Aurora Frostwhisper",
-      story: "Your blood freezes into ruby crystals when spilled, and flowers wilt at your touch. You were raised by the Winter Court after they found you laughing in a blizzard as a child. Your heartbeat echoes in empty rooms, counting down to something you can't remember."
+      story: "Brutally honest and unforgivingly wise, you cut through lies with sharp words and colder stares. You've survived winters that would kill lesser souls and have no patience for weakness. Your wisdom comes with edges, and your advice often stings worse than frostbite."
     }
   ],
   male: [
     {
       name: "Theron Grimward",
-      story: "You died for seven minutes as a child and came back speaking prophecies in dead languages. Your sword hums with the souls of thirteen kings, and crows gather wherever you make camp. The scar across your throat glows when demons are near."
+      story: "Prophetically doom-obsessed yet surprisingly optimistic, you speak in riddles and collect omens like other people collect coins. You argue with fate itself and treat every minor inconvenience as a cosmic sign. Crows think you're hilarious."
     },
     {
       name: "Marcus Ironheart",
-      story: "A blacksmith's son who forged his own heart from meteor iron after the original was stolen by fae. You can hear metal's memories when you touch it, and your hammer strikes echo across dimensions. Your breath turns to steam even in summer."
+      story: "Methodically passionate and emotionally explosive, you talk to metal like old friends and hold grudges against specific hammers. You're either completely silent or giving passionate speeches about the philosophy of craftsmanship - no middle ground."
     },
     {
       name: "Aldric Doomhammer",
-      story: "Your shadow walks three steps ahead of you, warning of danger. You've been struck by lightning seven times and now storms follow your moods. The ancient war drums in your chest beat louder with each battle won."
+      story: "Supernaturally paranoid yet recklessly brave, you dodge lightning that isn't there and charge headfirst into actual danger. You narrate your own life like an epic ballad and always expect the worst while hoping for the best."
     },
     {
       name: "Viktor Bonecaller",
-      story: "Raised by necromancers in the Whispering Catacombs, you learned to play chess with ghosts. Your left eye sees through the veil between worlds, and your laughter makes the dead dance. You age one day for every life you save."
+      story: "Morbidly witty with an inappropriate sense of humor about death, you make friends with ghosts easier than living people. You treat life like a cosmic joke and aging like a fascinating experiment. Time confuses you but amuses you even more."
     }
   ]
 } as const;
@@ -358,12 +358,12 @@ export default function CreateCharacterPage(): React.ReactElement {
                   {/* Description Textarea */}
                   <div className="backdrop-blur-sm bg-black/5 p-6 rounded-2xl border border-gold-500/10">
                     <div className="space-y-4">
-                      <h3 className="text-gold-300 font-ornate text-lg text-center">Life Story</h3>
+                      <h3 className="text-gold-300 font-ornate text-lg text-center">Personality</h3>
                       <div className="relative">
                         <textarea
                           value={characterDescription}
                           onChange={(e) => setCharacterDescription(e.target.value)}
-                          placeholder="Write your character's background story..."
+                          placeholder="Describe your character's personality traits, quirks, and behaviors..."
                           maxLength={500}
                           rows={6}
                           className="w-full px-6 py-4 bg-dark-800/60 border border-gold-600/30 rounded-xl 

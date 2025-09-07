@@ -26,6 +26,7 @@ export interface CharacterCreateRequest {
   portrait_id: string;
   build_id: string;
   build_type: 'warrior' | 'mage' | 'rogue' | 'ranger';
+  personality?: string;  // Character personality description
 }
 
 class CharacterService {

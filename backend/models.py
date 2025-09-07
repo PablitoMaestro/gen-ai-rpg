@@ -126,6 +126,7 @@ class Character(BaseModel):
     full_body_url: str
     build_type: Literal["warrior", "mage", "rogue", "ranger"] = "warrior"
     voice_id: str | None = None  # ElevenLabs voice ID for character narration
+    personality: str | None = None  # Character personality description for story generation
     hp: int = Field(default=100, ge=0, le=200)
     xp: int = Field(default=0, ge=0)
     level: int = Field(default=1, ge=1, le=100)
@@ -247,6 +248,7 @@ class CharacterCreateRequest(BaseModel):
     portrait_id: str  # Either preset ID or custom URL
     build_id: str  # Selected build variant ID
     build_type: Literal["warrior", "mage", "rogue", "ranger"]
+    personality: str | None = None  # Character personality description
 
 
 class CharacterBuildOption(BaseModel):

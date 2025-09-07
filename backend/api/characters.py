@@ -295,6 +295,14 @@ async def create_character(
             logger.info(f"Assigned voice {voice_id} to character with portrait {request.portrait_id}")
         else:
             logger.warning(f"No voice mapping found for portrait {request.portrait_id}")
+    elif request.portrait_id == 'custom' or request.portrait_id.startswith('http'):
+        # Auto-assign voice based on gender for custom portraits
+        if request.gender == "male":
+            voice_id = "TxGEqnHWrfWFTfGW9XjX"  # Josh - young energetic male
+            logger.info("Auto-assigned Josh voice for male custom portrait")
+        else:
+            voice_id = "AZnzlk1XvdvUeBnXmlld"  # Domi - young hopeful female  
+            logger.info("Auto-assigned Domi voice for female custom portrait")
 
     # Create character model
     character = Character(
@@ -305,6 +313,7 @@ async def create_character(
         full_body_url=full_body_url,
         build_type=request.build_type,
         voice_id=voice_id,
+        personality=request.personality,
         hp=100,
         xp=0,
         level=1

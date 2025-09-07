@@ -118,7 +118,8 @@ export default function BuildsPage(): React.ReactElement {
         gender: character.gender,
         portrait_id: character.portrait_url, // Use portrait_url as the ID
         build_id: selectedBuild,
-        build_type: selectedBuildData.build_type
+        build_type: selectedBuildData.build_type,
+        personality: character.description // Pass personality from localStorage
       });
 
       // Update localStorage with the created character (including database ID)

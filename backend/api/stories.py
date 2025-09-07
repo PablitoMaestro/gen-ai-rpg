@@ -23,6 +23,18 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+class BranchPrerenderRequest(PydanticBaseModel):
+    """Request model for pre-rendering story branches."""
+    character_id: UUID
+    scene_context: str
+    choices: list[str]  # List of choice texts to generate branches for
+
+
+class SessionCreateRequest(PydanticBaseModel):
+    """Request model for creating a game session."""
+    character_id: UUID
+
+
 @router.post("/generate", response_model=StoryScene)
 async def generate_story_scene(
     request: StoryGenerateRequest
@@ -45,6 +57,8 @@ async def generate_story_scene(
 
     # Build character description
     character_desc = f"{character.name}, a {character.build_type} {character.gender}"
+    if character.personality:
+        character_desc += f" with personality: {character.personality}"
 
     # Generate story content with Gemini
     try:
@@ -237,6 +251,8 @@ async def prerender_story_branches(
     
     # Build character description for consistency
     character_desc = f"{character.name}, a {character.build_type} {character.gender}"
+    if character.personality:
+        character_desc += f" with personality: {character.personality}"
     
     async def generate_single_branch(choice_text: str, choice_index: int) -> StoryBranch:
         """Generate a single story branch."""
@@ -432,16 +448,6 @@ async def get_game_session(session_id: UUID) -> GameSession:
 
     return session
 
-
-class BranchPrerenderRequest(PydanticBaseModel):
-    """Request model for pre-rendering story branches."""
-    character_id: UUID
-    scene_context: str
-    choices: list[str]  # List of choice texts to generate branches for
-
-class SessionCreateRequest(PydanticBaseModel):
-    """Request model for creating a game session."""
-    character_id: UUID
 
 @router.post("/session/create", response_model=GameSession)
 async def create_game_session(
