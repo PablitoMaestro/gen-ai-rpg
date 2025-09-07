@@ -14,6 +14,46 @@ import { characterService } from '@/services/characterService';
 type Gender = 'male' | 'female';
 type Portrait = { id: string; url: string };
 
+// Preset names and life stories based on gender and portrait
+const PRESET_CHARACTERS = {
+  female: [
+    {
+      name: "Lyralei Thornwick",
+      story: "You speak to ravens in the old tongue, and they whisper secrets of the dead. A childhood curse left you able to see the final moments of anyone whose bones you touch. Your laughter sounds like wind chimes, but your enemies hear funeral bells."
+    },
+    {
+      name: "Seraphine Nightwhisper",
+      story: "Your dreams bleed into reality when you sleep, painting impossible colors that shouldn't exist. You've never cast a shadow since the day you accidentally traded it for your sister's life. The library moths follow you everywhere, carrying messages from books that have never been written."
+    },
+    {
+      name: "Kira Shadowveil",
+      story: "Once a temple assassin, you carry 99 cursed daggers in your soul, each one a life you've taken. Your reflection ages backward, and mirrors shatter when you smile. You can taste lies on the wind and your tears turn to black pearls at midnight."
+    },
+    {
+      name: "Aurora Frostwhisper",
+      story: "Your blood freezes into ruby crystals when spilled, and flowers wilt at your touch. You were raised by the Winter Court after they found you laughing in a blizzard as a child. Your heartbeat echoes in empty rooms, counting down to something you can't remember."
+    }
+  ],
+  male: [
+    {
+      name: "Theron Grimward",
+      story: "You died for seven minutes as a child and came back speaking prophecies in dead languages. Your sword hums with the souls of thirteen kings, and crows gather wherever you make camp. The scar across your throat glows when demons are near."
+    },
+    {
+      name: "Marcus Ironheart",
+      story: "A blacksmith's son who forged his own heart from meteor iron after the original was stolen by fae. You can hear metal's memories when you touch it, and your hammer strikes echo across dimensions. Your breath turns to steam even in summer."
+    },
+    {
+      name: "Aldric Doomhammer",
+      story: "Your shadow walks three steps ahead of you, warning of danger. You've been struck by lightning seven times and now storms follow your moods. The ancient war drums in your chest beat louder with each battle won."
+    },
+    {
+      name: "Viktor Bonecaller",
+      story: "Raised by necromancers in the Whispering Catacombs, you learned to play chess with ghosts. Your left eye sees through the veil between worlds, and your laughter makes the dead dance. You age one day for every life you save."
+    }
+  ]
+} as const;
+
 export default function CreateCharacterPage(): React.ReactElement {
   const router = useRouter();
   const [selectedGender, setSelectedGender] = useState<Gender>('female');
@@ -28,45 +68,6 @@ export default function CreateCharacterPage(): React.ReactElement {
   const [isFiltering, setIsFiltering] = useState(false);
   const [allPortraits, setAllPortraits] = useState<{ male: Portrait[]; female: Portrait[] }>({ male: [], female: [] });
 
-  // Preset names and life stories based on gender and portrait
-  const presetCharacters = {
-    female: [
-      {
-        name: "Lyralei Thornwick",
-        story: "You speak to ravens in the old tongue, and they whisper secrets of the dead. A childhood curse left you able to see the final moments of anyone whose bones you touch. Your laughter sounds like wind chimes, but your enemies hear funeral bells."
-      },
-      {
-        name: "Seraphine Nightwhisper",
-        story: "Your dreams bleed into reality when you sleep, painting impossible colors that shouldn't exist. You've never cast a shadow since the day you accidentally traded it for your sister's life. The library moths follow you everywhere, carrying messages from books that have never been written."
-      },
-      {
-        name: "Zara Quicksilver",
-        story: "You can taste lies on the air like copper pennies, a gift that's made you wealthy but friendless. Your reflection sometimes moves a second too late, and you've learned not to look too closely at mirrors. Every lock you've ever picked remembers your touch."
-      },
-      {
-        name: "Elara Dawnbreaker",
-        story: "Your blood glows faintly in moonlight, a family secret that cost your village everything when the truth emerged. You count heartbeats instead of seconds, and can sense death approaching from three days away. Your tears turn to pearl dust when they hit the ground."
-      }
-    ],
-    male: [
-      {
-        name: "Kael Ravenshadow",
-        story: "You remember dying in seventeen different ways, each memory as vivid as your first breath. Your scars rearrange themselves while you sleep, forming maps to places that don't exist yet. When you laugh, clocks in the vicinity run backward."
-      },
-      {
-        name: "Aldric Stormwright",
-        story: "Lightning follows you like a loyal hound, and you've learned to sleep standing up to avoid burning down inns. Your grandfather's ghost lives in your left eye, offering terrible advice and spoiling surprises. You age one day slower than everyone else, a blessing that feels more like a curse."
-      },
-      {
-        name: "Finn Shadowstep",
-        story: "You were born during a solar eclipse and your footsteps make no sound on any surface. Your shadow dances independently when music plays, and you can slip through keyholes if you concentrate hard enough. The secret you keep would topple kingdoms, if only you could remember what it was."
-      },
-      {
-        name: "Marcus Lightbane",
-        story: "Holy symbols burn your skin, but unholy ones sing lullabies in your presence. You were blessed by an angel and cursed by a demon on the same day, leaving you perfectly balanced between salvation and damnation. Your prayers are answered, but never in the way you expect."
-      }
-    ]
-  };
 
   // Load all portraits on mount and restore previous selection
   useEffect(() => {
@@ -132,7 +133,7 @@ export default function CreateCharacterPage(): React.ReactElement {
             setSelectedPortraitUrl(firstPortrait.url);
             
             // Set preset name and description for first character
-            const character = presetCharacters.female[0];
+            const character = PRESET_CHARACTERS.female[0];
             setCharacterName(character.name);
             setCharacterDescription(character.story);
           }
@@ -147,7 +148,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     };
     
     loadAllPortraits();
-  }, [presetCharacters.female]);
+  }, []); // Run only on mount
   
   const handleGenderChange = async (gender: Gender): Promise<void> => {
     if (gender === selectedGender) {
@@ -169,7 +170,7 @@ export default function CreateCharacterPage(): React.ReactElement {
         setSelectedPortraitUrl(firstPortrait.url);
         
         // Set preset name and description for first character
-        const character = presetCharacters[gender][0];
+        const character = PRESET_CHARACTERS[gender][0];
         setCharacterName(character.name);
         setCharacterDescription(character.story);
       }
@@ -185,8 +186,8 @@ export default function CreateCharacterPage(): React.ReactElement {
     // Set preset name and description based on portrait index (assuming portraits are in order)
     if (portraitId !== 'custom') {
       const portraitIndex = portraits.findIndex(p => p.id === portraitId);
-      if (portraitIndex !== -1 && portraitIndex < presetCharacters[selectedGender].length) {
-        const character = presetCharacters[selectedGender][portraitIndex];
+      if (portraitIndex !== -1 && portraitIndex < PRESET_CHARACTERS[selectedGender].length) {
+        const character = PRESET_CHARACTERS[selectedGender][portraitIndex];
         setCharacterName(character.name);
         setCharacterDescription(character.story);
       }
