@@ -85,8 +85,7 @@ class GeminiService:
                 eye_color = portrait_characteristics.get("eye_color", "brown eyes")
                 skin = portrait_characteristics.get("skin", "weathered skin")
                 hair = portrait_characteristics.get("hair", "dark hair")
-                base_expression = portrait_characteristics.get("expression", "neutral expression")
-                
+
                 # Create base character description for consistency
                 consistent_desc = f"Person {age}, {eye_color}, {skin}, {hair}. "
             else:

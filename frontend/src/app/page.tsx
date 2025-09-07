@@ -1,12 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
 
 export default function Home(): React.ReactElement {
   const router = useRouter();
+  const [showPopup, setShowPopup] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden">
@@ -46,7 +47,7 @@ Begin Your Quest
           <Button
             variant="ghost"
             size="lg"
-            onClick={() => router.push('/continue')}
+            onClick={() => setShowPopup(true)}
           >
 Resume Adventure
           </Button>
@@ -81,6 +82,24 @@ Resume Adventure
           </div>
         </div>
       </div>
+
+      {/* Resume Adventure Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setShowPopup(false)}>
+          <div className="bg-gradient-to-b from-slate-800 to-slate-900 p-6 rounded-xl border border-amber-500/30 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-fantasy text-amber-400 mb-3">No Adventure to Resume</h3>
+            <p className="text-amber-100/80 mb-4">You don&apos;t have any saved adventures yet. Start your first quest to begin your legend!</p>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowPopup(false)}
+              className="w-full"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
       
       {/* Subtle magical light effects over the video */}
       <div className="absolute inset-0 overflow-hidden z-15 pointer-events-none">

@@ -11,6 +11,7 @@ from models import (
     StoryGenerateRequest,
     StoryScene,
 )
+from services.gemini import gemini_service
 from services.supabase import supabase_service
 
 router = APIRouter()
@@ -30,50 +31,97 @@ async def generate_story_scene(
     Returns:
         Generated story scene with narration and 4 choices
     """
-    # TODO: Implement Gemini story generation
     logger.info(f"Generating story scene for character {request.character_id}")
 
-    # Create story choices
-    choices = [
-        StoryChoice(
-            id="choice_1",
-            text="Stand up and look around carefully",
-            preview="Survey your surroundings",
-            consequence_hint="+5 XP"
-        ),
-        StoryChoice(
-            id="choice_2",
-            text="Call out to see if anyone is nearby",
-            preview="Seek help",
-            consequence_hint="Might attract attention"
-        ),
-        StoryChoice(
-            id="choice_3",
-            text="Check your belongings and equipment",
-            preview="Assess resources",
-            consequence_hint="Find useful items"
-        ),
-        StoryChoice(
-            id="choice_4",
-            text="Stay still and listen for danger",
-            preview="Remain cautious",
-            consequence_hint="Avoid immediate danger"
-        )
-    ]
+    # Get character from database
+    character = await supabase_service.get_character(request.character_id)
+    if not character:
+        raise HTTPException(status_code=404, detail="Character not found")
 
-    # Create story scene
-    scene = StoryScene(
-        scene_id="scene_001",
-        narration=(
-            "You wake up in a misty forest, the sound of rustling leaves all around you. "
-            "The morning dew glistens on ancient tree bark, and somewhere in the distance, "
-            "you hear the faint echo of a horn."
-        ),
-        image_url="/scenes/forest_awakening.jpg",
-        choices=choices,
-        is_combat=False,
-        is_checkpoint=True
-    )
+    # Build character description
+    character_desc = f"{character.name}, a {character.build_type} {character.gender}"
+
+    # Generate story content with Gemini
+    try:
+        story_data = await gemini_service.generate_story_scene(
+            character_description=character_desc,
+            scene_context=request.scene_context,
+            previous_choice=request.previous_choice
+        )
+
+        # Create story choices from generated data
+        choices = []
+        for i, choice_text in enumerate(story_data["choices"], 1):
+            choices.append(StoryChoice(
+                id=f"choice_{i}",
+                text=choice_text,
+                preview="",  # Could be generated later
+                consequence_hint=""  # Could be generated later
+            ))
+
+        # Generate scene image if character has full body image
+        image_url = None
+        if character.full_body_url:
+            try:
+                # TODO: Implement scene image generation and storage
+                # For now, use placeholder
+                image_url = "/scenes/generated_scene.jpg"
+            except Exception as e:
+                logger.warning(f"Scene image generation failed: {e}")
+                image_url = "/scenes/default.jpg"
+
+        # Create story scene
+        scene = StoryScene(
+            scene_id=f"scene_{request.character_id}_{len(request.scene_context or '')}",
+            narration=story_data["narration"],
+            image_url=image_url or "/scenes/default.jpg",
+            choices=choices,
+            is_combat=False,
+            is_checkpoint=True
+        )
+
+    except Exception as e:
+        logger.error(f"Story generation failed: {e}")
+        # Fallback to default scene
+        choices = [
+            StoryChoice(
+                id="choice_1",
+                text="Stand up and look around carefully",
+                preview="Survey your surroundings",
+                consequence_hint="+5 XP"
+            ),
+            StoryChoice(
+                id="choice_2",
+                text="Call out to see if anyone is nearby",
+                preview="Seek help",
+                consequence_hint="Might attract attention"
+            ),
+            StoryChoice(
+                id="choice_3",
+                text="Check your belongings and equipment",
+                preview="Assess resources",
+                consequence_hint="Find useful items"
+            ),
+            StoryChoice(
+                id="choice_4",
+                text="Stay still and listen for danger",
+                preview="Remain cautious",
+                consequence_hint="Avoid immediate danger"
+            )
+        ]
+
+        scene = StoryScene(
+            scene_id="scene_001",
+            narration=(
+                "You wake up in a misty forest, the sound of rustling leaves all around you. "
+                "The morning dew glistens on ancient tree bark, and somewhere in the distance, "
+                "you hear the faint echo of a horn."
+            ),
+            image_url="/scenes/forest_awakening.jpg",
+            choices=choices,
+            is_combat=False,
+            is_checkpoint=True
+        )
 
     return scene
 

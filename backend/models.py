@@ -22,65 +22,65 @@ BASE_URL = f"{STORAGE_URL}/storage/v1/object/public/character-images/presets"
 # Portrait generation characteristics for consistency
 PORTRAIT_CHARACTERISTICS = {
     "m1": {
-        "age": "early twenties", 
+        "age": "early twenties",
         "expression": "manic euphoria with wide eyes and unsettling grin",
-        "eye_color": "brown eyes gleaming with fervor", 
+        "eye_color": "brown eyes gleaming with fervor",
         "skin": "weathered skin flushed",
         "hair": "dark brown hair disheveled, stubble",
         "clothing": "brown tunic"
     },
     "m2": {
-        "age": "around 40", 
+        "age": "around 40",
         "expression": "deep melancholic sorrow with tears welling",
-        "eye_color": "brown eyes filled with grief", 
+        "eye_color": "brown eyes filled with grief",
         "skin": "weathered skin",
         "hair": "dark brown beard with gray",
         "clothing": "brown leather"
     },
     "m3": {
-        "age": "late twenties", 
+        "age": "late twenties",
         "expression": "burning rage with clenched jaw and flared nostrils",
-        "eye_color": "gray-brown eyes blazing with fury", 
+        "eye_color": "gray-brown eyes blazing with fury",
         "skin": "pale skin tense",
         "hair": "dark brown unkempt hair, scar through eyebrow, stubble",
         "clothing": "gray-brown cloak"
     },
     "m4": {
-        "age": "in sixties", 
+        "age": "in sixties",
         "expression": "profound terror with wide fearful eyes and parted lips",
-        "eye_color": "gray eyes showing panic", 
+        "eye_color": "gray eyes showing panic",
         "skin": "wrinkled skin pale with dread",
         "hair": "gray-white hair, gray beard",
         "clothing": "dark brown robe"
     },
     "f1": {
-        "age": "early twenties", 
+        "age": "early twenties",
         "expression": "ecstatic revelation with eyes wide in wonder and slight open-mouthed smile",
-        "eye_color": "brown eyes sparkling with awe", 
+        "eye_color": "brown eyes sparkling with awe",
         "skin": "fair skin with freckles glowing",
         "hair": "dark brown hair with simple coif",
         "clothing": "beige dress"
     },
     "f2": {
-        "age": "around 35", 
+        "age": "around 35",
         "expression": "bitter contempt with narrowed eyes and curled lip",
-        "eye_color": "brown eyes cold with disdain", 
+        "eye_color": "brown eyes cold with disdain",
         "skin": "weathered skin",
         "hair": "dark brown hair with veil",
         "clothing": "brown wool"
     },
     "f3": {
-        "age": "late twenties", 
+        "age": "late twenties",
         "expression": "desperate anguish with trembling lips and eyes brimming with tears",
-        "eye_color": "gray-brown eyes showing deep pain", 
+        "eye_color": "gray-brown eyes showing deep pain",
         "skin": "pale skin with scars",
         "hair": "dark brown unkempt hair",
         "clothing": "gray-brown torn fabric"
     },
     "f4": {
-        "age": "in sixties", 
+        "age": "in sixties",
         "expression": "sinister amusement with knowing smirk and glinting eyes",
-        "eye_color": "gray eyes with cataracts showing dark humor", 
+        "eye_color": "gray eyes with cataracts showing dark humor",
         "skin": "wrinkled weathered skin",
         "hair": "gray hair under wimple",
         "clothing": "dark brown shawl"

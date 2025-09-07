@@ -7,7 +7,13 @@ import httpx
 from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel
 
-from models import Character, CharacterBuildOption, CharacterCreateRequest, get_preset_portraits, get_portrait_characteristics
+from models import (
+    Character,
+    CharacterBuildOption,
+    CharacterCreateRequest,
+    get_portrait_characteristics,
+    get_preset_portraits,
+)
 from services.gemini import gemini_service
 from services.supabase import supabase_service
 
@@ -70,14 +76,14 @@ async def generate_character_builds(
     # Check if this is a preset portrait
     if portrait_id and portrait_id in [p["id"] for portraits in [get_preset_portraits("male"), get_preset_portraits("female")] for p in portraits]:
         logger.info(f"🎯 Loading pre-generated builds for preset portrait: {portrait_id}")
-        
+
         try:
             # Load stored builds from database
             result = supabase_service.client.table('character_builds').select("*").eq('portrait_id', portrait_id).execute()
-            
+
             if result.data and len(result.data) > 0:
                 logger.info(f"✅ Found {len(result.data)} pre-generated builds for {portrait_id}")
-                
+
                 # Convert database records to CharacterBuildOption models
                 builds = []
                 for build_data in result.data:
@@ -89,23 +95,23 @@ async def generate_character_builds(
                         stats_preview=build_data['stats_preview']
                     )
                     builds.append(build)
-                
+
                 # Sort builds to match the expected order
                 build_order = {build_type: i for i, build_type in enumerate(build_types)}
                 builds.sort(key=lambda b: build_order.get(b.build_type, 999))
-                
+
                 logger.info(f"🚀 Returning {len(builds)} pre-generated builds (instant response)")
                 return builds
             else:
                 logger.warning(f"⚠️  No pre-generated builds found for preset {portrait_id}, falling back to AI generation")
-        
+
         except Exception as e:
             logger.error(f"❌ Failed to load pre-generated builds for {portrait_id}: {e}")
             logger.info("Falling back to AI generation")
 
     # Either custom portrait or fallback: Generate builds using AI
     logger.info(f"🤖 Generating builds using AI for {'custom' if not portrait_id else 'preset'} portrait")
-    
+
     # Get portrait characteristics for consistency
     portrait_chars = get_portrait_characteristics(portrait_id) if portrait_id else None
     logger.info(f"Portrait characteristics: {portrait_chars}")

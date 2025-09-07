@@ -38,9 +38,19 @@ app = FastAPI(
 )
 
 # Configure CORS
+# In production, allow specific frontend URLs and Vercel preview deployments
+allowed_origins = ["*"] if settings.environment == "development" else [
+    settings.frontend_url,
+    "https://frontend-kjpmxr9eu-pablitomaestros-projects.vercel.app",
+    "https://frontend-gnbv22xtk-pablitomaestros-projects.vercel.app",
+    # Allow all Vercel preview deployments
+    "https://*.vercel.app",
+    "https://*-pablitomaestros-projects.vercel.app"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url] if settings.environment == "production" else ["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

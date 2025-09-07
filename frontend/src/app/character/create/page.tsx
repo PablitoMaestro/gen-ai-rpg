@@ -67,7 +67,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     ]
   };
 
-  // Load all portraits on mount
+  // Load all portraits on mount and restore previous selection
   useEffect(() => {
     const loadAllPortraits = async (): Promise<void> => {
       setIsLoadingPortraits(true);
@@ -78,19 +78,67 @@ export default function CreateCharacterPage(): React.ReactElement {
         ]);
         
         setAllPortraits({ male: malePortraits, female: femalePortraits });
-        setPortraits(femalePortraits);
         
-        // Auto-select first portrait as default
-        if (femalePortraits.length > 0) {
-          const firstPortrait = femalePortraits[0];
-          setSelectedPortrait(firstPortrait.id);
-          setSelectedPortraitUrl(firstPortrait.url);
-          
-          // Set preset name and description for first character
-          const character = presetCharacters.female[0];
-          setCharacterName(character.name);
-          setCharacterDescription(character.story);
+        // Check for stored character data (when coming back from build page)
+        const storedCharacter = localStorage.getItem('current_character');
+        let restoredSelection = false;
+        
+        if (storedCharacter) {
+          try {
+            const characterData = JSON.parse(storedCharacter);
+            
+            // Check if characterData is valid (not empty object)
+            if (!characterData || Object.keys(characterData).length === 0) {
+              console.warn('Invalid character data found in localStorage, clearing...');
+              localStorage.removeItem('current_character');
+              return;
+            }
+            
+            // Restore gender and portrait selection
+            if (characterData.gender && characterData.portrait_id && characterData.name) {
+              console.log('Restoring previous character selection:', characterData);
+              
+              const targetGender = characterData.gender as Gender;
+              const targetPortraits = targetGender === 'male' ? malePortraits : femalePortraits;
+              
+              // Find the portrait in the loaded portraits
+              const targetPortrait = targetPortraits.find(p => p.id === characterData.portrait_id);
+              
+              if (targetPortrait) {
+                // Restore all the previous selections
+                setSelectedGender(targetGender);
+                setPortraits(targetPortraits);
+                setSelectedPortrait(targetPortrait.id);
+                setSelectedPortraitUrl(targetPortrait.url);
+                setCharacterName(characterData.name);
+                setCharacterDescription(characterData.description || '');
+                
+                restoredSelection = true;
+                console.error('Successfully restored character selection');
+              }
+            }
+          } catch (error) {
+            console.error('Failed to restore character data:', error);
+          }
         }
+        
+        // If no stored data or restoration failed, use defaults
+        if (!restoredSelection) {
+          setPortraits(femalePortraits);
+          
+          // Auto-select first portrait as default
+          if (femalePortraits.length > 0) {
+            const firstPortrait = femalePortraits[0];
+            setSelectedPortrait(firstPortrait.id);
+            setSelectedPortraitUrl(firstPortrait.url);
+            
+            // Set preset name and description for first character
+            const character = presetCharacters.female[0];
+            setCharacterName(character.name);
+            setCharacterDescription(character.story);
+          }
+        }
+        
       } catch (error) {
         console.error('Failed to fetch portraits:', error);
         setPortraits([]);
@@ -100,7 +148,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     };
     
     loadAllPortraits();
-  }, []);
+  }, [presetCharacters.female]);
   
   const handleGenderChange = async (gender: Gender): Promise<void> => {
     if (gender === selectedGender) {

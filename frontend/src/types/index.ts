@@ -36,6 +36,8 @@ export interface SceneChoice {
   id: string;
   text: string;
   nextSceneId?: string;
+  preview?: string;
+  consequence_hint?: string;
 }
 
 export interface Choice {
