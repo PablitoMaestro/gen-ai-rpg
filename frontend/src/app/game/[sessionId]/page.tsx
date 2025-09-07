@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -144,10 +145,11 @@ export default function GamePage(): React.ReactElement {
           <div className="flex-1 relative p-6 min-h-[75vh]">
             {scene?.image_url ? (
               <div className="w-full h-full relative rounded-xl overflow-hidden flex items-center justify-center">
-                <img 
+                <Image 
                   src={scene.image_url} 
                   alt="Scene" 
-                  className="max-w-full max-h-full object-contain rounded-xl"
+                  fill
+                  className="object-contain rounded-xl"
                 />
                 {/* Narration overlay at bottom of container */}
                 {scene && (

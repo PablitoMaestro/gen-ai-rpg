@@ -44,7 +44,6 @@ export function useBuildAudio(): UseBuildAudioResult {
         if (response.ok) {
           const dialogueData = await response.json();
           setBuildDialogues(dialogueData);
-          console.log('✅ Loaded build dialogue data for', Object.keys(dialogueData).length, 'characters');
         } else {
           console.error('Failed to fetch build dialogue index:', response.status, response.statusText);
         }
@@ -86,7 +85,6 @@ export function useBuildAudio(): UseBuildAudioResult {
       audio.preload = 'auto';
       audio.src = dialogue.audio_url;
       
-      console.log(`🔄 Loading build audio for ${buildKey}: ${dialogue.audio_url}`);
       
       // Wait for audio to be ready
       await new Promise<void>((resolve, reject) => {
@@ -106,7 +104,7 @@ export function useBuildAudio(): UseBuildAudioResult {
           resolve();
         };
         
-        const handleError = (e: any): void => {
+        const handleError = (e: Event): void => {
           clearTimeout(timeout);
           audio.removeEventListener('canplaythrough', handleCanPlay);
           audio.removeEventListener('error', handleError);
@@ -124,11 +122,9 @@ export function useBuildAudio(): UseBuildAudioResult {
       });
       
       preloadedAudios.current.set(buildKey, audio);
-      console.log(`✅ Preloaded build dialogue audio for ${buildKey}`);
       
     } catch (error) {
       console.error(`❌ Failed to preload build dialogue for ${buildKey}:`, error);
-      console.log(`   Audio URL was: ${dialogue.audio_url}`);
     }
   }, [buildDialogues]);
   
@@ -145,10 +141,8 @@ export function useBuildAudio(): UseBuildAudioResult {
   // Play dialogue for a specific character-build combination
   const playBuildDialogue = useCallback(async (characterId: string, buildType: string): Promise<void> => {
     const buildKey = getBuildKey(characterId, buildType);
-    console.log(`🎭 Attempting to play build dialogue for ${buildKey}`);
     
     if (isMuted) {
-      console.log('🔇 Audio is muted, skipping build dialogue playback');
       return;
     }
     
@@ -161,12 +155,9 @@ export function useBuildAudio(): UseBuildAudioResult {
     const dialogue = characterBuilds[buildType];
     if (!dialogue) {
       console.warn(`❌ No dialogue found for ${characterId} ${buildType} build`);
-      console.log('Available builds:', Object.keys(characterBuilds));
       return;
     }
     
-    console.log(`📝 Playing: "${dialogue.text}"`);
-    console.log(`🎤 Character: ${dialogue.character_name} (${buildType})`);
     
     try {
       setIsLoading(true);
@@ -177,7 +168,6 @@ export function useBuildAudio(): UseBuildAudioResult {
       // Get preloaded audio or create new one
       let audio = preloadedAudios.current.get(buildKey);
       if (!audio) {
-        console.log(`🔄 Audio not preloaded for ${buildKey}, loading now...`);
         await preloadBuildDialogue(characterId, buildType);
         audio = preloadedAudios.current.get(buildKey);
       }
@@ -186,7 +176,6 @@ export function useBuildAudio(): UseBuildAudioResult {
         throw new Error(`Failed to load audio for ${buildKey}`);
       }
       
-      console.log(`🎵 Playing build audio for ${buildKey} with src: ${audio.src}`);
       
       // Set up event handlers for this playback
       const handlePlay = (): void => {
@@ -198,9 +187,11 @@ export function useBuildAudio(): UseBuildAudioResult {
         setIsPlaying(false);
         setCurrentBuild(null);
         // Clean up event listeners
-        audio!.removeEventListener('play', handlePlay);
-        audio!.removeEventListener('ended', handleEnded);
-        audio!.removeEventListener('error', handleError);
+        if (audio) {
+          audio.removeEventListener('play', handlePlay);
+          audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('error', handleError);
+        }
       };
       
       const handleError = (): void => {
@@ -208,9 +199,11 @@ export function useBuildAudio(): UseBuildAudioResult {
         setIsPlaying(false);
         setCurrentBuild(null);
         // Clean up event listeners
-        audio!.removeEventListener('play', handlePlay);
-        audio!.removeEventListener('ended', handleEnded);
-        audio!.removeEventListener('error', handleError);
+        if (audio) {
+          audio.removeEventListener('play', handlePlay);
+          audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('error', handleError);
+        }
       };
       
       // Add event listeners
@@ -223,14 +216,11 @@ export function useBuildAudio(): UseBuildAudioResult {
       
       // Reset audio to beginning and play
       audio.currentTime = 0;
-      console.log(`▶️ Starting build playback for ${buildKey}...`);
       await audio.play();
       
-      console.log(`✅ Successfully started playing build dialogue for ${dialogue.character_name}: "${dialogue.text}"`);
       
     } catch (error) {
       console.error(`❌ Failed to play build dialogue for ${buildKey}:`, error);
-      console.log(`   Error details:`, error);
       setIsPlaying(false);
       setCurrentBuild(null);
     } finally {

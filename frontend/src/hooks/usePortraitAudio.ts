@@ -44,7 +44,6 @@ export function usePortraitAudio(): UsePortraitAudioResult {
         if (response.ok) {
           const dialogueData = await response.json();
           setDialogues(dialogueData);
-          console.log('✅ Loaded dialogue data for', Object.keys(dialogueData).length, 'characters');
         } else {
           console.error('Failed to fetch dialogue index:', response.status, response.statusText);
         }
@@ -73,7 +72,6 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       audio.preload = 'auto';
       audio.src = dialogue.audio_url;
       
-      console.log(`🔄 Loading audio for ${portraitId}: ${dialogue.audio_url}`);
       
       // Wait for audio to be ready
       await new Promise<void>((resolve, reject) => {
@@ -84,7 +82,7 @@ export function usePortraitAudio(): UsePortraitAudioResult {
           resolve();
         };
         
-        const handleError = (e: any): void => {
+        const handleError = (e: Event): void => {
           audio.removeEventListener('canplaythrough', handleCanPlay);
           audio.removeEventListener('error', handleError);
           audio.removeEventListener('loadeddata', handleCanPlay);
@@ -118,11 +116,9 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       });
       
       preloadedAudios.current.set(portraitId, audio);
-      console.log(`✅ Preloaded dialogue audio for ${portraitId}`);
       
     } catch (error) {
       console.error(`❌ Failed to preload dialogue for ${portraitId}:`, error);
-      console.log(`   Audio URL was: ${dialogue.audio_url}`);
     }
   }, [dialogues]);
   
@@ -138,22 +134,17 @@ export function usePortraitAudio(): UsePortraitAudioResult {
   
   // Play dialogue for a specific portrait
   const playPortraitDialogue = useCallback(async (portraitId: string): Promise<void> => {
-    console.log(`🎭 Attempting to play dialogue for ${portraitId}`);
     
     if (isMuted) {
-      console.log('🔇 Audio is muted, skipping dialogue playback');
       return;
     }
     
     const dialogue = dialogues[portraitId];
     if (!dialogue) {
       console.warn(`❌ No dialogue found for portrait: ${portraitId}`);
-      console.log('Available dialogues:', Object.keys(dialogues));
       return;
     }
     
-    console.log(`📝 Playing: "${dialogue.text}"`);
-    console.log(`🎤 Character: ${dialogue.name} (${dialogue.emotion})`);
     
     try {
       setIsLoading(true);
@@ -164,7 +155,6 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       // Get preloaded audio or create new one
       let audio = preloadedAudios.current.get(portraitId);
       if (!audio) {
-        console.log(`🔄 Audio not preloaded for ${portraitId}, loading now...`);
         await preloadDialogue(portraitId);
         audio = preloadedAudios.current.get(portraitId);
       }
@@ -173,7 +163,6 @@ export function usePortraitAudio(): UsePortraitAudioResult {
         throw new Error(`Failed to load audio for ${portraitId}`);
       }
       
-      console.log(`🎵 Playing audio for ${portraitId} with src: ${audio.src}`);
       
       // Set up event handlers for this playback
       const handlePlay = (): void => {
@@ -185,9 +174,11 @@ export function usePortraitAudio(): UsePortraitAudioResult {
         setIsPlaying(false);
         setCurrentPortrait(null);
         // Clean up event listeners
-        audio!.removeEventListener('play', handlePlay);
-        audio!.removeEventListener('ended', handleEnded);
-        audio!.removeEventListener('error', handleError);
+        if (audio) {
+          audio.removeEventListener('play', handlePlay);
+          audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('error', handleError);
+        }
       };
       
       const handleError = (): void => {
@@ -195,9 +186,11 @@ export function usePortraitAudio(): UsePortraitAudioResult {
         setIsPlaying(false);
         setCurrentPortrait(null);
         // Clean up event listeners
-        audio!.removeEventListener('play', handlePlay);
-        audio!.removeEventListener('ended', handleEnded);
-        audio!.removeEventListener('error', handleError);
+        if (audio) {
+          audio.removeEventListener('play', handlePlay);
+          audio.removeEventListener('ended', handleEnded);
+          audio.removeEventListener('error', handleError);
+        }
       };
       
       // Add event listeners
@@ -210,14 +203,11 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       
       // Reset audio to beginning and play
       audio.currentTime = 0;
-      console.log(`▶️ Starting playback for ${portraitId}...`);
       await audio.play();
       
-      console.log(`✅ Successfully started playing dialogue for ${dialogue.name}: "${dialogue.text}"`);
       
     } catch (error) {
       console.error(`❌ Failed to play dialogue for ${portraitId}:`, error);
-      console.log(`   Error details:`, error);
       setIsPlaying(false);
       setCurrentPortrait(null);
     } finally {

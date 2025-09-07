@@ -33,12 +33,10 @@ export function BuildSelector({
   // Preload build audio for available builds when character is selected
   useEffect(() => {
     if (selectedCharacterId && builds.length > 0 && Object.keys(buildDialogues).length > 0) {
-      console.log(`🎭 Preloading build dialogues for character ${selectedCharacterId}`);
       
       builds.forEach((build) => {
         const buildType = build.build_type;
         if (buildDialogues[selectedCharacterId] && buildDialogues[selectedCharacterId][buildType]) {
-          console.log(`📋 Preloading dialogue for ${selectedCharacterId} ${buildType} build`);
           preloadBuildDialogue(selectedCharacterId, buildType);
         }
       });
@@ -58,13 +56,11 @@ export function BuildSelector({
         
         if (buildDialogues[selectedCharacterId] && buildDialogues[selectedCharacterId][buildType]) {
           try {
-            console.log(`🎬 Playing build dialogue for ${selectedCharacterId} ${buildType}`);
             await playBuildDialogue(selectedCharacterId, buildType);
           } catch (error) {
             console.error(`Failed to play build dialogue for ${selectedCharacterId} ${buildType}:`, error);
           }
         } else {
-          console.log(`🔇 No audio available for ${selectedCharacterId} ${buildType} build`);
         }
       }
     }
@@ -164,7 +160,7 @@ export function BuildSelector({
                   {selectedCharacterId && buildDialogues[selectedCharacterId] && buildDialogues[selectedCharacterId][build.build_type] && (
                     <div className="absolute bottom-2 left-2 right-2">
                       <div className="bg-black/80 text-white text-xs p-2 rounded backdrop-blur-sm">
-                        "{buildDialogues[selectedCharacterId][build.build_type].text}"
+                        &ldquo;{buildDialogues[selectedCharacterId][build.build_type].text}&rdquo;
                       </div>
                     </div>
                   )}

@@ -57,10 +57,8 @@ export function PortraitSelector({
       
       portraits.forEach((portrait) => {
         if (dialogues[portrait.id] && availableAudioFiles.includes(portrait.id)) {
-          console.log(`📋 Preloading dialogue for ${portrait.id} (audio available)`);
           preloadDialogue(portrait.id);
         } else if (dialogues[portrait.id]) {
-          console.log(`⚠️ Skipping preload for ${portrait.id} (no audio file yet)`);
         }
       });
     }
@@ -76,13 +74,11 @@ export function PortraitSelector({
     
     if (dialogues[portraitId] && !portraitId.startsWith('custom_') && availableAudioFiles.includes(portraitId)) {
       try {
-        console.log(`🎬 Playing dialogue for ${portraitId}`);
         await playPortraitDialogue(portraitId);
       } catch (error) {
         console.error(`Failed to play dialogue for ${portraitId}:`, error);
       }
     } else if (dialogues[portraitId] && !portraitId.startsWith('custom_')) {
-      console.log(`🔇 Portrait ${portraitId} has dialogue text but no audio file yet`);
     }
   };
 
@@ -251,7 +247,7 @@ export function PortraitSelector({
                 {dialogues[portrait.id] && (
                   <div className="absolute bottom-2 left-2 right-2">
                     <div className="bg-black/80 text-white text-xs p-2 rounded backdrop-blur-sm">
-                      "{dialogues[portrait.id].text}"
+                      &ldquo;{dialogues[portrait.id].text}&rdquo;
                     </div>
                   </div>
                 )}
