@@ -169,6 +169,12 @@ const config: Config = {
         'fade-out': 'fadeOut 1s ease-out',
         'heartbeat': 'heartbeat 2s ease-in-out infinite',
       },
+      animationDelay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '500': '500ms',
+      },
       keyframes: {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },

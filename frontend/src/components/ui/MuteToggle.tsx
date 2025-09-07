@@ -10,7 +10,7 @@ export function MuteToggle(): React.ReactElement {
   return (
     <button
       onClick={toggleMute}
-      className="fixed top-4 right-4 z-50 p-3 rounded-lg 
+      className="fixed bottom-4 left-4 z-50 p-3 rounded-lg 
                  bg-dark-900/80 border border-amber-500/30 
                  hover:border-amber-400/60 hover:bg-dark-800/90
                  backdrop-blur-sm transition-all duration-300 
@@ -55,7 +55,7 @@ export function MuteToggle(): React.ReactElement {
       </div>
       
       {/* Tooltip on hover */}
-      <div className="absolute top-full right-0 mt-2 px-3 py-1 bg-dark-900/95 
+      <div className="absolute bottom-full left-0 mb-2 px-3 py-1 bg-dark-900/95 
                       border border-amber-500/30 rounded-md backdrop-blur-sm
                       text-sm text-amber-200 opacity-0 group-hover:opacity-100 
                       transition-opacity duration-200 pointer-events-none

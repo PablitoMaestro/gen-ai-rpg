@@ -216,65 +216,87 @@ export default function GamePage(): React.ReactElement {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-900 to-dark-800 relative">
-      {/* Game UI Header */}
-      <div className="absolute top-0 left-0 right-0 z-30 p-4">
-        <div className="flex justify-between items-start max-w-7xl mx-auto">
-          {/* Character Stats */}
-          <GameStats character={character} className="w-80" />
-          
-          {/* Exit Button */}
-          <Button 
-            onClick={handleExit}
-            variant="ghost"
-            size="sm"
-            className="border-red-600/40 text-red-300 hover:text-red-200 hover:border-red-500/60"
-          >
-            Exit Adventure
-          </Button>
-        </div>
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Immersive full-screen experience */}
+      
+      {/* Character Stats HUD - positioned as overlay */}
+      <GameStats character={character} />
+      
+      {/* Exit Button - minimalist corner overlay */}
+      <div className="fixed top-4 right-4 z-40">
+        <Button 
+          onClick={handleExit}
+          variant="ghost"
+          size="sm"
+          className="bg-black/80 border border-red-600/40 text-red-300 hover:text-red-200 hover:border-red-500/60 backdrop-blur-sm"
+        >
+          <span className="text-lg mr-2">🚪</span>
+          Exit
+        </Button>
       </div>
 
-      {/* Main Game Content */}
-      <div className="pt-32 pb-8 px-4">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Story Display */}
-          <StoryDisplay 
-            scene={currentScene}
-            isLoading={isGeneratingScene && !selectedChoiceId}
-          />
+      {/* Main immersive game content */}
+      <div className="relative min-h-screen">
+        {/* Story Display - now full-screen cinematic */}
+        <StoryDisplay 
+          scene={currentScene}
+          isLoading={isGeneratingScene && !selectedChoiceId}
+          className="min-h-screen"
+        />
 
-          {/* Choice Selection */}
-          {currentScene.choices && currentScene.choices.length > 0 && (
+        {/* Choice Selection - overlay at bottom */}
+        {currentScene.choices && currentScene.choices.length > 0 && (
+          <div className="fixed bottom-0 left-0 right-0 z-30 p-4 sm:p-6 pl-16 sm:pl-20 md:pl-6">
             <ChoiceSelector
               choices={currentScene.choices}
               onChoiceSelect={handleChoiceSelect}
               isLoading={isGeneratingScene}
               selectedChoiceId={selectedChoiceId || undefined}
             />
-          )}
+          </div>
+        )}
 
-          {/* End of Story */}
-          {(!currentScene.choices || currentScene.choices.length === 0) && !isGeneratingScene && (
-            <div className="text-center space-y-6">
-              <div className="glass-morphism p-8 rounded-xl border border-gold-600/20 shadow-golden-lg max-w-2xl mx-auto">
-                <h2 className="text-gold-300 font-fantasy text-2xl mb-4">
-                  Your Journey Continues...
+        {/* End of Story - dramatic overlay */}
+        {(!currentScene.choices || currentScene.choices.length === 0) && !isGeneratingScene && (
+          <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div className="text-center space-y-8 max-w-2xl mx-auto p-8">
+              {/* Dramatic ending visual */}
+              <div className="text-8xl animate-pulse">👁️</div>
+              
+              <div className="bg-black/90 border border-red-500/30 rounded-2xl p-8 backdrop-blur-sm">
+                <h2 className="text-red-300 font-fantasy text-3xl mb-6 animate-pulse">
+                  The Void Calls...
                 </h2>
-                <p className="text-gold-200 font-fantasy mb-6">
-                  This chapter of your adventure has ended, but your story is far from over.
+                <p className="text-red-100 font-fantasy text-xl mb-8 leading-relaxed">
+                  <em>My consciousness fades... but this is only the beginning.</em>
                 </p>
-                <div className="space-x-4">
-                  <Button onClick={() => window.location.reload()} variant="primary">
-                    Start New Chapter
+                
+                <div className="space-y-4">
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    variant="primary"
+                    className="w-full bg-red-600 hover:bg-red-500 border-red-500 text-white font-fantasy text-lg py-4"
+                  >
+                    <span className="mr-2">🔄</span>
+                    Descend Deeper
                   </Button>
-                  <Button onClick={handleExit} variant="ghost">
-                    Return Home
+                  <Button 
+                    onClick={handleExit} 
+                    variant="ghost"
+                    className="w-full border-red-600/40 text-red-300 hover:text-red-200 font-fantasy"
+                  >
+                    <span className="mr-2">🌅</span>
+                    Return to Reality
                   </Button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Atmospheric background effects */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-950/20 via-black to-purple-950/20"></div>
         </div>
       </div>
     </div>

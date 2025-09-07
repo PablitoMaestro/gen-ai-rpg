@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
-import { Button } from '@/components/ui/Button';
 import { SceneChoice } from '@/types';
 
 interface ChoiceSelectorProps {
@@ -22,87 +21,149 @@ export function ChoiceSelector({
   selectedChoiceId,
   className = ''
 }: ChoiceSelectorProps): React.ReactElement {
+  const [hoveredChoice, setHoveredChoice] = useState<string | null>(null);
+
   const handleChoiceClick = (choice: SceneChoice): void => {
     if (!disabled && !isLoading) {
       onChoiceSelect(choice);
     }
   };
 
+  // Define thought bubble colors for each choice
+  const thoughtColors = [
+    'border-red-500/40 bg-red-950/60 hover:border-red-400/70 hover:bg-red-900/70',
+    'border-purple-500/40 bg-purple-950/60 hover:border-purple-400/70 hover:bg-purple-900/70', 
+    'border-blue-500/40 bg-blue-950/60 hover:border-blue-400/70 hover:bg-blue-900/70',
+    'border-orange-500/40 bg-orange-950/60 hover:border-orange-400/70 hover:bg-orange-900/70'
+  ];
+
+  const thoughtIcons = ['💀', '⚡', '🗡️', '🛡️'];
+  const thoughtLabels = ['Aggressive', 'Reckless', 'Strategic', 'Defensive'];
+
   return (
-    <div className={`max-w-4xl mx-auto ${className}`}>
-      <div className="glass-morphism p-8 rounded-xl border border-gold-600/20 shadow-golden-lg">
-        <h3 className="text-gold-300 font-fantasy text-xl mb-6 text-center">
-          What do you choose?
-        </h3>
+    <div className={`max-w-5xl mx-auto ${className}`}>
+      <div className="relative">
+        {/* Header with internal monologue indicator */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center space-x-3 bg-black/80 px-6 py-3 rounded-full border border-red-500/30">
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            <span className="text-red-300 font-fantasy text-lg italic">
+              What should I do...?
+            </span>
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse animation-delay-300"></div>
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Thought bubbles grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {choices.map((choice, index) => (
-            <Button
+            <button
               key={choice.id}
-              variant={selectedChoiceId === choice.id ? "primary" : "ghost"}
-              size="lg"
-              isLoading={isLoading && selectedChoiceId === choice.id}
               disabled={disabled || isLoading}
+              onMouseEnter={() => setHoveredChoice(choice.id)}
+              onMouseLeave={() => setHoveredChoice(null)}
               onClick={() => handleChoiceClick(choice)}
-              className="group relative p-6 h-auto text-left border-2 border-gold-600/30 hover:border-gold-400/60 transition-all duration-300"
+              className={`
+                group relative p-6 rounded-2xl border-2 transition-all duration-300 
+                ${thoughtColors[index % thoughtColors.length]}
+                ${selectedChoiceId === choice.id ? 'ring-2 ring-white/50 scale-105' : ''}
+                ${disabled || isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-102 hover:shadow-2xl'}
+              `}
             >
-              <div className="flex flex-col space-y-2">
-                {/* Choice number indicator */}
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gold-600/20 border border-gold-500/40 flex items-center justify-center text-gold-300 font-bold text-sm">
-                    {index + 1}
+              {/* Thought bubble tail */}
+              <div className="absolute -bottom-2 left-8">
+                <div className={`w-4 h-4 rotate-45 ${thoughtColors[index % thoughtColors.length].split(' ')[1]} border-b-2 border-r-2 ${thoughtColors[index % thoughtColors.length].split(' ')[0]}`}></div>
+              </div>
+
+              <div className="space-y-3">
+                {/* Thought type indicator */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">{thoughtIcons[index % thoughtIcons.length]}</span>
+                    <span className="text-sm font-fantasy text-white/70 italic">
+                      {thoughtLabels[index % thoughtLabels.length]} thought
+                    </span>
                   </div>
-                  
-                  {/* Choice text */}
-                  <div className="flex-1">
-                    <div className="text-gold-100 font-fantasy text-base leading-relaxed">
-                      {choice.text}
-                    </div>
-                    
-                    {/* Preview text */}
-                    {choice.preview && (
-                      <div className="text-gold-400 text-sm font-fantasy mt-1 opacity-80">
-                        {choice.preview}
-                      </div>
-                    )}
+                  <div className="text-white/40 font-fantasy text-xs">
+                    Option {index + 1}
                   </div>
                 </div>
                 
-                {/* Consequence hint */}
-                {choice.consequence_hint && (
-                  <div className="text-xs text-gold-500 font-fantasy ml-11 px-2 py-1 rounded bg-gold-900/20 border border-gold-600/20 inline-block">
-                    {choice.consequence_hint}
+                {/* Internal dialogue text */}
+                <div className="text-left">
+                  <div className="text-white font-fantasy text-lg leading-relaxed font-medium">
+                    <span className="text-white/60 italic">&ldquo;</span>
+                    {choice.text}
+                    <span className="text-white/60 italic">&rdquo;</span>
                   </div>
+                  
+                  {/* Preview text as whispered consequence */}
+                  {choice.preview && (
+                    <div className="text-white/60 text-sm font-fantasy mt-2 italic">
+                      <span className="text-xs">whispers:</span> {choice.preview}
+                    </div>
+                  )}
+                </div>
+
+                {/* Consequence hint as fear/excitement indicator */}
+                {choice.consequence_hint && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-yellow-300 font-fantasy">
+                      {choice.consequence_hint}
+                    </span>
+                  </div>
+                )}
+
+                {/* Pulse effect when hovered */}
+                {hoveredChoice === choice.id && (
+                  <div className="absolute inset-0 rounded-2xl bg-white/5 animate-pulse"></div>
                 )}
               </div>
 
-              {/* Selection indicator */}
+              {/* Selection indicator with heartbeat */}
               {selectedChoiceId === choice.id && (
-                <div className="absolute top-2 right-2">
-                  <div className="w-3 h-3 bg-gold-400 rounded-full animate-pulse"></div>
+                <div className="absolute top-3 right-3">
+                  <div className="w-4 h-4 bg-white rounded-full animate-ping"></div>
                 </div>
               )}
-            </Button>
+
+              {/* Loading spinner for selected choice */}
+              {isLoading && selectedChoiceId === choice.id && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-2xl">
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-white text-sm font-fantasy">
+                      Acting on impulse...
+                    </span>
+                  </div>
+                </div>
+              )}
+            </button>
           ))}
         </div>
 
-        {/* Global loading state */}
+        {/* Global loading state with panic indicator */}
         {isLoading && !selectedChoiceId && (
-          <div className="mt-6 text-center">
-            <div className="inline-flex items-center space-x-2 text-gold-400">
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span className="font-fantasy">Preparing choices...</span>
+          <div className="mt-8 text-center">
+            <div className="inline-flex flex-col items-center space-y-3 bg-black/80 px-8 py-6 rounded-xl border border-red-500/30">
+              <div className="w-12 h-12 border-3 border-red-600/30 border-t-red-400 rounded-full animate-spin"></div>
+              <span className="text-red-300 font-fantasy text-lg animate-pulse">
+                Mind racing... can&apos;t think straight...
+              </span>
             </div>
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty state with existential dread */}
         {choices.length === 0 && !isLoading && (
-          <div className="text-center text-gold-400 font-fantasy">
-            No choices available at this time.
+          <div className="text-center py-12">
+            <div className="inline-flex flex-col items-center space-y-4 bg-black/80 px-8 py-6 rounded-xl border border-gray-500/30">
+              <span className="text-4xl">😶</span>
+              <span className="text-gray-300 font-fantasy text-lg">
+                My mind goes blank... What now?
+              </span>
+            </div>
           </div>
         )}
       </div>

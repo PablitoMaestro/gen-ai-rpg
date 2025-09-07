@@ -1,9 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { BackgroundLayout } from '@/components/layout/BackgroundLayout';
 import { Scene } from '@/types';
 
 interface StoryDisplayProps {
@@ -17,78 +16,139 @@ export function StoryDisplay({
   isLoading = false,
   className = '' 
 }: StoryDisplayProps): React.ReactElement {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTypewriting, setIsTypewriting] = useState(false);
+
+  // Typewriter effect for narration
+  useEffect(() => {
+    if (!scene.narration || isLoading) {
+      return;
+    }
+    
+    setIsTypewriting(true);
+    setDisplayedText('');
+    
+    let index = 0;
+    const text = scene.narration;
+    const speed = 30; // ms per character
+    
+    const typeInterval = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(prev => prev + text[index]);
+        index++;
+      } else {
+        clearInterval(typeInterval);
+        setIsTypewriting(false);
+      }
+    }, speed);
+
+    return () => clearInterval(typeInterval);
+  }, [scene.narration, isLoading]);
+
   return (
-    <BackgroundLayout className={className}>
-      <div className="max-w-4xl mx-auto">
-        {/* Scene Image */}
-        <div className="relative mb-8 rounded-xl overflow-hidden shadow-2xl border-2 border-gold-600/30">
-          <div className="aspect-video relative">
-            {scene.imageUrl ? (
-              <Image
-                src={scene.imageUrl}
-                alt="Scene visualization"
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-dark-800 to-dark-900 flex items-center justify-center">
-                <div className="text-gold-400 text-lg font-fantasy">
-                  {isLoading ? 'Generating scene...' : 'Scene visualization loading...'}
-                </div>
-              </div>
-            )}
-            
-            {/* Subtle overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-          </div>
-        </div>
-
-        {/* Story Narration */}
-        <div className="glass-morphism p-8 rounded-xl border border-gold-600/20 shadow-golden-lg">
-          <div className="prose prose-fantasy prose-lg max-w-none">
-            {isLoading ? (
-              <div className="animate-pulse">
-                <div className="h-4 bg-gold-600/20 rounded mb-4 w-3/4"></div>
-                <div className="h-4 bg-gold-600/20 rounded mb-4 w-full"></div>
-                <div className="h-4 bg-gold-600/20 rounded mb-4 w-2/3"></div>
-                <div className="h-4 bg-gold-600/20 rounded w-4/5"></div>
-              </div>
-            ) : (
-              <p className="text-gold-100 font-fantasy leading-relaxed text-lg">
-                {scene.narration}
-              </p>
-            )}
-          </div>
-
-          {/* Audio controls (if available) */}
-          {scene.audioUrl && !isLoading && (
-            <div className="mt-6 flex justify-center">
-              <audio
-                controls
-                className="w-full max-w-md"
-                preload="none"
-              >
-                <source src={scene.audioUrl} type="audio/mpeg" />
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-          )}
-        </div>
-
-        {/* Loading indicator for narration */}
-        {isLoading && (
-          <div className="mt-6 text-center">
-            <div className="inline-flex items-center space-x-2 text-gold-400">
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span className="font-fantasy">Weaving your tale...</span>
+    <div className={`relative ${className}`}>
+      {/* Full-screen Scene Image with intense overlay */}
+      <div className="relative h-[70vh] w-full overflow-hidden">
+        {scene.imageUrl ? (
+          <Image
+            src={scene.imageUrl}
+            alt="Scene visualization"
+            fill
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center">
+            <div className="text-red-300 text-2xl font-fantasy animate-pulse">
+              {isLoading ? 'Peering into darkness...' : 'The void stares back...'}
             </div>
           </div>
         )}
+        
+        {/* Dramatic overlay with red/black gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+        
+        {/* Vignette effect for intense focus */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/90" />
       </div>
-    </BackgroundLayout>
+
+      {/* Cinematic Text Overlay */}
+      <div className="absolute bottom-32 sm:bottom-40 md:bottom-44 left-0 right-0 p-4 sm:p-6 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Internal monologue container */}
+          <div className="bg-black/90 border border-red-500/30 rounded-lg p-4 sm:p-6 md:p-8 backdrop-blur-sm shadow-2xl">
+            {/* Thought indicator */}
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse animation-delay-100"></div>
+              <div className="w-1 h-1 bg-red-300 rounded-full animate-pulse animation-delay-200"></div>
+              <span className="text-red-300 text-sm font-fantasy italic opacity-70">
+                My thoughts race...
+              </span>
+            </div>
+
+            {/* Story Narration with typewriter effect */}
+            <div className="min-h-[120px] flex items-center">
+              {isLoading ? (
+                <div className="w-full space-y-3">
+                  <div className="h-6 bg-red-900/40 rounded animate-pulse w-3/4"></div>
+                  <div className="h-6 bg-red-900/40 rounded animate-pulse w-full"></div>
+                  <div className="h-6 bg-red-900/40 rounded animate-pulse w-2/3"></div>
+                </div>
+              ) : (
+                <div className="w-full">
+                  <p className="text-red-100 font-fantasy text-2xl leading-relaxed font-semibold">
+                    {displayedText}
+                    {isTypewriting && (
+                      <span className="inline-block w-0.5 h-8 bg-red-400 ml-1 animate-pulse"></span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Heartbeat indicator for tension */}
+            <div className="mt-6 flex justify-center">
+              <div className="flex items-center space-x-2 text-red-400 text-sm font-fantasy">
+                <svg 
+                  className="w-5 h-5 animate-pulse" 
+                  fill="currentColor" 
+                  viewBox="0 0 20 20"
+                >
+                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                </svg>
+                <span className="animate-pulse">Heart pounding</span>
+              </div>
+            </div>
+
+            {/* Audio controls (if available) with dark styling */}
+            {scene.audioUrl && !isLoading && (
+              <div className="mt-6 flex justify-center">
+                <audio
+                  controls
+                  className="w-full max-w-md bg-black/50 rounded-lg"
+                  preload="none"
+                >
+                  <source src={scene.audioUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Loading indicator with intense styling */}
+      {isLoading && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 border-4 border-red-600/30 border-t-red-400 rounded-full animate-spin"></div>
+            <span className="text-red-300 font-fantasy text-xl animate-pulse">
+              The darkness consumes...
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

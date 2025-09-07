@@ -144,7 +144,7 @@ export default function BuildsPage(): React.ReactElement {
             <div className="text-gold-400/80 font-fantasy flex items-center justify-center space-x-3">
               <svg className="animate-spin h-8 w-8" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
               <span className="text-xl">Loading character data...</span>
             </div>
@@ -202,7 +202,7 @@ export default function BuildsPage(): React.ReactElement {
                 <div className="text-gold-400/80 font-fantasy flex items-center space-x-3">
                   <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                   <span>Forging your destiny...</span>
                 </div>
@@ -229,7 +229,9 @@ export default function BuildsPage(): React.ReactElement {
                   <div className="glass-morphism p-6 rounded-xl border border-gold-600/20 shadow-golden-lg max-w-2xl">
                     {(() => {
                       const build = builds.find(b => b.id === selectedBuild);
-                      if (!build) return null;
+                      if (!build) {
+                        return null;
+                      }
                       
                       return (
                         <div className="text-center space-y-4">
@@ -269,7 +271,7 @@ export default function BuildsPage(): React.ReactElement {
                   <div className="flex items-center space-x-3">
                     <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
                     <span>Forging Legend...</span>
                   </div>
