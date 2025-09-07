@@ -194,6 +194,34 @@ class GameSession(BaseModel):
             self.play_time_seconds = int(delta.total_seconds())
 
 
+class CharacterBuild(BaseModel):
+    """
+    DATABASE MODEL - maps to 'character_builds' table.
+    Used for both API responses and database operations.
+    """
+    portrait_id: str
+    build_type: Literal["warrior", "mage", "rogue", "ranger"]
+    image_url: str
+    description: str
+    stats_preview: dict[str, int] = Field(default_factory=lambda: {
+        "strength": 10,
+        "intelligence": 10,
+        "agility": 10
+    })
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat() if v else None
+        }
+
+    def dict_for_db(self) -> dict[str, Any]:
+        """Get dict for database operations, excluding None values."""
+        data = self.model_dump(exclude={'created_at', 'updated_at'}, exclude_none=True)
+        return data
+
+
 # ============================================
 # API MODELS (Not in DB - for API communication)
 # ============================================

@@ -86,7 +86,7 @@ async def generate_story_scene(
                 import httpx
                 import uuid
                 
-                # Prepare character image URL - add protocol if missing
+                # Prepare character image URL - add base URL only for relative paths
                 character_image_url = character.full_body_url
                 if not character_image_url.startswith(('http://', 'https://')):
                     # Add base URL for relative paths
@@ -95,7 +95,13 @@ async def generate_story_scene(
                         base_url = "http://127.0.0.1:54331"
                     else:
                         base_url = settings.supabase_url
-                    character_image_url = f"{base_url}{character_image_url}"
+                    # Ensure no double slashes when combining base_url and relative path
+                    if character_image_url.startswith('/'):
+                        character_image_url = f"{base_url}{character_image_url}"
+                    else:
+                        character_image_url = f"{base_url}/{character_image_url}"
+                
+                logger.info(f"🔍 Downloading character image from: {character_image_url}")
                 
                 # Download character image
                 async with httpx.AsyncClient() as client:
@@ -283,7 +289,7 @@ async def prerender_story_branches(
                 try:
                     import httpx
                     
-                    # Prepare character image URL
+                    # Prepare character image URL - add base URL only for relative paths
                     character_image_url = character.full_body_url
                     if not character_image_url.startswith(('http://', 'https://')):
                         from config.settings import settings
@@ -291,7 +297,13 @@ async def prerender_story_branches(
                             base_url = "http://127.0.0.1:54331"
                         else:
                             base_url = settings.supabase_url
-                        character_image_url = f"{base_url}{character_image_url}"
+                        # Ensure no double slashes when combining base_url and relative path
+                        if character_image_url.startswith('/'):
+                            character_image_url = f"{base_url}{character_image_url}"
+                        else:
+                            character_image_url = f"{base_url}/{character_image_url}"
+                    
+                    logger.info(f"🔍 Branch {choice_index}: Downloading character image from: {character_image_url}")
                     
                     # Download character image and generate scene
                     async with httpx.AsyncClient() as client:
