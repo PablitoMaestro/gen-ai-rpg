@@ -80,7 +80,7 @@ export default function BuildsPage(): React.ReactElement {
     if (match) {
       const gender = match[1];
       const number = match[2];
-      return gender === 'male' ? `m${number}` : `f${number}`;
+      return gender === 'male' ? `m${parseInt(number, 10)}` : `f${parseInt(number, 10)}`;
     }
     
     // Fallback: check if it's already in the format we need (m1, f2, etc.)
