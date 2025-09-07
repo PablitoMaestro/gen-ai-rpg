@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 
+import { imageGenerationService, type MergedSceneImage } from '@/services/imageGenerationService';
+import { useGameStore } from '@/store/gameStore';
 import { Scene } from '@/types';
 
 interface StoryDisplayProps {
@@ -18,6 +20,10 @@ export function StoryDisplay({
 }: StoryDisplayProps): React.ReactElement {
   const [displayedText, setDisplayedText] = useState('');
   const [isTypewriting, setIsTypewriting] = useState(false);
+  const [mergedSceneImage, setMergedSceneImage] = useState<MergedSceneImage | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  
+  const { character } = useGameStore();
 
   // Typewriter effect for narration
   useEffect(() => {
@@ -45,11 +51,49 @@ export function StoryDisplay({
     return () => clearInterval(typeInterval);
   }, [scene.narration, isLoading]);
 
+  // Generate merged character+scene image
+  useEffect(() => {
+    if (!character || !scene.narration || isLoading) return;
+    
+    const generateMergedImage = async (): Promise<void> => {
+      setImageLoading(true);
+      try {
+        const merged = await imageGenerationService.mergeCharacterScene(
+          character,
+          scene.narration,
+          scene.id
+        );
+        setMergedSceneImage(merged);
+      } catch (error) {
+        console.error('Failed to generate merged scene image:', error);
+        setMergedSceneImage(null);
+      } finally {
+        setImageLoading(false);
+      }
+    };
+
+    generateMergedImage();
+  }, [character, scene.id, scene.narration, isLoading]);
+
   return (
     <div className={`relative ${className}`}>
       {/* Full-screen Scene Image with intense overlay */}
       <div className="relative h-[70vh] w-full overflow-hidden">
-        {scene.imageUrl ? (
+        {mergedSceneImage?.image.url ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={mergedSceneImage.image.url}
+              alt="Character in scene"
+              fill
+              className="object-cover"
+              priority
+            />
+            {/* Character+Scene merge indicator */}
+            <div className="absolute bottom-2 right-2 bg-black/60 text-amber-300 text-xs px-2 py-1 rounded-md backdrop-blur-sm border border-amber-500/30">
+              🎭 Immersed
+            </div>
+          </div>
+        ) : scene.imageUrl ? (
           <Image
             src={scene.imageUrl}
             alt="Scene visualization"
@@ -60,7 +104,7 @@ export function StoryDisplay({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center">
             <div className="text-red-300 text-2xl font-fantasy animate-pulse">
-              {isLoading ? 'Peering into darkness...' : 'The void stares back...'}
+              {imageLoading ? 'Weaving reality with your essence...' : isLoading ? 'Peering into darkness...' : 'The void stares back...'}
             </div>
           </div>
         )}
