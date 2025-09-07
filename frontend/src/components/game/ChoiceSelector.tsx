@@ -22,7 +22,7 @@ export function ChoiceSelector({
   selectedChoiceId,
   className = ''
 }: ChoiceSelectorProps): React.ReactElement {
-  const handleChoiceClick = (choice: SceneChoice) => {
+  const handleChoiceClick = (choice: SceneChoice): void => {
     if (!disabled && !isLoading) {
       onChoiceSelect(choice);
     }

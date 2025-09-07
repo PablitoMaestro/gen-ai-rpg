@@ -49,7 +49,7 @@ async def regenerate_portrait_builds(portrait_id: str) -> None:
         'http://127.0.0.1:54331/storage/v1/object/public',
         'https://mvwotulkyowfuqoounix.supabase.co/storage/v1/object/public'
     )
-    
+
     logger.info(f"📸 Found {portrait_id}: {portrait_url} ({gender})")
 
     # Delete existing builds for this portrait

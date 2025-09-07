@@ -12,7 +12,7 @@ import { storyService } from '@/services/storyService';
 import { useGameStore } from '@/store/gameStore';
 import { SceneChoice } from '@/types';
 
-export default function GamePage() {
+export default function GamePage(): React.ReactElement {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
@@ -37,7 +37,7 @@ export default function GamePage() {
 
   // Load game session on mount with enhanced error handling
   useEffect(() => {
-    const loadGameSession = async () => {
+    const loadGameSession = async (): Promise<void> => {
       if (!sessionId) {
         setError('No session ID provided');
         setLoading(false);
@@ -103,7 +103,7 @@ export default function GamePage() {
   }, [sessionId, setLoading, setError, setSession, setCurrentScene, setCharacter]);
 
   // Handle choice selection with enhanced error handling and loading states
-  const handleChoiceSelect = async (choice: SceneChoice) => {
+  const handleChoiceSelect = async (choice: SceneChoice): Promise<void> => {
     if (!character || !session || !currentScene || isGeneratingScene) {
       return;
     }
@@ -162,7 +162,7 @@ export default function GamePage() {
   };
 
   // Handle exit to main menu
-  const handleExit = () => {
+  const handleExit = (): void => {
     router.push('/');
   };
 

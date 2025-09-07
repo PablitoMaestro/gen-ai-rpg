@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState, Suspense } from 'react';
 
@@ -9,7 +10,7 @@ import { storyService } from '@/services/storyService';
 import { useGameStore } from '@/store/gameStore';
 import { Character } from '@/types';
 
-function GameStartContent() {
+function GameStartContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const characterId = searchParams.get('characterId');
@@ -21,7 +22,7 @@ function GameStartContent() {
 
   useEffect(() => {
     // Load character data
-    const loadCharacter = () => {
+    const loadCharacter = (): void => {
       try {
         const storedCharacter = localStorage.getItem('current_character');
         if (!storedCharacter) {
@@ -43,7 +44,7 @@ function GameStartContent() {
     }
   }, [characterId]);
 
-  const handleStartAdventure = async () => {
+  const handleStartAdventure = async (): Promise<void> => {
     if (!character) {
       return;
     }
@@ -68,11 +69,11 @@ function GameStartContent() {
     }
   };
 
-  const handleBackToCharacterCreation = () => {
+  const handleBackToCharacterCreation = (): void => {
     router.push('/character/create');
   };
 
-  const handleGoHome = () => {
+  const handleGoHome = (): void => {
     router.push('/');
   };
 
@@ -113,9 +114,11 @@ function GameStartContent() {
             <div className="flex-shrink-0">
               <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-gold-600/40 shadow-golden">
                 {character.portrait_url ? (
-                  <img
+                  <Image
                     src={character.portrait_url}
                     alt={character.name}
+                    width={128}
+                    height={128}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -209,7 +212,7 @@ function GameStartContent() {
   );
 }
 
-export default function GameStartPage() {
+export default function GameStartPage(): React.ReactElement {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-dark-900 to-dark-800">

@@ -17,7 +17,7 @@ interface StatBarProps {
   showMax?: boolean;
 }
 
-function StatBar({ label, current, max, color, showMax = true }: StatBarProps) {
+function StatBar({ label, current, max, color, showMax = true }: StatBarProps): React.ReactElement {
   const percentage = Math.min((current / max) * 100, 100);
   
   const colorClasses = {

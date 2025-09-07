@@ -13,20 +13,21 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from services.supabase import supabase_service
 
+
 def export_builds_to_seed():
     """Export all character builds to a SQL seed file."""
     print("📦 Exporting character builds to seed file...")
-    
+
     # Fetch all builds from database
     result = supabase_service.client.table('character_builds').select('*').order('portrait_id').order('build_type').execute()
     builds = result.data or []
-    
+
     if not builds:
         print("❌ No builds found in database!")
         return
-    
+
     print(f"✅ Found {len(builds)} builds to export")
-    
+
     # Generate SQL insert statements
     sql_lines = [
         "-- Character builds seed data",
@@ -38,17 +39,17 @@ def export_builds_to_seed():
         "",
         "-- Insert character builds",
     ]
-    
+
     for build in builds:
         # Escape single quotes in text fields
         description = build['description'].replace("'", "''")
         stats_json = json.dumps(build['stats_preview']).replace("'", "''")
-        
+
         sql = f"""INSERT INTO character_builds (
-    portrait_id, 
-    build_type, 
-    image_url, 
-    description, 
+    portrait_id,
+    build_type,
+    image_url,
+    description,
     stats_preview
 ) VALUES (
     '{build['portrait_id']}',
@@ -61,10 +62,10 @@ def export_builds_to_seed():
     description = EXCLUDED.description,
     stats_preview = EXCLUDED.stats_preview,
     updated_at = NOW();"""
-        
+
         sql_lines.append(sql)
         sql_lines.append("")
-    
+
     # Add verification query
     sql_lines.extend([
         "-- Verify all builds are present",
@@ -79,24 +80,24 @@ def export_builds_to_seed():
         "    END IF;",
         "END $$;",
     ])
-    
+
     # Write to seed file
     seed_path = Path(__file__).parent.parent.parent / "supabase" / "seed_character_builds.sql"
     with open(seed_path, 'w') as f:
         f.write('\n'.join(sql_lines))
-    
+
     print(f"✅ Exported {len(builds)} builds to {seed_path}")
-    
+
     # Summary by portrait
     portrait_counts = {}
     for build in builds:
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1
-    
+
     print("\n📊 Export Summary:")
     for pid in sorted(portrait_counts.keys()):
         print(f"  {pid}: {portrait_counts[pid]} builds")
-    
+
     print(f"\n💾 Seed file created at: {seed_path}")
     print("ℹ️  To apply this seed, add to supabase/seed.sql:")
     print("   \\i seed_character_builds.sql")

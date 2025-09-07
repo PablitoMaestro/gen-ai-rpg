@@ -97,7 +97,6 @@ export default function CreateCharacterPage(): React.ReactElement {
             
             // Restore gender and portrait selection
             if (characterData.gender && characterData.portrait_id && characterData.name) {
-              console.log('Restoring previous character selection:', characterData);
               
               const targetGender = characterData.gender as Gender;
               const targetPortraits = targetGender === 'male' ? malePortraits : femalePortraits;
@@ -115,7 +114,6 @@ export default function CreateCharacterPage(): React.ReactElement {
                 setCharacterDescription(characterData.description || '');
                 
                 restoredSelection = true;
-                console.log('Successfully restored character selection');
               }
             }
           } catch (error) {
@@ -149,7 +147,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     };
     
     loadAllPortraits();
-  }, []);
+  }, [presetCharacters.female]);
   
   const handleGenderChange = async (gender: Gender): Promise<void> => {
     if (gender === selectedGender) {
