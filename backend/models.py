@@ -270,7 +270,7 @@ class StoryGenerateRequest(BaseModel):
     """
     character_id: UUID
     previous_choice: str | None = None
-    scene_context: dict[str, Any] | None = None
+    scene_context: str | None = None
 
     class Config:
         json_encoders = {UUID: str}
