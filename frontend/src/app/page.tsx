@@ -27,7 +27,7 @@ export default function Home(): React.ReactElement {
       
       <div className="max-w-4xl mx-auto text-center space-y-8 relative z-20 backdrop-blur-sm bg-black/10 p-8 rounded-2xl border border-amber-500/20">
         <h1 className="text-5xl md:text-7xl font-manuscript font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-600 drop-shadow-2xl filter brightness-110 animate-pulse-gentle">
-          Path to Destiny
+          AI Hero&apos;s Journey
         </h1>
         
         <p className="text-base md:text-lg text-quest max-w-2xl mx-auto">

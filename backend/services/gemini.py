@@ -12,6 +12,7 @@ except ImportError:
 import google.generativeai as genai
 
 from config.settings import settings
+from services.content_sanitizer import content_sanitizer
 
 logger = logging.getLogger(__name__)
 
@@ -160,17 +161,33 @@ class GeminiService:
             # Open character image
             character_pil = Image.open(io.BytesIO(character_image))
 
-            # Build scene prompt
-            prompt = f"""Place this character in the following scene:
-            {scene_description}
+            # Sanitize scene description for image generation
+            sanitized_description = content_sanitizer.sanitize_for_image_generation(scene_description)
 
-            Requirements:
-            - Maintain character appearance exactly
-            - First-person RPG perspective
-            - Dark fantasy atmosphere
-            - Cinematic composition
-            - Dramatic lighting
-            - Include environmental details"""
+            # Build comprehensive scene prompt
+            prompt = f"""Create a first-person RPG scene image showing this character in an environment.
+
+ENVIRONMENT DESCRIPTION:
+{sanitized_description}
+
+CHARACTER PLACEMENT:
+- Show the character from behind or at a 3/4 angle
+- Character positioned in lower third of the image
+- Character facing into the scene/environment
+- Maintain exact appearance, clothing, and equipment from reference image
+
+VISUAL COMPOSITION:
+- First-person RPG perspective (slightly behind and above character)
+- Cinematic wide shot showing both character and environment
+- Environmental storytelling through scene details
+- Create depth with foreground, midground, and background elements
+
+ARTISTIC STYLE:
+- Medieval dark fantasy atmosphere
+- Dramatic lighting with strong contrast
+- Rich environmental details and textures
+- Game-ready cinematic art style
+- High-quality digital artwork"""
 
             # Use chat session if available for consistency
             if session_id and session_id in self.chat_sessions:
@@ -354,6 +371,7 @@ class GeminiService:
 
             Format your response as:
             NARRATION: [Confused, disoriented internal monologue, 40-60 words describing the amnesia awakening]
+            VISUAL_SCENE: [Environmental description for scene image: forest clearing with broken barrels, scattered debris, morning light, weathered ground, 30-50 words]
             CHOICE_1: [Weak survival choice, like "Try to stand up slowly and look around"]
             CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]  
             CHOICE_3: [Defensive choice, like "Listen carefully for any sounds or threats"]
@@ -391,6 +409,7 @@ class GeminiService:
 
             Format your response as:
             NARRATION: [Emotional internal monologue, 40-60 words with more atmosphere and context]
+            VISUAL_SCENE: [Environmental description for scene image: current location, lighting, atmosphere, objects, mood indicators, 30-50 words]
             CHOICE_1: [Desperate thought-choice, like "Charge forward with everything I have"]
             CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]  
             CHOICE_3: [Creative thought-choice, like "Try something unexpected"]
@@ -399,22 +418,51 @@ class GeminiService:
 
         return base_prompt
 
+    def _generate_fallback_visual_scene(self, narration: str) -> str:
+        """Generate a basic visual scene description as fallback."""
+        # Simple keyword-based scene generation for common scenarios
+        lower_narration = narration.lower()
+        
+        if "forest" in lower_narration or "trees" in lower_narration:
+            return "Dense forest with ancient trees towering overhead. Dappled sunlight filters through the canopy. Moss-covered ground with fallen logs."
+        elif "dungeon" in lower_narration or "stone" in lower_narration or "chamber" in lower_narration:
+            return "Dark stone chamber with rough-hewn walls. Flickering torchlight casts dancing shadows. Cold, damp air fills the ancient space."
+        elif "tavern" in lower_narration or "inn" in lower_narration:
+            return "Dimly lit tavern with wooden tables and chairs. Warm firelight glows from the hearth. Shadows dance on weathered stone walls."
+        elif "road" in lower_narration or "path" in lower_narration:
+            return "Winding dirt path through rolling countryside. Scattered rocks and wild grass line the route. Overcast sky creates moody atmosphere."
+        elif "village" in lower_narration or "town" in lower_narration:
+            return "Medieval village with cobblestone streets. Thatched-roof buildings line the narrow pathways. Soft lantern light from windows."
+        elif "castle" in lower_narration or "tower" in lower_narration:
+            return "Grand castle courtyard with high stone walls. Ancient banners flutter in the breeze. Weathered stairs lead to imposing structures."
+        else:
+            # Generic dark fantasy fallback
+            return "Mysterious medieval environment shrouded in mist. Ancient stonework and weathered surfaces. Moody lighting creates atmospheric shadows."
+
     def _parse_story_response(self, response_text: str) -> dict[str, Any]:
         """Parse the story response into structured data."""
         lines = response_text.strip().split('\n')
 
         narration = ""
+        visual_scene = ""
         choices = []
 
         for line in lines:
             if line.startswith("NARRATION:"):
                 narration = line.replace("NARRATION:", "").strip()
+            elif line.startswith("VISUAL_SCENE:"):
+                visual_scene = line.replace("VISUAL_SCENE:", "").strip()
             elif line.startswith("CHOICE_"):
                 choice_text = line.split(":", 1)[1].strip()
                 choices.append(choice_text)
 
+        # Fallback visual scene if not provided
+        if not visual_scene and narration:
+            visual_scene = self._generate_fallback_visual_scene(narration)
+
         return {
             "narration": narration,
+            "visual_scene": visual_scene,
             "choices": choices[:4]  # Ensure exactly 4 choices
         }
 

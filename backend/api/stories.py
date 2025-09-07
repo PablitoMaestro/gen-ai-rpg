@@ -86,9 +86,12 @@ async def generate_story_scene(
                         character_image_bytes = response.content
                         
                         # Generate scene image using Nano Banana
+                        # Use visual scene description if available, otherwise fallback to narration
+                        scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
+                        
                         scene_image_bytes = await gemini_service.generate_scene_image(
                             character_image=character_image_bytes,
-                            scene_description=story_data["narration"]
+                            scene_description=scene_description_for_image
                         )
                         
                         # Upload to storage

@@ -20,6 +20,17 @@ interface Scene {
   choices: Choice[];
 }
 
+const LOADING_MESSAGES = [
+  "The fates weave your story...",
+  "Ancient runes align...",
+  "Destiny beckons from the shadows...",
+  "Magic stirs in the ethereal realm...",
+  "Your legend takes shape...",
+  "The realm awaits your choices...",
+  "Mystic forces gather...",
+  "Time bends to your will..."
+];
+
 export default function GamePage(): React.ReactElement {
   const params = useParams();
   const sessionId = params.sessionId as string;
@@ -27,6 +38,8 @@ export default function GamePage(): React.ReactElement {
   const { character } = useGameStore();
   const [scene, setScene] = useState<Scene | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isChoiceLoading, setIsChoiceLoading] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const handleChoiceSelection = async (choice: Choice): Promise<void> => {
@@ -35,7 +48,7 @@ export default function GamePage(): React.ReactElement {
       return;
     }
     
-    setIsLoading(true);
+    setIsChoiceLoading(true);
     setError(null);
     
     try {
@@ -63,7 +76,7 @@ export default function GamePage(): React.ReactElement {
       setError('Network error');
     }
     
-    setIsLoading(false);
+    setIsChoiceLoading(false);
   };
 
   useEffect(() => {
@@ -104,10 +117,26 @@ export default function GamePage(): React.ReactElement {
     loadScene();
   }, [character]);
 
+  // Rotate loading messages when loading
+  useEffect(() => {
+    if (!isChoiceLoading) {
+      return;
+    }
+    
+    const messageTimer = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 2000);
+
+    return () => clearInterval(messageTimer);
+  }, [isChoiceLoading]);
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/20">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-amber-600/30 border-t-amber-400 rounded-full animate-spin mx-auto" />
+          <p className="text-gold-200 text-lg font-fantasy">Loading your adventure...</p>
+        </div>
       </div>
     );
   }
@@ -140,9 +169,9 @@ export default function GamePage(): React.ReactElement {
         <div className="fixed inset-0 bg-gradient-to-br from-red-950/40 via-red-900/30 to-red-800/20 z-[15]" />
         <div className="fixed inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.6)] z-[16]" />
         
-        <div className="h-screen w-full flex flex-col overflow-hidden relative z-[20]">
+        <div className="h-[100dvh] w-full flex flex-col overflow-hidden relative z-[20]">
           {/* Combined Image and Narration Area - Takes up most of the screen */}
-          <div className="flex-1 relative p-6 min-h-[75vh]">
+          <div className="flex-1 relative p-2 sm:p-4 md:p-6">
             {scene?.image_url ? (
               <div className="w-full h-full relative rounded-xl overflow-hidden flex items-center justify-center">
                 <Image 
@@ -153,9 +182,9 @@ export default function GamePage(): React.ReactElement {
                 />
                 {/* Narration overlay at bottom of container */}
                 {scene && (
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
-                      <p className="text-gold-200 text-lg font-fantasy leading-relaxed text-center">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 md:p-6">
+                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto">
+                      <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
                         {scene.narration}
                       </p>
                     </div>
@@ -165,10 +194,10 @@ export default function GamePage(): React.ReactElement {
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-black/50 rounded-xl">
                 <div className="text-center">
-                  <div className="text-6xl opacity-30 text-gold-400 mb-4">🌙</div>
+                  <div className="text-4xl sm:text-5xl md:text-6xl opacity-30 text-gold-400 mb-4">🌙</div>
                   {scene && (
-                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
-                      <p className="text-gold-200 text-lg font-fantasy leading-relaxed text-center">
+                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto">
+                      <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
                         {scene.narration}
                       </p>
                     </div>
@@ -179,20 +208,21 @@ export default function GamePage(): React.ReactElement {
           </div>
 
           {/* Choices - Bottom section */}
-          <div className="flex-shrink-0 pb-6">
+          <div className="flex-shrink-0 pb-2 sm:pb-4 md:pb-6">
 
             {/* Choices */}
             {scene && scene.choices && scene.choices.length > 0 && (
-              <div className="px-6">
+              <div className="px-2 sm:px-4 md:px-6">
                 <div className="max-w-4xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                     {scene.choices.map((choice) => (
                       <button
                         key={choice.id}
-                        className="glass-morphism bg-amber-900/20 border border-gold-600/30 rounded-xl p-4 text-gold-200 hover:bg-amber-800/30 hover:border-gold-500/50 hover:shadow-golden-sm transition-all duration-200 hover:scale-[1.02] font-fantasy"
+                        className="glass-morphism bg-amber-900/20 border border-gold-600/30 rounded-xl p-3 sm:p-4 text-gold-200 hover:bg-amber-800/30 hover:border-gold-500/50 hover:shadow-golden-sm transition-all duration-200 hover:scale-[1.02] font-fantasy min-h-[60px] sm:min-h-[auto] touch-manipulation disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
                         onClick={() => handleChoiceSelection(choice)}
+                        disabled={isChoiceLoading}
                       >
-                        <div className="text-left">
+                        <div className="text-left text-sm sm:text-base">
                           {choice.text}
                         </div>
                       </button>
@@ -202,8 +232,24 @@ export default function GamePage(): React.ReactElement {
               </div>
             )}
 
+            {/* Loading Overlay */}
+            {isChoiceLoading && (
+              <div className="px-2 sm:px-4 md:px-6 mt-4">
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-black/40 backdrop-blur-sm rounded-xl border border-amber-500/30 p-4 text-center">
+                    <div className="flex items-center justify-center space-x-3 mb-2">
+                      <div className="w-4 h-4 border-2 border-amber-600/30 border-t-amber-400 rounded-full animate-spin" />
+                      <p className="text-gold-200 text-sm font-fantasy">
+                        {LOADING_MESSAGES[loadingMessageIndex]}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Debug Info */}
-            <div className="px-6 pt-4 text-center">
+            <div className="px-2 sm:px-4 md:px-6 pt-2 sm:pt-3 md:pt-4 text-center">
               <div className="text-gold-400/50 text-xs font-fantasy">
                 Session: {sessionId}
               </div>

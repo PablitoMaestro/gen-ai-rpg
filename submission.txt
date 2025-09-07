@@ -1,0 +1,71 @@
+# Kaggle Writeup - Nano Banana Hackathon
+
+## Project Title
+AI Hero's Journey - The First True Visual RPG with Persistent Character Identity
+
+## Problem Statement
+
+Visual RPGs struggle with character consistency across scenes. Traditional solutions require expensive custom art or produce generic characters identical for every player. Standard AI generators create inconsistent results where characters look completely different between scenes.
+
+Our project leverages Gemini 2.5 Flash Image's multi-image fusion capability to solve this problem. The model processes multiple input images simultaneously - combining character portraits with scene elements, weapons, armor, and environments in real-time, creating unprecedented visual consistency where characters maintain exact facial features across infinite story scenarios.
+
+Gemini 2.5 Flash Image is central to our application through:
+1. **Multi-image composition**: Fusing portraits with class-specific equipment and poses
+2. **Scene generation**: Combining character identity with dynamic story environments  
+3. **Real-time consistency**: Maintaining visual DNA across narrative branches
+
+Enhanced with ElevenLabs for immersive voice dialogues and potential expansion to dynamic music and sound effects, this transforms one portrait into infinite consistent possibilities, enabling truly personalized visual storytelling where every player experiences their unique character seamlessly integrated into any scene.
+
+VIDEO DEMO LINK:
+[YouTube link - See one character, infinite consistent variations]
+
+PUBLIC PROJECT LINK:
+GitHub: https://github.com/[username]/gen-ai-rpg
+
+EXPERIENCE THE BREAKTHROUGH:
+
+Prerequisites: Node.js 18+, Python 3.8+, Docker
+
+Quick Setup:
+1. git clone https://github.com/[username]/gen-ai-rpg.git
+2. cd gen-ai-rpg && make install
+3. Add GEMINI_API_KEY to backend/.env
+4. make runl
+5. Visit http://localhost:3000
+
+WHAT YOU'LL WITNESS:
+
+Current Release - Character Identity System (Fully Functional):
+• Upload any portrait or choose a preset
+• Watch Nano Banana generate the same character as four different classes
+• Notice how the Warrior version has identical facial features to the Mage version
+• Each class brings different armor, weapons, poses - but it's unmistakably the same person
+• This consistency was impossible before Nano Banana
+• Complete character creation flow ready to play
+
+Coming Next - The Full RPG Experience (Under Active Development):
+• Your character appears in procedurally generated story scenes
+• Same face whether you're in a castle, forest, or dungeon
+• Dynamic equipment changes while maintaining identity
+• Multiple characters with consistent appearances interacting
+• Infinite visual variations from a single portrait source
+• Full narrative gameplay with choices and consequences
+
+THE TECHNICAL REVOLUTION:
+
+Traditional Approach: 
+- Static sprites = everyone looks the same
+- Commissioned art = costs thousands, takes months
+- Standard AI = inconsistent characters between scenes
+
+Our Nano Banana Solution:
+- One portrait = infinite consistent scenes
+- Real-time generation = instant visual feedback
+- Multi-image fusion = perfect character persistence
+- Dynamic composition = weapons + armor + character + background in perfect harmony
+
+This isn't just a character creator. It's proof that visual consistency in AI-generated content is finally solved. We're not making another RPG - we're pioneering the future of dynamic visual storytelling where every player gets their own perfectly consistent, personally unique visual narrative.
+
+Game developers have been waiting for this moment. Players have been dreaming of it. 
+
+Welcome to the first day of truly personalized visual gaming.
