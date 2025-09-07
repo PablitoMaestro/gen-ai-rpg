@@ -212,8 +212,8 @@ async def generate_character_builds(
         ]
 
 
-# Default user ID for development
-DEFAULT_USER_ID = UUID("00000000-0000-0000-0000-000000000000")
+# Default user ID for development (matches existing user in local DB)
+DEFAULT_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 @router.post("/create", response_model=Character)
 async def create_character(

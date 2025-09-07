@@ -67,9 +67,9 @@ class StoryService {
   }
 
   async createGameSession(characterId: string): Promise<GameSession> {
-    return this.fetchWithError<GameSession>(`/api/stories/session/create?character_id=${characterId}`, {
+    return this.fetchWithError<GameSession>('/api/stories/session/create', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ character_id: characterId }),
     });
   }
 

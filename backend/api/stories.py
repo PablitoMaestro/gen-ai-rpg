@@ -183,22 +183,28 @@ async def get_game_session(session_id: UUID) -> GameSession:
     return session
 
 
+from pydantic import BaseModel as PydanticBaseModel
+
+class SessionCreateRequest(PydanticBaseModel):
+    """Request model for creating a game session."""
+    character_id: UUID
+
 @router.post("/session/create", response_model=GameSession)
 async def create_game_session(
-    character_id: UUID
+    request: SessionCreateRequest
 ) -> GameSession:
     """
     Create a new game session for a character.
 
     Args:
-        character_id: ID of the character to create session for
+        request: Request containing character_id
 
     Returns:
         Created game session
     """
     # Create new session
     session = GameSession(
-        character_id=character_id,
+        character_id=request.character_id,
         current_scene={},
         choices_made=[],
         inventory=[]

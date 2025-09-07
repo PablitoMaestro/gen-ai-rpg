@@ -144,6 +144,9 @@ class Character(BaseModel):
         data.pop('id', None)
         data.pop('created_at', None)
         data.pop('updated_at', None)
+        # Convert UUID to string for JSON serialization
+        if 'user_id' in data and data['user_id']:
+            data['user_id'] = str(data['user_id'])
         return data
 
     def dict_for_update(self) -> dict[str, Any]:
@@ -177,6 +180,9 @@ class GameSession(BaseModel):
         """Get dict for database operations."""
         data = self.model_dump(exclude={'id', 'created_at', 'updated_at', 'play_time_seconds'},
                               exclude_none=True)
+        # Convert UUID to string for JSON serialization
+        if 'character_id' in data and data['character_id']:
+            data['character_id'] = str(data['character_id'])
         return data
 
     def calculate_play_time(self) -> None:

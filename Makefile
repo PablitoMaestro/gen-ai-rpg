@@ -13,7 +13,8 @@ BRANCH := $(shell git branch --show-current)
 .PHONY: help
 help:
 	@echo "$(GREEN)Available commands:$(NC)"
-	@echo "  make runl       - Run all services locally (frontend, backend, supabase)"
+	@echo "  make runl       - Run all services locally (auto-detects next available ports)"
+	@echo "  make runl-nobuckets - Run all services locally without seeding storage buckets"
 	@echo "  make commitq    - Quick commit and push all changes to current branch"
 	@echo "  make stop       - Stop all running services"
 	@echo "  make status     - Check status of all services"
@@ -23,6 +24,17 @@ help:
 	@echo ""
 	@echo "$(YELLOW)Current branch: $(BRANCH)$(NC)"
 
+# Helper function to find next available port
+define find_next_port
+$(shell \
+	port=$(1); \
+	while lsof -i:$$port >/dev/null 2>&1; do \
+		port=$$((port + 1)); \
+	done; \
+	echo $$port \
+)
+endef
+
 # Run all services locally
 .PHONY: runl
 runl:
@@ -30,16 +42,51 @@ runl:
 	@echo "$(YELLOW)Starting Supabase...$(NC)"
 	@cd supabase && supabase start &
 	@sleep 5
-	@echo "$(YELLOW)Starting Backend...$(NC)"
-	@cd backend && source venv/bin/activate 2>/dev/null || python -m venv venv && source venv/bin/activate && uvicorn main:app --reload --port 8000 &
+	@echo "$(YELLOW)Seeding storage buckets...$(NC)"
+	@cd supabase && supabase seed buckets 2>/dev/null || echo "$(YELLOW)Storage buckets already seeded or not available$(NC)"
+	@echo "$(YELLOW)Finding available ports and starting Backend...$(NC)"
+	@backend_port=$(call find_next_port,8000); \
+	echo "$(GREEN)Backend will run on port $$backend_port$(NC)"; \
+	cd backend && source venv/bin/activate 2>/dev/null || python -m venv venv && source venv/bin/activate && uvicorn main:app --reload --port $$backend_port &
 	@sleep 3
-	@echo "$(YELLOW)Starting Frontend...$(NC)"
-	@cd frontend && npm run dev &
+	@echo "$(YELLOW)Finding available port and starting Frontend...$(NC)"
+	@frontend_port=$(call find_next_port,3000); \
+	echo "$(GREEN)Frontend will run on port $$frontend_port$(NC)"; \
+	cd frontend && PORT=$$frontend_port npm run dev &
 	@sleep 3
 	@echo "$(GREEN)All services started!$(NC)"
-	@echo "$(GREEN)Frontend: http://localhost:3000$(NC)"
-	@echo "$(GREEN)Backend: http://localhost:8000$(NC)"
-	@echo "$(GREEN)Supabase Studio: http://localhost:54323$(NC)"
+	@frontend_port=$(call find_next_port,3000); \
+	backend_port=$(call find_next_port,8000); \
+	echo "$(GREEN)Frontend: http://localhost:$$frontend_port$(NC)"; \
+	echo "$(GREEN)Backend: http://localhost:$$backend_port$(NC)"; \
+	echo "$(GREEN)Supabase Studio: http://localhost:54323$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Press Ctrl+C to stop all services or run 'make stop'$(NC)"
+	@wait
+
+# Run all services locally without seeding buckets
+.PHONY: runl-nobuckets
+runl-nobuckets:
+	@echo "$(GREEN)Starting all services locally (without bucket seeding)...$(NC)"
+	@echo "$(YELLOW)Starting Supabase...$(NC)"
+	@cd supabase && supabase start &
+	@sleep 5
+	@echo "$(YELLOW)Finding available ports and starting Backend...$(NC)"
+	@backend_port=$(call find_next_port,8000); \
+	echo "$(GREEN)Backend will run on port $$backend_port$(NC)"; \
+	cd backend && source venv/bin/activate 2>/dev/null || python -m venv venv && source venv/bin/activate && uvicorn main:app --reload --port $$backend_port &
+	@sleep 3
+	@echo "$(YELLOW)Finding available port and starting Frontend...$(NC)"
+	@frontend_port=$(call find_next_port,3000); \
+	echo "$(GREEN)Frontend will run on port $$frontend_port$(NC)"; \
+	cd frontend && PORT=$$frontend_port npm run dev &
+	@sleep 3
+	@echo "$(GREEN)All services started!$(NC)"
+	@frontend_port=$(call find_next_port,3000); \
+	backend_port=$(call find_next_port,8000); \
+	echo "$(GREEN)Frontend: http://localhost:$$frontend_port$(NC)"; \
+	echo "$(GREEN)Backend: http://localhost:$$backend_port$(NC)"; \
+	echo "$(GREEN)Supabase Studio: http://localhost:54323$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Press Ctrl+C to stop all services or run 'make stop'$(NC)"
 	@wait
@@ -72,14 +119,21 @@ stop:
 status:
 	@echo "$(YELLOW)Checking service status...$(NC)"
 	@echo ""
-	@if lsof -i:3000 >/dev/null 2>&1; then \
-		echo "$(GREEN)✓ Frontend is running on port 3000$(NC)"; \
-	else \
+	@frontend_found=false; \
+	backend_found=false; \
+	for port in $$(lsof -i -n | grep LISTEN | awk '{print $$9}' | cut -d: -f2 | sort -u); do \
+		if lsof -i:$$port | grep -q "node.*npm"; then \
+			echo "$(GREEN)✓ Frontend is running on port $$port$(NC)"; \
+			frontend_found=true; \
+		elif lsof -i:$$port | grep -q "uvicorn"; then \
+			echo "$(GREEN)✓ Backend is running on port $$port$(NC)"; \
+			backend_found=true; \
+		fi; \
+	done; \
+	if [ "$$frontend_found" = false ]; then \
 		echo "$(RED)✗ Frontend is not running$(NC)"; \
-	fi
-	@if lsof -i:8000 >/dev/null 2>&1; then \
-		echo "$(GREEN)✓ Backend is running on port 8000$(NC)"; \
-	else \
+	fi; \
+	if [ "$$backend_found" = false ]; then \
 		echo "$(RED)✗ Backend is not running$(NC)"; \
 	fi
 	@if lsof -i:54321 >/dev/null 2>&1; then \
