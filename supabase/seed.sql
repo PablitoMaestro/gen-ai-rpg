@@ -42,6 +42,8 @@ INSERT INTO public.characters (
   portrait_url,
   full_body_url,
   build_type,
+  voice_id,
+  personality,
   hp,
   xp,
   level
@@ -54,6 +56,8 @@ INSERT INTO public.characters (
     'https://placehold.co/400x400/2c3e50/ecf0f1?text=Aragorn',
     'https://placehold.co/800x1200/2c3e50/ecf0f1?text=Aragorn+Full',
     'warrior',
+    'IKne3meq5aSn9XLyUdCD',
+    'A noble warrior with unwavering courage and strong moral principles. Leads by example and never abandons those in need. Speaks with conviction and determination.',
     120,
     250,
     3
@@ -66,6 +70,8 @@ INSERT INTO public.characters (
     'https://placehold.co/400x400/9b59b6/ecf0f1?text=Lyra',
     'https://placehold.co/800x1200/9b59b6/ecf0f1?text=Lyra+Full',
     'mage',
+    'AZnzlk1XvdvUeBnXmlld',
+    'A wise and mystical mage with deep knowledge of ancient spells. Thoughtful and measured in speech, with a hint of mysterious power. Values wisdom over brute force.',
     85,
     180,
     2
