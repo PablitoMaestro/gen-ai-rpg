@@ -282,6 +282,14 @@ class ImageGenerationService {
       keys: Array.from(this.cache.keys())
     };
   }
+
+  /**
+   * Get pre-generated consequence image for instant display when choice is selected
+   */
+  getCachedChoiceConsequence(characterId: string, choiceId: string): GeneratedImage | null {
+    const cacheKey = `preview_${characterId}_${choiceId}`;
+    return this.cache.get(cacheKey) || null;
+  }
 }
 
 // Singleton instance

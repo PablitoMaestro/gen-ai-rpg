@@ -30,26 +30,22 @@ export interface CharacterCreateRequest {
 
 class CharacterService {
   /**
-   * Get preset portraits for a specific gender
+   * Get preset portraits for a specific gender directly from Supabase storage
    */
   async getPresetPortraits(gender: 'male' | 'female'): Promise<Portrait[]> {
-    try {
-      const response = await fetch(`${API_URL}/api/characters/presets/${gender}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    // Get Supabase URL from environment
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54331';
+    const baseUrl = `${supabaseUrl}/storage/v1/object/public/character-images/presets`;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch portraits: ${response.statusText}`);
-      }
+    // Return static portrait URLs directly - no API call needed
+    const portraits: Portrait[] = [
+      { id: `${gender[0]}1`, url: `${baseUrl}/${gender}/${gender}_portrait_01.png` },
+      { id: `${gender[0]}2`, url: `${baseUrl}/${gender}/${gender}_portrait_02.png` },
+      { id: `${gender[0]}3`, url: `${baseUrl}/${gender}/${gender}_portrait_03.png` },
+      { id: `${gender[0]}4`, url: `${baseUrl}/${gender}/${gender}_portrait_04.png` },
+    ];
 
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching preset portraits:', error);
-      throw error;
-    }
+    return portraits;
   }
 
   /**
@@ -78,6 +74,8 @@ class CharacterService {
 
   /**
    * Generate character build options based on portrait
+   * For preset portraits: loads pre-generated builds (fast)
+   * For custom uploads: generates builds using AI (slower)
    */
   async generateCharacterBuilds(
     gender: 'male' | 'female',

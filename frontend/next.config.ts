@@ -53,6 +53,12 @@ const nextConfig: NextConfig = {
         hostname: '**',
         pathname: '/api/characters/**',
       },
+      // Placeholder service for fallback images
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        pathname: '/**',
+      },
     ],
   },
 };

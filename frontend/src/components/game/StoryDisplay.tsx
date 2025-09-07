@@ -53,7 +53,9 @@ export function StoryDisplay({
 
   // Generate merged character+scene image
   useEffect(() => {
-    if (!character || !scene.narration || isLoading) return;
+    if (!character || !scene.narration || isLoading) {
+      return;
+    }
     
     const generateMergedImage = async (): Promise<void> => {
       setImageLoading(true);
@@ -102,9 +104,18 @@ export function StoryDisplay({
             priority
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center">
-            <div className="text-red-300 text-2xl font-fantasy animate-pulse">
-              {imageLoading ? 'Weaving reality with your essence...' : isLoading ? 'Peering into darkness...' : 'The void stares back...'}
+          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center relative">
+            {/* Fallback scene image */}
+            <Image
+              src="https://via.placeholder.com/800x600/1a1a1a/888888?text=Dark+Fantasy+Scene"
+              alt="Dark fantasy scene"
+              fill
+              className="object-cover opacity-60"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+            <div className="relative z-10 text-red-300 text-2xl font-fantasy animate-pulse text-center">
+              {imageLoading ? 'Weaving reality with your essence...' : isLoading ? 'Peering into darkness...' : 'The adventure begins...'}
             </div>
           </div>
         )}
@@ -116,8 +127,8 @@ export function StoryDisplay({
         <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/90" />
       </div>
 
-      {/* Cinematic Text Overlay */}
-      <div className="absolute bottom-32 sm:bottom-40 md:bottom-44 left-0 right-0 p-4 sm:p-6 md:p-8">
+      {/* Story Narration Section */}
+      <div className="relative p-4 sm:p-6 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Internal monologue container */}
           <div className="bg-black/90 border border-red-500/30 rounded-lg p-4 sm:p-6 md:p-8 backdrop-blur-sm shadow-2xl">

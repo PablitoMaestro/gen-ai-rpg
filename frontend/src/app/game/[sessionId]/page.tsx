@@ -237,22 +237,31 @@ export default function GamePage(): React.ReactElement {
 
       {/* Main immersive game content */}
       <div className="relative min-h-screen">
-        {/* Story Display - now full-screen cinematic */}
+        {/* Story Display - cinematic with proper spacing for choices */}
         <StoryDisplay 
           scene={currentScene}
           isLoading={isGeneratingScene && !selectedChoiceId}
-          className="min-h-screen"
+          className="pb-8"
         />
 
-        {/* Choice Selection - overlay at bottom */}
-        {currentScene.choices && currentScene.choices.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 z-30 p-4 sm:p-6 pl-16 sm:pl-20 md:pl-6">
+        {/* Choice Selection - positioned below story */}
+        {currentScene && (currentScene.choices && currentScene.choices.length > 0) && (
+          <div className="relative z-30 p-4 sm:p-6 bg-gradient-to-t from-black via-black/95 to-transparent">
             <ChoiceSelector
               choices={currentScene.choices}
               onChoiceSelect={handleChoiceSelect}
               isLoading={isGeneratingScene}
               selectedChoiceId={selectedChoiceId || undefined}
             />
+          </div>
+        )}
+        
+        {/* Debug: Always show message when no choices available */}
+        {(!currentScene || !currentScene.choices || currentScene.choices.length === 0) && (
+          <div className="relative z-30 p-4 sm:p-6 bg-gradient-to-t from-black via-black/95 to-transparent">
+            <div className="text-center text-white/70 font-fantasy">
+              {!currentScene ? 'Loading scene...' : 'Waiting for choices...'}
+            </div>
           </div>
         )}
 

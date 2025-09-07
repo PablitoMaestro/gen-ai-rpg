@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { imageGenerationService } from '@/services/imageGenerationService';
+import { useGameStore } from '@/store/gameStore';
 import { SceneChoice } from '@/types';
 
 interface ChoiceSelectorProps {
@@ -22,6 +24,31 @@ export function ChoiceSelector({
   className = ''
 }: ChoiceSelectorProps): React.ReactElement {
   const [hoveredChoice, setHoveredChoice] = useState<string | null>(null);
+  const { character } = useGameStore();
+
+  // Generate choice consequence images in background (silent pre-generation)
+  useEffect(() => {
+    if (!character || choices.length === 0) {
+      return;
+    }
+    
+    const generatePreviewsSilently = async (): Promise<void> => {
+      // Generate silently in background - no loading state shown to user
+      try {
+        await imageGenerationService.generateChoicePreviews(
+          character,
+          choices,
+          'Current intense scene context'
+        );
+        // Results are cached in imageGenerationService for instant retrieval when choice is made
+      } catch (error) {
+        console.error('Background choice consequence generation failed:', error);
+      }
+    };
+
+    generatePreviewsSilently();
+  }, [character, choices]);
+
 
   const handleChoiceClick = (choice: SceneChoice): void => {
     if (!disabled && !isLoading) {
@@ -76,6 +103,8 @@ export function ChoiceSelector({
               </div>
 
               <div className="space-y-3">
+                {/* Background image generation (silent - no display) */}
+
                 {/* Thought type indicator */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
