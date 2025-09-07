@@ -1,4 +1,5 @@
 import logging
+import uuid
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
@@ -14,6 +15,7 @@ from models import (
 )
 from services.gemini import gemini_service
 from services.supabase import supabase_service
+from services.elevenlabs import elevenlabs_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -117,11 +119,47 @@ async def generate_story_scene(
                 logger.warning(f"Scene image generation failed: {e}")
                 image_url = character.full_body_url
 
+        # Generate voice narration for the scene
+        audio_url = None
+        if character.voice_id:
+            try:
+                # Generate audio using the character's voice
+                audio_data = await elevenlabs_service.generate_narration(
+                    text=story_data["narration"],
+                    voice_id=character.voice_id
+                )
+                
+                if audio_data:
+                    # Upload audio to storage
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"narration_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
+                    
+                    uploaded_audio_url = await supabase_service.upload_character_image(
+                        user_id=character.user_id,
+                        file_data=audio_data,
+                        filename=filename
+                    )
+                    
+                    if uploaded_audio_url:
+                        audio_url = uploaded_audio_url
+                        logger.info(f"✅ Generated scene narration: {audio_url}")
+                    else:
+                        logger.warning("Failed to upload narration audio")
+                else:
+                    logger.warning("No audio data generated")
+                    
+            except Exception as e:
+                logger.warning(f"Voice narration generation failed: {e}")
+        else:
+            logger.info(f"No voice_id set for character {character.id}, skipping narration")
+
         # Create story scene
         scene = StoryScene(
             scene_id=f"scene_{request.character_id}_{len(request.scene_context or '')}",
             narration=story_data["narration"],
             image_url=image_url or "/scenes/default.jpg",
+            audio_url=audio_url,
             choices=choices,
             is_combat=False,
             is_checkpoint=True
@@ -164,6 +202,7 @@ async def generate_story_scene(
                 "Blood stains my clothes but I'm alive. Where am I? Who am I? Nothing comes back to me."
             ),
             image_url="/scenes/forest_awakening.jpg",
+            audio_url=None,  # No audio for fallback scene
             choices=choices,
             is_combat=False,
             is_checkpoint=True

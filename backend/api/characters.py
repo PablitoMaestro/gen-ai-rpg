@@ -86,8 +86,18 @@ async def generate_character_builds(
             if portrait_id:
                 break
     
-    # Check if this is a preset portrait
-    if portrait_id and portrait_id in [p["id"] for portraits in [get_preset_portraits("male"), get_preset_portraits("female")] for p in portraits]:
+    # Check if this is a custom portrait (contains custom indicators or is null/None)
+    is_custom_portrait = (
+        portrait_id is None or
+        not portrait_id or 
+        portrait_id == 'custom' or
+        (portrait_url and ('custom_portrait_' in portrait_url or 'uploads/' in portrait_url)) or
+        (portrait_id and portrait_id.startswith('http'))
+    )
+    
+    # Check if this is a preset portrait (has valid preset ID and not custom)
+    valid_preset_ids = [p["id"] for portraits in [get_preset_portraits("male"), get_preset_portraits("female")] for p in portraits]
+    if not is_custom_portrait and portrait_id and portrait_id in valid_preset_ids:
         logger.info(f"🎯 Loading pre-generated builds for preset portrait: {portrait_id}")
 
         try:
@@ -123,9 +133,9 @@ async def generate_character_builds(
         except Exception as e:
             logger.error(f"❌ Failed to load pre-generated builds for {portrait_id}: {e}")
             logger.info("Falling back to AI generation")
-
-    # Either custom portrait or fallback: Generate builds using AI
-    logger.info(f"🤖 Generating builds using AI for {'custom' if not portrait_id else 'preset'} portrait")
+    else:
+        # Custom portrait: Generate builds using AI
+        logger.info(f"🤖 Generating builds using AI for custom portrait (URL: {portrait_url}, ID: {portrait_id})")
 
     # Get portrait characteristics for consistency
     portrait_chars = get_portrait_characteristics(portrait_id) if portrait_id else None
@@ -262,6 +272,30 @@ async def create_character(
     # Clean trailing ? from URL
     full_body_url = request.build_id.rstrip('?') if request.build_id else request.build_id
 
+    # Map portrait_id to voice_id from existing voice mappings
+    voice_mappings = {
+        # Male Characters
+        "m1": "TxGEqnHWrfWFTfGW9XjX",  # Josh - energetic young male (Young Rogue)
+        "m2": "D38z5RcWu1voky8WS1ja",  # Ethan - mature, emotional depth (Weary Warrior)  
+        "m3": "IKne3meq5aSn9XLyUdCD",  # Charlie - strong, assertive (Fierce Fighter)
+        "m4": "onwK4e9ZLuTAKqWW03F9",  # Daniel - epic deep old male voice (Wise Elder)
+        
+        # Female Characters
+        "f1": "AZnzlk1XvdvUeBnXmlld",  # Domi - young, hopeful (Young Hope)
+        "f2": "EXAVITQu4vr4xnSDxMaL",  # Sarah - strong, serious (Hardened Survivor)
+        "f3": "oWAxZDx7w5VEj9dCyTzz",  # Grace - soft, emotional (Sorrowful Soul)
+        "f4": "XB0fDUnXU5powFXDhCwa",  # Alice - warm, nurturing elder (Elder Sage)
+    }
+    
+    # Get voice_id for preset portraits
+    voice_id = None
+    if request.portrait_id.startswith(('m', 'f')) and len(request.portrait_id) <= 2:
+        voice_id = voice_mappings.get(request.portrait_id)
+        if voice_id:
+            logger.info(f"Assigned voice {voice_id} to character with portrait {request.portrait_id}")
+        else:
+            logger.warning(f"No voice mapping found for portrait {request.portrait_id}")
+
     # Create character model
     character = Character(
         user_id=user_id,
@@ -270,6 +304,7 @@ async def create_character(
         portrait_url=portrait_url,
         full_body_url=full_body_url,
         build_type=request.build_type,
+        voice_id=voice_id,
         hp=100,
         xp=0,
         level=1

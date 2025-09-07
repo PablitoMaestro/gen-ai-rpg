@@ -17,6 +17,7 @@ interface Choice {
 interface Scene {
   narration: string;
   image_url?: string;
+  audio_url?: string;
   choices: Choice[];
 }
 
@@ -67,6 +68,7 @@ export default function GamePage(): React.ReactElement {
         setScene({
           narration: data.narration,
           image_url: data.image_url,
+          audio_url: data.audio_url,
           choices: data.choices || []
         });
       } else {
@@ -103,6 +105,7 @@ export default function GamePage(): React.ReactElement {
           setScene({
             narration: data.narration,
             image_url: data.image_url,
+            audio_url: data.audio_url,
             choices: data.choices || []
           });
         } else {
@@ -132,12 +135,14 @@ export default function GamePage(): React.ReactElement {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/20">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-amber-600/30 border-t-amber-400 rounded-full animate-spin mx-auto" />
-          <p className="text-gold-200 text-lg font-fantasy">Loading your adventure...</p>
+      <BackgroundLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 border-4 border-amber-600/30 border-t-amber-400 rounded-full animate-spin mx-auto" />
+            <p className="text-gold-200 text-lg font-fantasy">Loading your adventure...</p>
+          </div>
         </div>
-      </div>
+      </BackgroundLayout>
     );
   }
 
@@ -187,6 +192,24 @@ export default function GamePage(): React.ReactElement {
                       <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
                         {scene.narration}
                       </p>
+                      
+                      {/* Voice narration audio */}
+                      {scene.audio_url && (
+                        <div className="mt-3 flex justify-center">
+                          <audio
+                            src={scene.audio_url}
+                            autoPlay
+                            controls
+                            className="w-full max-w-md bg-black/30 rounded-lg"
+                            onError={(e) => {
+                              console.error('Audio playback error:', e);
+                            }}
+                          >
+                            <source src={scene.audio_url} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -200,6 +223,24 @@ export default function GamePage(): React.ReactElement {
                       <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
                         {scene.narration}
                       </p>
+                      
+                      {/* Voice narration audio */}
+                      {scene.audio_url && (
+                        <div className="mt-3 flex justify-center">
+                          <audio
+                            src={scene.audio_url}
+                            autoPlay
+                            controls
+                            className="w-full max-w-md bg-black/30 rounded-lg"
+                            onError={(e) => {
+                              console.error('Audio playback error:', e);
+                            }}
+                          >
+                            <source src={scene.audio_url} type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

@@ -83,6 +83,19 @@ class CharacterService {
     portraitId?: string
   ): Promise<CharacterBuildOption[]> {
     try {
+      // Detect if this is a custom portrait (URL) vs preset (ID like m1, f2)
+      let actualPortraitId = portraitId;
+      
+      // If portraitId is 'custom' or a URL, it's a custom portrait
+      if (portraitId === 'custom' || (portraitId && portraitId.startsWith('http'))) {
+        actualPortraitId = undefined; // Force AI generation for custom portraits
+      }
+      
+      // If portraitUrl looks like a custom upload URL, treat as custom
+      if (portraitUrl && (portraitUrl.includes('custom_portrait_') || portraitUrl.includes('uploads/'))) {
+        actualPortraitId = undefined; // Force AI generation for custom portraits
+      }
+
       const response = await fetch(`${API_URL}/api/characters/generate`, {
         method: 'POST',
         headers: {
@@ -91,7 +104,7 @@ class CharacterService {
         body: JSON.stringify({
           gender,
           portrait_url: portraitUrl,
-          portrait_id: portraitId,
+          portrait_id: actualPortraitId,
         }),
       });
 

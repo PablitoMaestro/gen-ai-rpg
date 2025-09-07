@@ -13,6 +13,15 @@ export interface Character {
   updated_at: string;
 }
 
+// Character data during creation (before saving to database)
+export interface CharacterCreateData {
+  name: string;
+  gender: 'male' | 'female';
+  portrait_id: string;
+  portrait_url: string;
+  description?: string;
+}
+
 export interface GameSession {
   id: string;
   character_id: string;

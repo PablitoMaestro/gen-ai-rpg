@@ -7,11 +7,11 @@ import { BuildSelector } from '@/components/character/BuildSelector';
 import { BackgroundLayout } from '@/components/layout/BackgroundLayout';
 import { Button } from '@/components/ui/Button';
 import { characterService, CharacterBuildOption } from '@/services/characterService';
-import { Character } from '@/types';
+import { Character, CharacterCreateData } from '@/types';
 
 export default function BuildsPage(): React.ReactElement {
   const router = useRouter();
-  const [character, setCharacter] = useState<Character | null>(null);
+  const [character, setCharacter] = useState<CharacterCreateData | null>(null);
   const [builds, setBuilds] = useState<CharacterBuildOption[]>([]);
   const [selectedBuild, setSelectedBuild] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +29,7 @@ export default function BuildsPage(): React.ReactElement {
           return;
         }
 
-        const characterData = JSON.parse(storedCharacter) as Character;
+        const characterData = JSON.parse(storedCharacter) as CharacterCreateData;
         
         // Validate character data
         if (!characterData.name || !characterData.gender || !characterData.portrait_url) {
@@ -41,9 +41,13 @@ export default function BuildsPage(): React.ReactElement {
         setIsGenerating(true);
 
         // Generate character builds using the portrait
+        // Pass portrait_id for preset detection, or 'custom' for uploads
+        const portraitId = characterData.portrait_id === characterData.portrait_url ? 'custom' : characterData.portrait_id;
+        
         const generatedBuilds = await characterService.generateCharacterBuilds(
           characterData.gender,
-          characterData.portrait_url
+          characterData.portrait_url,
+          portraitId
         );
 
         setBuilds(generatedBuilds);
@@ -109,7 +113,7 @@ export default function BuildsPage(): React.ReactElement {
       }
 
       // Create character with selected build
-      const createdCharacter = await characterService.createCharacter({
+      const createdCharacter: Character = await characterService.createCharacter({
         name: character.name,
         gender: character.gender,
         portrait_id: character.portrait_url, // Use portrait_url as the ID

@@ -216,6 +216,7 @@ class StoryScene(BaseModel):
     scene_id: str
     narration: str = Field(..., min_length=50, max_length=1000)
     image_url: str
+    audio_url: str | None = None  # URL for voice narration audio
     choices: list[StoryChoice] = Field(..., min_length=4, max_length=4)
     is_combat: bool = False
     is_checkpoint: bool = False
