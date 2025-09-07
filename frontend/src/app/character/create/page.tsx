@@ -218,18 +218,20 @@ export default function CreateCharacterPage(): React.ReactElement {
     setIsLoading(true);
     
     try {
-      const characterData = {
-        id: uuidv4(),
+      // Create character via API
+      const createdCharacter = await characterService.createCharacter({
         name: characterName,
-        description: characterDescription,
         gender: selectedGender,
-        portrait_url: selectedPortraitUrl,
         portrait_id: selectedPortrait === 'custom' ? selectedPortraitUrl : selectedPortrait,
-        created_at: new Date().toISOString()
-      };
+        build_id: 'default_build', // TODO: Implement proper build selection
+        build_type: 'warrior' // Default for now
+      });
       
-      localStorage.setItem('current_character', JSON.stringify(characterData));
-      router.push(`/character/${characterData.id}/build`);
+      // Save the created character (with database ID) to localStorage
+      localStorage.setItem('current_character', JSON.stringify(createdCharacter));
+      
+      // Redirect to game start instead of non-existent build page
+      router.push(`/game/start?characterId=${createdCharacter.id}`);
     } catch (error) {
       console.error('Failed to create character:', error);
       alert('Failed to create character. Please try again.');
