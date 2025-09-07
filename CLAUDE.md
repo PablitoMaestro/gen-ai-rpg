@@ -34,6 +34,13 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 - **MCP Integration**: Supabase MCP available for read operations (search_docs working)
 - **Status**: Migration applied to both local and production, simplified schema active
 
+#### **CRITICAL Database Workflow** ⚠️
+- **ALWAYS implement changes on LOCAL Supabase first**
+- **Local DB Access**: CLI ONLY (no MCP access to local instance)
+- **Production DB Access**: MCP available for queries/operations READ-only
+- **Migration Flow**: Local → Test → Production push via `supabase db push`
+- **Rule**: Never make direct changes to production without local testing first
+
 ### External APIs
 - **Gemini 2.5 Pro**: Story generation and narration
 - **Nano Banana API**: Character and scene image generation
@@ -70,15 +77,19 @@ pip install fastapi uvicorn pydantic python-dotenv
 uvicorn main:app --reload  # Start development server
 ```
 
-### Supabase Setup
+### Supabase Setup & Database Workflow
 ```bash
 cd supabase
 supabase init
 supabase start      # Start local instance
-supabase db push    # Push migrations to remote
 supabase migration new <name>  # Create new migration
-supabase db reset   # Reset database (use 'make resetdb' for storage preservation)
+supabase db reset   # Reset local database (use 'make resetdb' for storage preservation)
 supabase seed buckets # Seed storage buckets from local files
+
+# CRITICAL: Always follow this workflow for database changes
+# 1. Create migration locally and test
+# 2. ONLY when local works perfectly:
+supabase db push    # Push migrations to remote production
 ```
 
 ### Storage Management
@@ -212,7 +223,8 @@ supabase seed buckets # Seed storage buckets from local files
 - **Chuck Norris**: Complex coding challenges, debugging, and elegant refactoring solutions
   - Use for: Difficult bugs, performance optimization, complex algorithms, DRY refactoring
 - **Robert**: Database operations specialist for Supabase queries, migrations, and schema management
-  - Use for: All database operations, migrations, schema validation, data consistency checks
+  - Use for: Production database queries (MCP access), migration planning, schema validation
+  - **IMPORTANT**: Robert can only access PRODUCTION database via MCP, not local instance
 - **Kasia**: API documentation collector for external API integration docs
   - Use for: Gemini API, Nano Banana API, ElevenLabs integration, any external service docs
 - **Sun Tzu**: Strategic planning for code changes, refactoring, and architectural decisions
