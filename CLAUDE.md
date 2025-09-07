@@ -163,22 +163,37 @@ supabase seed buckets # Seed storage buckets from local files
 
 ## Visual Development & Testing
 
-### MCP Playwright Integration
-- **Purpose**: Visual feedback and frontend development verification
-- **Usage**: ALWAYS use Playwright when working on frontend components or UI
-- **Workflow**: 
-  1. Make frontend changes
-  2. Use `mcp__playwright__playwright_navigate` to open http://localhost:3000
-  3. Use `mcp__playwright__playwright_screenshot` to capture current state
-  4. Analyze screenshot for UI correctness, layout, and styling
-  5. Iterate based on visual feedback
-- **Benefits**: Immediate visual validation of changes, catch UI regressions, verify responsive design
+### Code-First Development Approach
+- **Primary Method**: Code review and analysis before visual testing
+- **Process**: 
+  1. Read and analyze component code for correctness
+  2. Check imports, types, and logic flow
+  3. Verify CSS classes and styling approach
+  4. Only use Playwright MCP when code analysis is insufficient
+
+### MCP Playwright Integration (Use Sparingly)
+- **Purpose**: Visual verification for complex UI issues or when code analysis is unclear
+- **When to Use**: 
+  - Complex interactive features that are hard to verify in code
+  - Layout issues that require visual confirmation
+  - Cross-browser compatibility testing
+  - User flow testing for critical paths
+- **When NOT to Use**:
+  - Simple component changes
+  - Basic styling updates
+  - Type fixes or logic corrections
+  - Changes that can be verified through code review
+- **Workflow** (only when necessary): 
+  1. Analyze code thoroughly first
+  2. If visual verification is needed, use `mcp__playwright__playwright_navigate`
+  3. Take targeted screenshots with `mcp__playwright__playwright_screenshot`
+  4. Focus on specific UI elements rather than full page captures
 
 ### Frontend Development Protocol
-1. **Before Changes**: Take baseline screenshot of current UI
-2. **After Changes**: Take updated screenshot to compare
-3. **Analysis**: Review both screenshots to ensure improvements
-4. **Testing**: Use Playwright to interact with UI elements and verify functionality
+1. **Code Analysis**: Review component structure, props, types, and styling
+2. **Logic Verification**: Check state management, event handlers, and data flow
+3. **Visual Testing** (if needed): Use Playwright for complex interactions or layouts
+4. **Targeted Testing**: Focus on specific functionality rather than broad UI sweeps
 
 ## Specialized Agents
 

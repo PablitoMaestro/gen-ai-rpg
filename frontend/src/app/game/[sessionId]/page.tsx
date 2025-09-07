@@ -24,6 +24,37 @@ export default function GamePage(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleChoiceSelection = async (choice: Choice) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/stories/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          character_id: "90cdf6af-907f-440d-9d72-fdbd0ad0f29e",
+          scene_context: scene?.narration || "Continuing adventure",
+          previous_choice: choice.text
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setScene({
+          narration: data.narration,
+          choices: data.choices || []
+        });
+      } else {
+        setError('Failed to generate next scene');
+      }
+    } catch (err) {
+      setError('Network error');
+    }
+    
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     const loadScene = async () => {
       try {
@@ -103,10 +134,7 @@ export default function GamePage(): React.ReactElement {
               <button
                 key={choice.id}
                 className="bg-red-900/50 border border-red-600/50 rounded-lg p-4 text-white hover:bg-red-800/50 transition-colors"
-                onClick={() => {
-                  // Handle choice selection
-                  console.log('Choice selected:', choice.text);
-                }}
+                onClick={() => handleChoiceSelection(choice)}
               >
                 <div className="text-left">
                   <div className="text-sm text-red-300 mb-2">Option {index + 1}</div>
