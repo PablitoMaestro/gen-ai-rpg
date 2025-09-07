@@ -318,6 +318,9 @@ class SupabaseService:
 
             # Get public URL
             url = self.storage.from_("character-images").get_public_url(path)
+            # Remove trailing ? that sometimes appears in Supabase URLs
+            if url.endswith('?'):
+                url = url[:-1]
             logger.info(f"Successfully uploaded image to: {url}")
             return url  # type: ignore
 

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/Button';
+import { useGameStore } from '@/store/gameStore';
 
 interface Choice {
   id: string;
@@ -13,6 +14,7 @@ interface Choice {
 
 interface Scene {
   narration: string;
+  image_url?: string;
   choices: Choice[];
 }
 
@@ -20,11 +22,17 @@ export default function GamePage(): React.ReactElement {
   const params = useParams();
   const sessionId = params.sessionId as string;
   
+  const { character } = useGameStore();
   const [scene, setScene] = useState<Scene | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleChoiceSelection = async (choice: Choice): Promise<void> => {
+    if (!character) {
+      setError('Character not found');
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -33,7 +41,7 @@ export default function GamePage(): React.ReactElement {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          character_id: "90cdf6af-907f-440d-9d72-fdbd0ad0f29e",
+          character_id: character.id,
           scene_context: scene?.narration || "Continuing adventure",
           previous_choice: choice.text
         })
@@ -43,6 +51,7 @@ export default function GamePage(): React.ReactElement {
         const data = await response.json();
         setScene({
           narration: data.narration,
+          image_url: data.image_url,
           choices: data.choices || []
         });
       } else {
@@ -57,13 +66,19 @@ export default function GamePage(): React.ReactElement {
 
   useEffect(() => {
     const loadScene = async (): Promise<void> => {
+      if (!character) {
+        setError('Character not found');
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         // Get the story scene directly
         const response = await fetch('http://localhost:8000/api/stories/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            character_id: "90cdf6af-907f-440d-9d72-fdbd0ad0f29e", // hardcoded for now
+            character_id: character.id,
             scene_context: "Beginning of adventure"
           })
         });
@@ -72,6 +87,7 @@ export default function GamePage(): React.ReactElement {
           const data = await response.json();
           setScene({
             narration: data.narration,
+            image_url: data.image_url,
             choices: data.choices || []
           });
         } else {
@@ -84,7 +100,7 @@ export default function GamePage(): React.ReactElement {
     };
 
     loadScene();
-  }, []);
+  }, [character]);
 
   if (isLoading) {
     return (
@@ -114,8 +130,16 @@ export default function GamePage(): React.ReactElement {
       {/* Scene Display */}
       <div className="max-w-4xl mx-auto">
         {/* Scene Image Area */}
-        <div className="h-64 bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center mb-8 rounded-lg">
-          <div className="text-6xl opacity-30">🌙</div>
+        <div className="h-64 bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center mb-8 rounded-lg overflow-hidden">
+          {scene?.image_url ? (
+            <img 
+              src={scene.image_url} 
+              alt="Scene" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-6xl opacity-30">🌙</div>
+          )}
         </div>
 
         {/* Story Text */}

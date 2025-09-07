@@ -73,6 +73,16 @@ async def generate_character_builds(
     # Build types in consistent order
     build_types: list[Literal["warrior", "mage", "rogue", "ranger"]] = ["warrior", "mage", "rogue", "ranger"]
 
+    # Detect preset portrait ID from URL if not provided
+    if not portrait_id and portrait_url:
+        for gender_portraits in [get_preset_portraits("male"), get_preset_portraits("female")]:
+            for preset in gender_portraits:
+                if preset['url'] == portrait_url:
+                    portrait_id = preset['id']
+                    break
+            if portrait_id:
+                break
+    
     # Check if this is a preset portrait
     if portrait_id and portrait_id in [p["id"] for portraits in [get_preset_portraits("male"), get_preset_portraits("female")] for p in portraits]:
         logger.info(f"🎯 Loading pre-generated builds for preset portrait: {portrait_id}")
@@ -87,9 +97,11 @@ async def generate_character_builds(
                 # Convert database records to CharacterBuildOption models
                 builds = []
                 for build_data in result.data:
+                    # Clean trailing ? from URLs
+                    clean_image_url = build_data['image_url'].rstrip('?') if build_data['image_url'] else build_data['image_url']
                     build = CharacterBuildOption(
-                        id=build_data['id'],
-                        image_url=build_data['image_url'],
+                        id=clean_image_url,  # Use clean image_url as id for frontend
+                        image_url=clean_image_url,
                         build_type=build_data['build_type'],
                         description=build_data['description'],
                         stats_preview=build_data['stats_preview']
@@ -172,8 +184,8 @@ async def generate_character_builds(
                     url = f"/placeholder/{build_type}.jpg"
 
                 return CharacterBuildOption(
-                    id=f"build_{build_type}",
-                    image_url=url,
+                    id=url.rstrip('?') if url else f"build_{build_type}",
+                    image_url=url.rstrip('?') if url else url,
                     build_type=build_type,
                     description=build_descriptions[build_type],
                     stats_preview=build_stats[build_type]
@@ -243,9 +255,9 @@ async def create_character(
             # Fall back to first preset for gender
             portrait_url = portraits[0]['url'] if portraits else request.portrait_id
 
-    # Resolve full body URL from build_id (should be passed from generate endpoint)
-    # For now, use the build_id as-is if it's a URL, otherwise use placeholder
-    full_body_url = request.build_id if request.build_id.startswith('http') else f"/placeholder/{request.build_id}.jpg"
+    # Resolve full body URL from build_id (which is the actual image URL from generate endpoint)
+    # Clean trailing ? from URL
+    full_body_url = request.build_id.rstrip('?') if request.build_id else request.build_id
 
     # Create character model
     character = Character(

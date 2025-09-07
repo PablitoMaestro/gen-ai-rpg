@@ -64,12 +64,55 @@ async def generate_story_scene(
         image_url = None
         if character.full_body_url:
             try:
-                # TODO: Implement scene image generation and storage
-                # For now, use placeholder
-                image_url = "/scenes/generated_scene.jpg"
+                # Generate scene image with character
+                import httpx
+                import uuid
+                
+                # Prepare character image URL - add protocol if missing
+                character_image_url = character.full_body_url
+                if not character_image_url.startswith(('http://', 'https://')):
+                    # Add base URL for relative paths
+                    from config.settings import settings
+                    if settings.environment == "development":
+                        base_url = "http://127.0.0.1:54331"
+                    else:
+                        base_url = settings.supabase_url
+                    character_image_url = f"{base_url}{character_image_url}"
+                
+                # Download character image
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(character_image_url)
+                    if response.status_code == 200:
+                        character_image_bytes = response.content
+                        
+                        # Generate scene image using Nano Banana
+                        scene_image_bytes = await gemini_service.generate_scene_image(
+                            character_image=character_image_bytes,
+                            scene_description=story_data["narration"]
+                        )
+                        
+                        # Upload to storage
+                        from datetime import datetime
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        filename = f"scene_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
+                        
+                        uploaded_url = await supabase_service.upload_character_image(
+                            user_id=character.user_id,
+                            file_data=scene_image_bytes,
+                            filename=filename
+                        )
+                        
+                        if uploaded_url:
+                            image_url = uploaded_url
+                            logger.info(f"✅ Generated scene image: {image_url}")
+                        else:
+                            raise Exception("Failed to upload scene image")
+                    else:
+                        raise Exception(f"Failed to download character image from {character_image_url}: {response.status_code}")
+                        
             except Exception as e:
                 logger.warning(f"Scene image generation failed: {e}")
-                image_url = "/scenes/default.jpg"
+                image_url = character.full_body_url
 
         # Create story scene
         scene = StoryScene(
