@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import { GenderToggle } from '@/components/character/GenderToggle';
 import { HeroPortraitPreview } from '@/components/character/HeroPortraitPreview';

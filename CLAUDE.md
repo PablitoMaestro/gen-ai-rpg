@@ -105,11 +105,12 @@ supabase seed buckets # Seed storage buckets from local files
 
 ## Game Flow Implementation
 
-### Stage 1: Character Creation
+### Character Creation Flow
 1. Gender selection (male/female)
 2. Portrait selection (4 presets per gender) or custom upload
-3. Generate 4 full-body character builds in parallel using Nano Banana
-4. Save selected build for story image generation
+3. Character name and backstory input
+4. Build selection - Generate 4 full-body character builds (Warrior, Mage, Rogue, Ranger) with stats preview
+5. Save selected build for story image generation
 
 ### Core Gameplay Loop
 1. Present first-person narration with scene image

@@ -43,8 +43,7 @@ export default function BuildsPage(): React.ReactElement {
         // Generate character builds using the portrait
         const generatedBuilds = await characterService.generateCharacterBuilds(
           characterData.gender,
-          characterData.portrait_url,
-          characterData.portrait_id
+          characterData.portrait_url
         );
 
         setBuilds(generatedBuilds);
@@ -89,7 +88,7 @@ export default function BuildsPage(): React.ReactElement {
       const createdCharacter = await characterService.createCharacter({
         name: character.name,
         gender: character.gender,
-        portrait_id: character.portrait_id,
+        portrait_id: character.portrait_url, // Use portrait_url as the ID
         build_id: selectedBuild,
         build_type: selectedBuildData.build_type
       });
