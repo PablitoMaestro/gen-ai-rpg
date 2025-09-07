@@ -43,6 +43,8 @@ allowed_origins = ["*"] if settings.environment == "development" else [
     settings.frontend_url,
     "https://frontend-kjpmxr9eu-pablitomaestros-projects.vercel.app",
     "https://frontend-gnbv22xtk-pablitomaestros-projects.vercel.app",
+    "https://frontend-six-ivory-65.vercel.app",
+    "https://frontend-pablitomaestros-projects.vercel.app",
     # Allow all Vercel preview deployments
     "https://*.vercel.app",
     "https://*-pablitomaestros-projects.vercel.app"
