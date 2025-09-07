@@ -41,6 +41,10 @@ app = FastAPI(
 # In production, allow specific frontend URLs and Vercel preview deployments
 allowed_origins = ["*"] if settings.environment == "development" else [
     settings.frontend_url,
+    "https://gen-ai-rpg.vercel.app",  # Production domain
+    "https://gen-ai-rpg-pablitomaestros-projects.vercel.app",  # Assigned domain 1
+    "https://gen-ai-rpg-pablitomaestro-pablitomaestros-projects.vercel.app",  # Assigned domain 2
+    "https://gen-ai-ncziqxthg-pablitomaestros-projects.vercel.app",  # Preview domain
     "https://frontend-kjpmxr9eu-pablitomaestros-projects.vercel.app",
     "https://frontend-gnbv22xtk-pablitomaestros-projects.vercel.app",
     "https://frontend-six-ivory-65.vercel.app",
