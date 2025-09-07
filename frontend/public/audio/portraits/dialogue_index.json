@@ -1,0 +1,58 @@
+{
+  "m1": {
+    "name": "Young Rogue",
+    "text": "Quick fingers, quicker wit... your gold's already mine, friend!",
+    "emotion": "playful_cocky",
+    "duration_estimate": 4.5,
+    "audio_url": "/audio/portraits/m1_dialogue.mp3"
+  },
+  "m2": {
+    "name": "Weary Warrior",
+    "text": "I've buried too many brothers... but I'll bury more if I must.",
+    "emotion": "deep_sorrow",
+    "duration_estimate": 5.0,
+    "audio_url": "/audio/portraits/m2_dialogue.mp3"
+  },
+  "m3": {
+    "name": "Fierce Fighter",
+    "text": "You want a fight?! I'll paint these walls with your blood!",
+    "emotion": "aggressive_fury",
+    "duration_estimate": 4.0,
+    "audio_url": "/audio/portraits/m3_dialogue.mp3"
+  },
+  "m4": {
+    "name": "Wise Elder",
+    "text": "Age brings power, child... power you cannot yet comprehend.",
+    "emotion": "mystical_wisdom",
+    "duration_estimate": 4.8,
+    "audio_url": "/audio/portraits/m4_dialogue.mp3"
+  },
+  "f1": {
+    "name": "Young Hope",
+    "text": "Every sunrise brings new possibilities! I can feel destiny calling!",
+    "emotion": "innocent_optimism",
+    "duration_estimate": 4.2,
+    "audio_url": "/audio/portraits/f1_dialogue.mp3"
+  },
+  "f2": {
+    "name": "Hardened Survivor",
+    "text": "Trust is a luxury I can't afford... stay back, or regret it.",
+    "emotion": "defensive_warning",
+    "duration_estimate": 4.6,
+    "audio_url": "/audio/portraits/f2_dialogue.mp3"
+  },
+  "f3": {
+    "name": "Sorrowful Soul",
+    "text": "The pain never leaves... it just learns to hide behind my smile.",
+    "emotion": "melancholic_whisper",
+    "duration_estimate": 5.2,
+    "audio_url": "/audio/portraits/f3_dialogue.mp3"
+  },
+  "f4": {
+    "name": "Elder Sage",
+    "text": "Come closer, dear one... let these old hands mend what's broken.",
+    "emotion": "maternal_warmth",
+    "duration_estimate": 5.0,
+    "audio_url": "/audio/portraits/f4_dialogue.mp3"
+  }
+}

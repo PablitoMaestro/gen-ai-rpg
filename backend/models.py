@@ -125,6 +125,7 @@ class Character(BaseModel):
     portrait_url: str
     full_body_url: str
     build_type: Literal["warrior", "mage", "rogue", "ranger"] = "warrior"
+    voice_id: str | None = None  # ElevenLabs voice ID for character narration
     hp: int = Field(default=100, ge=0, le=200)
     xp: int = Field(default=0, ge=0)
     level: int = Field(default=1, ge=1, le=100)

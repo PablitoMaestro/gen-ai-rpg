@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import { usePortraitAudio } from '@/hooks/usePortraitAudio';
 
 interface Portrait {
   id: string;
@@ -37,6 +39,52 @@ export function PortraitSelector({
 }: PortraitSelectorProps): React.ReactElement {
   const [customPortraits, setCustomPortraits] = useState<CustomPortrait[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Portrait audio hook for dialogue playback
+  const { 
+    playPortraitDialogue, 
+    preloadDialogue, 
+    isPlaying, 
+    currentPortrait,
+    dialogues
+  } = usePortraitAudio();
+
+  // Preload audio for available portraits (all characters now have audio files)
+  useEffect(() => {
+    if (portraits.length > 0 && Object.keys(dialogues).length > 0) {
+      // All characters now have audio files
+      const availableAudioFiles = ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4'];
+      
+      portraits.forEach((portrait) => {
+        if (dialogues[portrait.id] && availableAudioFiles.includes(portrait.id)) {
+          console.log(`📋 Preloading dialogue for ${portrait.id} (audio available)`);
+          preloadDialogue(portrait.id);
+        } else if (dialogues[portrait.id]) {
+          console.log(`⚠️ Skipping preload for ${portrait.id} (no audio file yet)`);
+        }
+      });
+    }
+  }, [portraits, dialogues, preloadDialogue]);
+
+  // Handle portrait click with audio playback
+  const handlePortraitClick = async (portraitId: string, portraitUrl: string): Promise<void> => {
+    // Always call the original selection handler
+    onSelectPortrait(portraitId, portraitUrl);
+    
+    // Play dialogue if available (for preset portraits with actual audio files)
+    const availableAudioFiles = ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4'];
+    
+    if (dialogues[portraitId] && !portraitId.startsWith('custom_') && availableAudioFiles.includes(portraitId)) {
+      try {
+        console.log(`🎬 Playing dialogue for ${portraitId}`);
+        await playPortraitDialogue(portraitId);
+      } catch (error) {
+        console.error(`Failed to play dialogue for ${portraitId}:`, error);
+      }
+    } else if (dialogues[portraitId] && !portraitId.startsWith('custom_')) {
+      console.log(`🔇 Portrait ${portraitId} has dialogue text but no audio file yet`);
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
@@ -126,7 +174,7 @@ export function PortraitSelector({
         {customPortraits.map((customPortrait, _index) => (
           <button
             key={customPortrait.id}
-            onClick={() => onSelectPortrait(customPortrait.id, customPortrait.url)}
+            onClick={() => handlePortraitClick(customPortrait.id, customPortrait.url)}
             disabled={isLoading || isFiltering}
             className={`
               relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden
@@ -160,7 +208,7 @@ export function PortraitSelector({
         {portraits.map((portrait) => (
           <button
             key={portrait.id}
-            onClick={() => onSelectPortrait(portrait.id, portrait.url)}
+            onClick={() => handlePortraitClick(portrait.id, portrait.url)}
             disabled={isLoading || isFiltering}
             className={`
               relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden
@@ -168,6 +216,7 @@ export function PortraitSelector({
               hover:shadow-golden-lg hover:scale-105 transform hover:border-gold-400/60
               disabled:opacity-50 disabled:cursor-not-allowed
               ${selectedPortrait === portrait.id ? 'ring-4 ring-gold-400 shadow-golden-lg scale-105 border-gold-400' : ''}
+              ${isPlaying && currentPortrait === portrait.id ? 'ring-4 ring-blue-400 shadow-blue-lg animate-pulse border-blue-400' : ''}
             `}
             style={{ scrollSnapAlign: 'start' }}
           >
@@ -178,13 +227,34 @@ export function PortraitSelector({
               className="object-cover object-center"
               sizes="128px"
             />
-            {selectedPortrait === portrait.id && (
+            {selectedPortrait === portrait.id && !isPlaying && (
               <div className="absolute inset-0 bg-gold-400/20 flex items-center justify-center">
                 <div className="bg-gold-600 text-dark-900 rounded-full p-2 shadow-golden">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
+              </div>
+            )}
+            
+            {/* Audio playing indicator */}
+            {isPlaying && currentPortrait === portrait.id && (
+              <div className="absolute inset-0 bg-blue-400/30 flex items-center justify-center">
+                <div className="bg-blue-600 text-white rounded-full p-2 shadow-lg animate-pulse">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.617.793L4.228 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.228l4.155-3.793z"/>
+                    <path d="M11.293 7.293a1 1 0 011.414 0C13.89 8.476 14.5 9.681 14.5 11s-.61 2.524-1.793 3.707a1 1 0 11-1.414-1.414C12.184 12.402 12.5 11.74 12.5 11s-.316-1.402-1.207-2.293a1 1 0 010-1.414z"/>
+                    <path d="M15.657 5.657a1 1 0 011.414 0C18.165 6.751 19 8.787 19 11s-.835 4.249-1.929 5.343a1 1 0 11-1.414-1.414C16.514 14.072 17 12.614 17 11s-.486-3.072-1.343-3.929a1 1 0 010-1.414z"/>
+                  </svg>
+                </div>
+                {/* Dialogue text overlay */}
+                {dialogues[portrait.id] && (
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <div className="bg-black/80 text-white text-xs p-2 rounded backdrop-blur-sm">
+                      "{dialogues[portrait.id].text}"
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </button>

@@ -5,7 +5,7 @@ from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, HTTPException, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from models import (
     Character,
@@ -16,6 +16,9 @@ from models import (
 )
 from services.gemini import gemini_service
 from services.supabase import supabase_service
+from services.voice_design import voice_design_service
+from services.elevenlabs import elevenlabs_service
+from services.portrait_dialogue import portrait_dialogue_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -349,3 +352,226 @@ async def upload_custom_portrait(
         "url": url,
         "status": "uploaded"
     }
+
+
+# ============================================
+# VOICE-RELATED ENDPOINTS
+# ============================================
+
+class VoiceDesignRequest(BaseModel):
+    character_id: str  # Portrait ID like m1, f2, etc.
+    custom_text: str | None = None
+
+class VoicePreviewRequest(BaseModel):
+    voice_id: str
+    text: str = Field(..., min_length=10, max_length=1000)
+
+@router.get("/voice/configs")
+async def get_all_voice_configs() -> dict[str, any]:
+    """
+    Get all character voice configurations.
+    
+    Returns:
+        Dictionary of all character voice configurations
+    """
+    return voice_design_service.list_all_character_configs()
+
+
+@router.get("/voice/config/{character_id}")
+async def get_voice_config(character_id: str) -> dict[str, any]:
+    """
+    Get voice configuration for a specific character.
+    
+    Args:
+        character_id: Character portrait ID (m1, m2, f1, f2, etc.)
+        
+    Returns:
+        Character voice configuration
+    """
+    config = voice_design_service.get_character_voice_config(character_id)
+    if not config:
+        raise HTTPException(status_code=404, detail=f"Voice config not found for character: {character_id}")
+    return config
+
+
+@router.post("/voice/design")
+async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
+    """
+    Design a voice for a specific character using ElevenLabs.
+    
+    Args:
+        request: Voice design request with character_id and optional custom text
+        
+    Returns:
+        Voice design results with preview information
+    """
+    result = await voice_design_service.design_character_voice(
+        character_id=request.character_id,
+        custom_text=request.custom_text,
+        save_previews=True
+    )
+    
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
+        
+    return result
+
+
+@router.post("/voice/design/all")
+async def design_all_character_voices(save_previews: bool = True) -> dict[str, any]:
+    """
+    Design voices for all character archetypes.
+    
+    Args:
+        save_previews: Whether to save preview files
+        
+    Returns:
+        Results for all character voice designs
+    """
+    result = await voice_design_service.design_all_character_voices(save_previews=save_previews)
+    return result
+
+
+@router.post("/voice/preview")
+async def preview_voice(request: VoicePreviewRequest) -> bytes:
+    """
+    Generate a voice preview using an existing ElevenLabs voice ID.
+    
+    Args:
+        request: Voice preview request with voice_id and text
+        
+    Returns:
+        Audio data as bytes (MP3 format)
+    """
+    audio_data = await elevenlabs_service.generate_narration(
+        text=request.text,
+        voice_id=request.voice_id
+    )
+    
+    if not audio_data:
+        raise HTTPException(status_code=500, detail="Failed to generate voice preview")
+        
+    return audio_data
+
+
+@router.put("/character/{character_id}/voice")
+async def update_character_voice(character_id: UUID, voice_id: str) -> dict[str, str]:
+    """
+    Update the voice_id for a character.
+    
+    Args:
+        character_id: Character UUID
+        voice_id: ElevenLabs voice ID
+        
+    Returns:
+        Success confirmation
+    """
+    try:
+        # Update character voice_id in database
+        result = supabase_service.client.table('characters').update({
+            'voice_id': voice_id
+        }).eq('id', str(character_id)).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="Character not found")
+            
+        logger.info(f"Updated character {character_id} voice to {voice_id}")
+        return {"status": "success", "voice_id": voice_id}
+        
+    except Exception as e:
+        logger.error(f"Failed to update character voice: {e}")
+        raise HTTPException(status_code=500, detail="Failed to update character voice")
+
+
+# ============================================
+# PORTRAIT DIALOGUE ENDPOINTS
+# ============================================
+
+@router.get("/portrait/dialogue/{portrait_id}")
+async def get_portrait_dialogue(portrait_id: str) -> dict[str, any]:
+    """
+    Get dialogue information for a specific portrait.
+    
+    Args:
+        portrait_id: Character portrait ID (m1, m2, f1, f2, etc.)
+        
+    Returns:
+        Dialogue information with text and audio URL
+    """
+    dialogue = portrait_dialogue_service.get_dialogue_line(portrait_id)
+    if not dialogue:
+        raise HTTPException(status_code=404, detail=f"No dialogue found for portrait: {portrait_id}")
+    
+    return {
+        "portrait_id": portrait_id,
+        "name": dialogue["name"],
+        "text": dialogue["text"],
+        "emotion": dialogue["emotion"],
+        "duration_estimate": dialogue["duration_estimate"],
+        "audio_url": f"/audio/portraits/{portrait_id}_dialogue.mp3"
+    }
+
+
+@router.get("/portrait/dialogues")
+async def get_all_portrait_dialogues() -> dict[str, any]:
+    """
+    Get dialogue information for all portraits.
+    
+    Returns:
+        Dictionary of all portrait dialogues
+    """
+    all_dialogues = portrait_dialogue_service.get_all_dialogue_lines()
+    result = {}
+    
+    for portrait_id, dialogue in all_dialogues.items():
+        result[portrait_id] = {
+            "name": dialogue["name"],
+            "text": dialogue["text"],
+            "emotion": dialogue["emotion"],
+            "duration_estimate": dialogue["duration_estimate"],
+            "audio_url": f"/audio/portraits/{portrait_id}_dialogue.mp3"
+        }
+    
+    return result
+
+
+@router.post("/portrait/dialogue/generate")
+async def generate_portrait_dialogue_audio(
+    portrait_id: str,
+    voice_id: str | None = None
+) -> dict[str, any]:
+    """
+    Generate dialogue audio for a specific portrait.
+    
+    Args:
+        portrait_id: Character portrait ID
+        voice_id: Optional ElevenLabs voice ID
+        
+    Returns:
+        Generation result with audio information
+    """
+    dialogue = portrait_dialogue_service.get_dialogue_line(portrait_id)
+    if not dialogue:
+        raise HTTPException(status_code=404, detail=f"No dialogue found for portrait: {portrait_id}")
+    
+    try:
+        audio_data = await portrait_dialogue_service.generate_dialogue_audio(
+            portrait_id=portrait_id,
+            voice_id=voice_id,
+            save_file=True
+        )
+        
+        if not audio_data:
+            raise HTTPException(status_code=500, detail="Failed to generate dialogue audio")
+        
+        return {
+            "success": True,
+            "portrait_id": portrait_id,
+            "audio_size": len(audio_data),
+            "audio_url": f"/audio/portraits/{portrait_id}_dialogue.mp3",
+            "dialogue": dialogue
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to generate dialogue audio for {portrait_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate dialogue audio: {str(e)}")

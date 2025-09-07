@@ -140,31 +140,44 @@ export default function GamePage(): React.ReactElement {
         <div className="fixed inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.6)] z-[16]" />
         
         <div className="h-screen w-full flex flex-col overflow-hidden relative z-[20]">
-          {/* Scene Image Area - Takes up most of the screen */}
-          <div className="flex-1 flex items-center justify-center p-6">
+          {/* Combined Image and Narration Area - Takes up most of the screen */}
+          <div className="flex-1 relative p-6 min-h-[75vh]">
             {scene?.image_url ? (
-              <img 
-                src={scene.image_url} 
-                alt="Scene" 
-                className="w-full h-auto max-h-[60vh] object-contain"
-              />
+              <div className="w-full h-full relative rounded-xl overflow-hidden flex items-center justify-center">
+                <img 
+                  src={scene.image_url} 
+                  alt="Scene" 
+                  className="max-w-full max-h-full object-contain rounded-xl"
+                />
+                {/* Narration overlay at bottom of container */}
+                {scene && (
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
+                      <p className="text-gold-200 text-lg font-fantasy leading-relaxed text-center">
+                        {scene.narration}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-96 text-6xl opacity-30 text-gold-400">
-                🌙
+              <div className="w-full h-full flex items-center justify-center bg-black/50 rounded-xl">
+                <div className="text-center">
+                  <div className="text-6xl opacity-30 text-gold-400 mb-4">🌙</div>
+                  {scene && (
+                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
+                      <p className="text-gold-200 text-lg font-fantasy leading-relaxed text-center">
+                        {scene.narration}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Story Text and Choices - Bottom section */}
+          {/* Choices - Bottom section */}
           <div className="flex-shrink-0 pb-6">
-            {/* Story Text */}
-            {scene && (
-              <div className="px-6 mb-6">
-                <p className="text-gold-200 text-lg font-fantasy leading-relaxed text-center max-w-4xl mx-auto">
-                  {scene.narration}
-                </p>
-              </div>
-            )}
 
             {/* Choices */}
             {scene && scene.choices && scene.choices.length > 0 && (
