@@ -210,7 +210,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     }
   };
 
-  const handleCreateCharacter = async (): Promise<void> => {
+  const handleCreateCharacter = (): void => {
     if (!selectedGender || !selectedPortrait || !characterName.trim() || !selectedPortraitUrl) {
       return;
     }
@@ -218,23 +218,22 @@ export default function CreateCharacterPage(): React.ReactElement {
     setIsLoading(true);
     
     try {
-      // Create character via API
-      const createdCharacter = await characterService.createCharacter({
+      // Save character data to localStorage for build selection
+      const characterData = {
         name: characterName,
         gender: selectedGender,
         portrait_id: selectedPortrait === 'custom' ? selectedPortraitUrl : selectedPortrait,
-        build_id: 'default_build', // TODO: Implement proper build selection
-        build_type: 'warrior' // Default for now
-      });
+        portrait_url: selectedPortraitUrl,
+        description: characterDescription
+      };
       
-      // Save the created character (with database ID) to localStorage
-      localStorage.setItem('current_character', JSON.stringify(createdCharacter));
+      localStorage.setItem('current_character', JSON.stringify(characterData));
       
-      // Redirect to game start instead of non-existent build page
-      router.push(`/game/start?characterId=${createdCharacter.id}`);
+      // Redirect to build selection page
+      router.push('/character/builds');
     } catch (error) {
-      console.error('Failed to create character:', error);
-      alert('Failed to create character. Please try again.');
+      console.error('Failed to save character data:', error);
+      alert('Failed to save character data. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -413,7 +412,7 @@ export default function CreateCharacterPage(): React.ReactElement {
                   <span>Forging Legend...</span>
                 </div>
               ) : (
-                'Create Character'
+                'Continue to Builds'
               )}
             </Button>
           </div>
