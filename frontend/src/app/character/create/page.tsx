@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { GenderToggle } from '@/components/character/GenderToggle';
 import { HeroPortraitPreview } from '@/components/character/HeroPortraitPreview';
@@ -219,7 +220,7 @@ export default function CreateCharacterPage(): React.ReactElement {
     
     try {
       const characterData = {
-        id: `char_${Date.now()}`,
+        id: uuidv4(),
         name: characterName,
         description: characterDescription,
         gender: selectedGender,

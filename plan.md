@@ -2,16 +2,16 @@
 
 ## Summary
 **Project**: AI-powered first-person RPG with dynamic story generation and character imagery  
-**Status**: 🟢 Phase 2 Complete - Character Creation System with Visual Polish  
-**Current Phase**: Ready for Phase 3 - Core Game Loop Implementation  
-**Last Updated**: 2025-01-16 (Ready for Core Game Loop Implementation)  
+**Status**: 🟡 Phase 3 In Progress - Core Game Loop Implementation  
+**Current Phase**: Building Story Display and Choice System UI  
+**Last Updated**: 2025-01-07 (Core Game Loop Development)  
 
 ### Progress Overview
 - [x] Phase 1: Project Setup & Infrastructure ✅
 - [x] Phase 1.5: Model Architecture Simplification ✅
 - [x] Phase 2.5: Backend API Integration ✅
 - [x] Phase 2: Character Creation System ✅
-- [ ] Phase 3: Core Game Loop
+- [🟡] Phase 3: Core Game Loop (In Progress)
 - [ ] Phase 4: Advanced Features & Polish
 - [ ] Phase 5: Testing & Deployment
 
@@ -160,7 +160,7 @@
 
 ---
 
-## Phase 3: Core Game Loop
+## Phase 3: Core Game Loop 🟡
 
 ### 3.1 Story Engine (Backend Ready ✅)
 - [x] Integrate Gemini 2.0 Flash Exp API
@@ -175,17 +175,17 @@
 - [x] Handle character + environment merging
 - [ ] Optimize image loading and caching (frontend focus)
 
-### 3.3 Choice System (Mostly Backend Ready)
-- [ ] Design choice UI (4 options layout) - frontend
+### 3.3 Choice System 🟡 (In Development)
+- [x] Design choice UI (4 options layout) - frontend complete
 - [x] Implement pre-rendering for all branches - backend complete
-- [ ] Create smooth transition animations - frontend
-- [ ] Add choice history tracking - frontend
+- [x] Create smooth transition animations - frontend complete
+- [x] Add choice history tracking - frontend complete
 - [x] Implement state updates (HP, XP, inventory) - backend complete
 
-### 3.4 Game State Management
-- [ ] Design Zustand store structure
-- [ ] Implement character state management
-- [ ] Create scene navigation system
+### 3.4 Game State Management 🟡
+- [x] Design Zustand store structure - complete
+- [x] Implement character state management - complete
+- [x] Create scene navigation system - complete
 - [ ] Add save/load functionality
 - [ ] Handle offline state persistence
 
@@ -263,7 +263,7 @@
 - **Testing**: Backend has complete test suite; frontend E2E testing needed
 - **Deployment Ready**: Backend can be deployed immediately; frontend in development
 
-### Recent Achievements (January 16, 2025)
+### Recent Achievements (January 2025)
 - ✅ Complete Nano Banana (Gemini 2.5 Flash Image) integration
 - ✅ Story generation with Gemini 2.0 Flash Exp
 - ✅ Comprehensive test suite with browser UI
@@ -274,41 +274,56 @@
 - ✅ **Complete Character Creation UI**: Medieval themed 3-step flow with glass-morphism effects
 - ✅ **Navigation Enhancement**: Exit button for returning to intro from any character page
 - ✅ **Character Creation System Fully Complete**: All UI components, backend integration, and visual polish finished
+- ✅ **Core Gameplay Implementation**: Story generation with Gemini, choice system, and scene rendering complete
+- ✅ **Sound Manager Integration**: TTS narration with ElevenLabs/system voices for immersive storytelling
+- ✅ **Game State Management**: Zustand store with character stats, inventory, and scene progression
 
 ---
 
 ## Daily Checklist
-- [x] Update plan.md with completed tasks ✅ (Updated January 16, 2025)
+- [x] Update plan.md with completed tasks ✅ (Updated January 7, 2025)
 - [x] Review and adjust priorities ✅ (Ready for Phase 3)  
 - [x] Test latest changes ✅ (Backend API fully tested, character creation complete)
 - [x] Commit code with clear messages ✅ (Recent commits documented)
 - [ ] Document any blockers or changes
 
-### Next Priority: Phase 3 - Core Game Loop Implementation
-- **Immediate**: Story UI components and scene rendering system
-- **Focus**: First-person narrative interface with choice mechanics
-- **Backend Status**: Story generation and scene rendering APIs are production-ready ✅
-- **Frontend Status**: Need to implement game UI, story display, and choice system
-- **Goal**: Complete playable game loop from character creation to story progression
-- **Dependencies**: Character creation system complete ✅, backend APIs ready ✅
+### Current Focus: Phase 3 - Core Game Loop Refinement
+- **Status**: Core gameplay loop COMPLETE ✅
+- **Implemented**: Story generation, choice system, scene rendering, sound integration
+- **Backend Status**: All APIs operational and tested ✅
+- **Frontend Status**: Game UI, story display, and choice system functional ✅
+- **Achievement**: Playable game from character creation through story progression ✅
+- **Next Steps**: Polish, save/load system, and deployment preparation
 
-### Phase 3 Implementation Plan
-1. **Story Display UI** (Priority 1)
-   - Scene description rendering with first-person narrative
-   - Generated scene image display with character integration
-   - Smooth transitions between scenes
+### Phase 3 Completed Features ✅
+1. **Story Display UI** ✅
+   - First-person narrative rendering with typewriter effect
+   - Dynamic scene image generation with character integration
+   - Smooth fade transitions between scenes
 
-2. **Choice System UI** (Priority 2) 
-   - 4-choice selection interface with visual feedback
-   - Pre-loading system for instant choice response
-   - Choice history and state management
+2. **Choice System UI** ✅ 
+   - 4-choice grid layout with hover effects and visual feedback
+   - Pre-loading system for instant response
+   - Choice history tracking in game state
 
-3. **Game State Management** (Priority 3)
-   - Zustand store for game progression
-   - Character state updates (HP, XP, inventory)
-   - Save/load functionality
+3. **Game State Management** ✅
+   - Comprehensive Zustand store for all game data
+   - Real-time character stat updates (HP, XP, level)
+   - Scene navigation with history tracking
 
-4. **Integration & Polish** (Priority 4)
-   - Connect all components into seamless gameplay flow
-   - Add loading states and error handling
-   - Implement audio narration (ElevenLabs integration)
+4. **Integration & Polish** ✅
+   - Seamless gameplay flow from intro to adventure
+   - Loading states with skeleton UI
+   - Audio narration via Sound Manager (ElevenLabs/system TTS)
+
+### Remaining Tasks for MVP
+1. **Save/Load System** 🔴
+   - Persist game state to Supabase
+   - Resume from last checkpoint
+   - Multiple save slots
+
+2. **Deployment** 🔴
+   - Configure production environment variables
+   - Deploy frontend to Vercel
+   - Deploy backend to Scaleway
+   - Set up production Supabase
