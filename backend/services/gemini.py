@@ -327,42 +327,75 @@ class GeminiService:
         choice: str | None
     ) -> str:
         """Build the prompt for story generation."""
-        base_prompt = f"""
-        You are generating EXTREME first-person internal monologue for a psychological horror/dark comedy RPG.
-        Create INTENSE, SHORT, raw internal thoughts - like the character's panicked inner voice.
+        # Check if this is the initial amnesia scenario
+        is_initial_scene = context and ("Beginning of adventure" in context or "Awakening in forest" in context)
+        
+        if is_initial_scene:
+            base_prompt = f"""
+            You are generating first-person internal monologue for a dark fantasy RPG where the character has amnesia.
+            Create confused, disoriented thoughts as the character wakes up after a bandit attack.
 
-        Character: {character}
-        """
+            Character: {character} (but they don't remember who they are yet)
+            
+            AMNESIA SCENARIO: The character wakes up unconscious in a forest. Their head is in severe pain, vision is blurry, and they can barely see. They've been robbed by bandits and hit hard in the head. They cannot remember who they really are or where they came from. Around them are pieces of broken wood, some robbed barrels, and they're lying in a pool of dry blood. They are very weak, level 1, and can barely do anything potent. They start only with basic items from their character build.
 
-        if context:
-            base_prompt += f"\nSituation: {context}"
+            CRITICAL REQUIREMENTS:
+            1. Write ONLY confused internal thoughts - "Where... where am I?", "My head is splitting...", "I can't remember anything..."
+            2. Keep narration to 40-60 words - describe the disorientation and pain
+            3. Make emotions realistic: confused, scared, weak, disoriented, trying to piece things together
+            4. NO vulgar language - keep it clean and atmospheric
+            5. Create exactly 4 choice-thoughts that reflect their weakened, confused state
+            6. Remember they're level 1 - choices should be simple survival actions
 
-        if choice:
-            base_prompt += f"\nWhat just happened: {choice}"
+            Examples of appropriate style:
+            - "My vision blurs as I try to focus. Everything hurts. What happened to me?"
+            - "These broken barrels... was I traveling? I can't remember anything before waking up here."
+            - "Blood on my clothes, but I'm alive. Barely. Need to figure out what to do next."
 
-        base_prompt += """
+            Format your response as:
+            NARRATION: [Confused, disoriented internal monologue, 40-60 words describing the amnesia awakening]
+            CHOICE_1: [Weak survival choice, like "Try to stand up slowly and look around"]
+            CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]  
+            CHOICE_3: [Defensive choice, like "Listen carefully for any sounds or threats"]
+            CHOICE_4: [Recovery choice, like "Rest a moment and try to remember something"]
+            """
+        else:
+            base_prompt = f"""
+            You are generating first-person internal monologue for a dark fantasy RPG.
+            Create intense, emotional thoughts - like the character's inner voice under pressure.
 
-        CRITICAL REQUIREMENTS:
-        1. Write ONLY internal thoughts - "My heart's exploding!", "What the HELL?!", "I'm so screwed..."
-        2. Keep narration to 20-40 words MAX - super punchy and intense
-        3. Make emotions EXTREME: terrified, enraged, euphoric, disgusted, absurdly confident
-        4. Use profanity, panic, dark humor, ridiculous overreactions
-        5. Create exactly 4 internal choice-thoughts that sound desperate/excited/panicked
-        6. Make it feel like the character's racing thoughts under pressure
+            Character: {character}
+            """
 
-        Examples of style:
-        - "Blood everywhere. Can't breathe. Why did I come here?!"
-        - "Holy crap, that thing has too many teeth!"
-        - "I'm either genius or completely insane. Probably both."
-        - "My hands are shaking. This is either heroic or suicidal."
+            if context:
+                base_prompt += f"\nSituation: {context}"
 
-        Format your response as:
-        NARRATION: [Panicked internal monologue, 20-40 words]
-        CHOICE_1: [Desperate thought-choice, like "Charge in screaming like a maniac"]
-        CHOICE_2: [Panicked thought-choice, like "Hide behind something and pray"]
-        CHOICE_3: [Reckless thought-choice, like "Try something stupidly clever"]
-        CHOICE_4: [Absurd thought-choice, like "Just start laughing at the insanity"]
-        """
+            if choice:
+                base_prompt += f"\nWhat just happened: {choice}"
+
+            base_prompt += """
+
+            CRITICAL REQUIREMENTS:
+            1. Write ONLY internal thoughts - "My heart's racing!", "What is that thing?!", "I'm in trouble..."
+            2. Keep narration to 40-60 words - more descriptive than before but still punchy
+            3. Make emotions EXTREME: terrified, determined, confused, desperate, cautiously optimistic
+            4. NO vulgar language - keep it clean but intense and atmospheric
+            5. Create exactly 4 internal choice-thoughts that sound desperate/excited/determined
+            6. Make it feel like the character's thoughts under pressure but with more context
+
+            Examples of style:
+            - "Blood everywhere. Can't breathe properly. Why did I come to this cursed place?!"
+            - "That creature has way too many teeth! My weapon feels so small in my hands right now."
+            - "I'm either brilliant or completely insane. Probably both, but I have to try something."
+            - "My hands are shaking. This is either heroic or suicidal, but I can't back down now."
+
+            Format your response as:
+            NARRATION: [Emotional internal monologue, 40-60 words with more atmosphere and context]
+            CHOICE_1: [Desperate thought-choice, like "Charge forward with everything I have"]
+            CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]  
+            CHOICE_3: [Creative thought-choice, like "Try something unexpected"]
+            CHOICE_4: [Retreat thought-choice, like "Maybe discretion is the better part of valor"]
+            """
 
         return base_prompt
 

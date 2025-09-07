@@ -79,7 +79,7 @@ export default function GamePage(): React.ReactElement {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             character_id: character.id,
-            scene_context: "Beginning of adventure"
+            scene_context: "Awakening in forest after bandit attack"
           })
         });
         

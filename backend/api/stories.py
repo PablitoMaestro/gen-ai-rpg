@@ -126,39 +126,39 @@ async def generate_story_scene(
 
     except Exception as e:
         logger.error(f"Story generation failed: {e}")
-        # Fallback to intense first-person default scene
+        # Fallback to amnesia-themed default scene
         choices = [
             StoryChoice(
                 id="choice_1",
-                text="Get up and scan for threats like a paranoid fool",
-                preview="Full panic mode",
-                consequence_hint="Heart attack risk"
+                text="Try to stand up slowly and look around",
+                preview="Careful movement",
+                consequence_hint="Assess the situation"
             ),
             StoryChoice(
                 id="choice_2",
-                text="Scream into the void and see what screams back",
-                preview="Terrible idea",
-                consequence_hint="Attract EVERYTHING"
+                text="Check my belongings to see what's left",
+                preview="Inventory check",
+                consequence_hint="Find what remains"
             ),
             StoryChoice(
                 id="choice_3",
-                text="Pat myself down frantically for weapons",
-                preview="Desperate prep",
-                consequence_hint="Find something awful"
+                text="Listen carefully for any sounds or threats",
+                preview="Stay alert",
+                consequence_hint="Detect danger early"
             ),
             StoryChoice(
                 id="choice_4",
-                text="Just lay here and pretend I'm dead",
-                preview="Peak cowardice",
-                consequence_hint="Avoid immediate doom"
+                text="Rest a moment and try to remember something",
+                preview="Memory attempt",
+                consequence_hint="Recover slowly"
             )
         ]
 
         scene = StoryScene(
             scene_id="scene_001",
             narration=(
-                "What the hell?! My eyes snap open. Everything's wrong. "
-                "This isn't my bed. Where AM I?!"
+                "My head throbs as consciousness returns. Vision blurry, surrounded by broken wood and empty barrels. "
+                "Blood stains my clothes but I'm alive. Where am I? Who am I? Nothing comes back to me."
             ),
             image_url="/scenes/forest_awakening.jpg",
             choices=choices,
