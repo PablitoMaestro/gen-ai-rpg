@@ -207,6 +207,77 @@ class PortraitDialogueService:
         except Exception as e:
             logger.error(f"Failed to save dialogue audio for {portrait_id}: {e}")
     
+    async def generate_build_dialogue_audio(
+        self,
+        portrait_id: str,
+        build_type: str,
+        voice_id: Optional[str] = None,
+        save_file: bool = True
+    ) -> bytes:
+        """
+        Generate audio for a character's build-specific dialogue line.
+        
+        Args:
+            portrait_id: Character portrait ID (for voice mapping)
+            build_type: Build type (warrior, mage, rogue, ranger)
+            voice_id: ElevenLabs voice ID (if None, will use mapped voice for portrait)
+            save_file: Whether to save the audio file to disk
+            
+        Returns:
+            Audio data as bytes (MP3 format)
+        """
+        build_dialogue = self.get_build_dialogue_line(build_type)
+        if not build_dialogue:
+            logger.error(f"No build dialogue found for build type: {build_type}")
+            return b""
+            
+        # Use provided voice_id or try to get from portrait mappings
+        target_voice_id = voice_id or self.voice_mappings.get(portrait_id)
+        
+        if not target_voice_id:
+            logger.warning(f"No voice ID found for portrait {portrait_id}, using default voice")
+            
+        logger.info(f"🎭 Generating build dialogue audio for {portrait_id} ({build_type}): \"{build_dialogue['text']}\"")
+        
+        try:
+            # Generate audio using ElevenLabs service
+            audio_data = await elevenlabs_service.generate_narration(
+                text=build_dialogue["text"],
+                voice_id=target_voice_id,
+                model_id="eleven_monolingual_v1"  # Use standard model for dialogue
+            )
+            
+            if not audio_data:
+                logger.error(f"Failed to generate build audio for {portrait_id} ({build_type})")
+                return b""
+                
+            # Save to file if requested
+            if save_file:
+                await self._save_build_dialogue_audio(portrait_id, build_type, audio_data)
+                
+            logger.info(f"✅ Generated build dialogue audio for {portrait_id}_{build_type} ({len(audio_data)} bytes)")
+            return audio_data
+            
+        except Exception as e:
+            logger.error(f"Error generating build dialogue audio for {portrait_id} ({build_type}): {e}")
+            return b""
+    
+    async def _save_build_dialogue_audio(self, portrait_id: str, build_type: str, audio_data: bytes) -> None:
+        """Save build dialogue audio to file."""
+        try:
+            # Create dialogue audio directory
+            audio_dir = Path("build_dialogues")
+            audio_dir.mkdir(exist_ok=True)
+            
+            # Save audio file
+            audio_file = audio_dir / f"{portrait_id}_{build_type}_dialogue.mp3"
+            audio_file.write_bytes(audio_data)
+            
+            logger.info(f"💾 Saved build dialogue audio: {audio_file}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save build dialogue audio for {portrait_id}_{build_type}: {e}")
+    
     async def generate_all_dialogues(
         self, 
         voice_mappings: Optional[Dict[str, str]] = None,

@@ -69,6 +69,30 @@ export default function BuildsPage(): React.ReactElement {
     setSelectedBuild(buildId);
   };
 
+  // Extract portrait ID from portrait URL for voice mapping
+  const getPortraitIdFromUrl = (portraitUrl: string): string | null => {
+    // Extract portrait ID from URL patterns like:
+    // /storage/v1/object/public/character-images/presets/male/male_portrait_01.png -> m1
+    // /storage/v1/object/public/character-images/presets/female/female_portrait_02.png -> f2
+    const urlPattern = /\/(male|female)_portrait_(\d+)\.png$/;
+    const match = portraitUrl.match(urlPattern);
+    
+    if (match) {
+      const gender = match[1];
+      const number = match[2];
+      return gender === 'male' ? `m${number}` : `f${number}`;
+    }
+    
+    // Fallback: check if it's already in the format we need (m1, f2, etc.)
+    const directPattern = /\/(m|f)(\d+)(?:_|\.|$)/;
+    const directMatch = portraitUrl.match(directPattern);
+    if (directMatch) {
+      return `${directMatch[1]}${directMatch[2]}`;
+    }
+    
+    return null;
+  };
+
   const handleConfirmBuild = async (): Promise<void> => {
     if (!character || !selectedBuild) {
       return;
@@ -220,6 +244,7 @@ export default function BuildsPage(): React.ReactElement {
                   selectedBuild={selectedBuild}
                   onSelectBuild={handleSelectBuild}
                   isLoading={isConfirming}
+                  selectedCharacterId={character ? getPortraitIdFromUrl(character.portrait_url) : null}
                 />
               </div>
 

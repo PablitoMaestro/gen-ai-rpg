@@ -1,0 +1,274 @@
+{
+  "m1": {
+    "warrior": {
+      "character_name": "Young Rogue",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/m1_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Young Rogue",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/m1_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Young Rogue",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/m1_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Young Rogue",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/m1_ranger_dialogue.mp3"
+    }
+  },
+  "m2": {
+    "warrior": {
+      "character_name": "Weary Warrior",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/m2_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Weary Warrior",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/m2_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Weary Warrior",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/m2_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Weary Warrior",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/m2_ranger_dialogue.mp3"
+    }
+  },
+  "m3": {
+    "warrior": {
+      "character_name": "Fierce Fighter",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/m3_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Fierce Fighter",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/m3_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Fierce Fighter",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/m3_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Fierce Fighter",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/m3_ranger_dialogue.mp3"
+    }
+  },
+  "m4": {
+    "warrior": {
+      "character_name": "Wise Elder",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/m4_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Wise Elder",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/m4_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Wise Elder",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/m4_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Wise Elder",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/m4_ranger_dialogue.mp3"
+    }
+  },
+  "f1": {
+    "warrior": {
+      "character_name": "Young Hope",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/f1_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Young Hope",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/f1_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Young Hope",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/f1_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Young Hope",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/f1_ranger_dialogue.mp3"
+    }
+  },
+  "f2": {
+    "warrior": {
+      "character_name": "Hardened Survivor",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/f2_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Hardened Survivor",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/f2_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Hardened Survivor",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/f2_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Hardened Survivor",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/f2_ranger_dialogue.mp3"
+    }
+  },
+  "f3": {
+    "warrior": {
+      "character_name": "Sorrowful Soul",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/f3_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Sorrowful Soul",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/f3_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Sorrowful Soul",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/f3_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Sorrowful Soul",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/f3_ranger_dialogue.mp3"
+    }
+  },
+  "f4": {
+    "warrior": {
+      "character_name": "Elder Sage",
+      "build_type": "warrior",
+      "text": "My sword is yours, and with it, victory is assured!",
+      "emotion": "determined_loyalty",
+      "duration_estimate": 4.0,
+      "audio_url": "/audio/builds/f4_warrior_dialogue.mp3"
+    },
+    "mage": {
+      "character_name": "Elder Sage",
+      "build_type": "mage",
+      "text": "My spells will crush every enemy that dares oppose us!",
+      "emotion": "confident_power",
+      "duration_estimate": 4.2,
+      "audio_url": "/audio/builds/f4_mage_dialogue.mp3"
+    },
+    "rogue": {
+      "character_name": "Elder Sage",
+      "build_type": "rogue",
+      "text": "From shadows I strike, silent and deadly as the night!",
+      "emotion": "stealthy_menace",
+      "duration_estimate": 4.5,
+      "audio_url": "/audio/builds/f4_rogue_dialogue.mp3"
+    },
+    "ranger": {
+      "character_name": "Elder Sage",
+      "build_type": "ranger",
+      "text": "My arrows never miss, and nature itself fights beside me!",
+      "emotion": "wild_confidence",
+      "duration_estimate": 4.8,
+      "audio_url": "/audio/builds/f4_ranger_dialogue.mp3"
+    }
+  }
+}
