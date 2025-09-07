@@ -55,19 +55,29 @@ export default function GamePage(): React.ReactElement {
           const gameSession = await storyService.getGameSession(sessionId);
           setSession(gameSession);
           
-          // Load character if not already loaded
+          // Get character from localStorage or create minimal character object
+          let characterData = null;
           const storedCharacter = localStorage.getItem('current_character');
           if (storedCharacter) {
-            const characterData = JSON.parse(storedCharacter);
-            setCharacter(characterData);
-            
-            // If no current scene, start new story
-            const firstScene = await storyService.generateStoryScene({
-              character_id: characterData.id,
-              scene_context: "Beginning of adventure",
-            });
-            setCurrentScene(firstScene);
+            characterData = JSON.parse(storedCharacter);
+          } else {
+            // Create minimal character object for session
+            characterData = {
+              id: gameSession.character_id,
+              name: "Adventurer",
+              build_type: "warrior",
+              gender: "unknown"
+            };
           }
+          
+          setCharacter(characterData);
+          
+          // Always generate a new scene since current_scene is empty
+          const firstScene = await storyService.generateStoryScene({
+            character_id: characterData.id,
+            scene_context: "Beginning of adventure",
+          });
+          setCurrentScene(firstScene);
           
           break; // Success, exit retry loop
           

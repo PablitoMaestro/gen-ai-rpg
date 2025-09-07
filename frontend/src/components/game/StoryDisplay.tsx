@@ -27,7 +27,7 @@ export function StoryDisplay({
 
   // Typewriter effect for narration
   useEffect(() => {
-    if (!scene.narration || isLoading) {
+    if (!scene.narration || isLoading || typeof scene.narration !== 'string') {
       return;
     }
     
@@ -35,11 +35,11 @@ export function StoryDisplay({
     setDisplayedText('');
     
     let index = 0;
-    const text = scene.narration;
+    const text = scene.narration.replace(/undefined/g, ''); // Remove any 'undefined' strings
     const speed = 30; // ms per character
     
     const typeInterval = setInterval(() => {
-      if (index < text.length) {
+      if (index < text.length && text[index] !== undefined) {
         setDisplayedText(prev => prev + text[index]);
         index++;
       } else {
@@ -105,14 +105,17 @@ export function StoryDisplay({
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center relative">
-            {/* Fallback scene image */}
-            <Image
-              src="https://via.placeholder.com/800x600/1a1a1a/888888?text=Dark+Fantasy+Scene"
-              alt="Dark fantasy scene"
-              fill
-              className="object-cover opacity-60"
-              priority
-            />
+            {/* Fallback scene image - using data URL since external services are blocked */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-red-950 via-gray-900 to-purple-950 flex items-center justify-center"
+              style={{
+                backgroundImage: `radial-gradient(circle at 30% 20%, rgba(139, 69, 19, 0.3), transparent 60%),
+                                 radial-gradient(circle at 70% 80%, rgba(75, 0, 130, 0.2), transparent 50%),
+                                 linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(139, 0, 0, 0.4))`
+              }}
+            >
+              <div className="text-6xl opacity-20">🌙</div>
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
             <div className="relative z-10 text-red-300 text-2xl font-fantasy animate-pulse text-center">
               {imageLoading ? 'Weaving reality with your essence...' : isLoading ? 'Peering into darkness...' : 'The adventure begins...'}
