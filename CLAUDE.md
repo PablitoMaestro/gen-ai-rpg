@@ -28,7 +28,8 @@ This is an AI-powered RPG hackathon project that creates an interactive, first-p
 - **Local Development**: Local Supabase instance running with Docker
 - **Production**: Deployed to Supabase Cloud (mvwotulkyowfuqoounix)
 - **Schema**: Flattened tables with direct columns (no JSONB stats)
-- **Tables**: `characters`, `game_sessions` (character_portraits removed)
+- **Tables**: `characters`, `game_sessions`, `character_builds`
+- **Storage**: Character images bucket with automatic seeding after reset
 - **Management**: Use Supabase CLI for all database operations
 - **MCP Integration**: Supabase MCP available for read operations (search_docs working)
 - **Status**: Migration applied to both local and production, simplified schema active
@@ -47,6 +48,8 @@ make stop        # Stop all services
 make status      # Check service status
 make commitq     # Quick commit and push to current branch
 make install     # Install all dependencies
+make resetdb     # Reset database and reseed storage buckets
+make seed-storage # Reseed storage buckets without database reset
 ```
 
 ### Frontend Setup
@@ -74,7 +77,15 @@ supabase init
 supabase start      # Start local instance
 supabase db push    # Push migrations to remote
 supabase migration new <name>  # Create new migration
+supabase db reset   # Reset database (use 'make resetdb' for storage preservation)
+supabase seed buckets # Seed storage buckets from local files
 ```
+
+### Storage Management
+- **Local Files**: Stored in `supabase/character-images/`
+- **Auto-seeding**: Configured in `supabase/config.toml` under `[storage.buckets]`
+- **Reset Behavior**: `supabase db reset` clears storage metadata
+- **Restoration**: Use `make resetdb` or `supabase seed buckets` to re-upload files
 
 ## Project Status
 - **Phase 1**: ✅ Complete (All infrastructure set up)

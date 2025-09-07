@@ -18,6 +18,8 @@ help:
 	@echo "  make stop       - Stop all running services"
 	@echo "  make status     - Check status of all services"
 	@echo "  make logs       - Show logs from all services"
+	@echo "  make resetdb    - Reset database and reseed storage buckets"
+	@echo "  make seed-storage - Reseed storage buckets from local files"
 	@echo ""
 	@echo "$(YELLOW)Current branch: $(BRANCH)$(NC)"
 
@@ -123,6 +125,23 @@ dev-backend:
 .PHONY: dev-db
 dev-db:
 	@cd supabase && supabase start
+
+# Database operations
+.PHONY: resetdb
+resetdb:
+	@echo "$(YELLOW)Resetting database and storage...$(NC)"
+	@cd supabase && supabase db reset
+	@echo "$(GREEN)Database reset complete!$(NC)"
+	@echo "$(YELLOW)Seeding storage buckets...$(NC)"
+	@cd supabase && supabase seed buckets
+	@echo "$(GREEN)Storage buckets seeded successfully!$(NC)"
+
+.PHONY: seed-storage
+seed-storage:
+	@echo "$(YELLOW)Seeding storage buckets from local files...$(NC)"
+	@cd supabase && supabase seed buckets
+	@echo "$(GREEN)Storage buckets seeded successfully!$(NC)"
+	@echo "$(GREEN)Files uploaded from supabase/character-images/ to storage$(NC)"
 
 # Git shortcuts
 .PHONY: pull
