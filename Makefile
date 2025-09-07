@@ -13,8 +13,8 @@ BRANCH := $(shell git branch --show-current)
 .PHONY: help
 help:
 	@echo "$(GREEN)Available commands:$(NC)"
-	@echo "  make runl       - Run all services locally (auto-detects next available ports)"
-	@echo "  make runl-nobuckets - Run all services locally without seeding storage buckets"
+	@echo "  make runl       - Run all services locally without seeding storage buckets"
+	@echo "  make runl-buckets - Run all services locally with storage bucket seeding"
 	@echo "  make commitq    - Quick commit and push all changes to current branch"
 	@echo "  make stop       - Stop all running services"
 	@echo "  make status     - Check status of all services"
@@ -35,15 +35,13 @@ $(shell \
 )
 endef
 
-# Run all services locally
+# Run all services locally (without buckets)
 .PHONY: runl
 runl:
-	@echo "$(GREEN)Starting all services locally...$(NC)"
+	@echo "$(GREEN)Starting all services locally (without bucket seeding)...$(NC)"
 	@echo "$(YELLOW)Starting Supabase...$(NC)"
 	@cd supabase && supabase start &
 	@sleep 5
-	@echo "$(YELLOW)Seeding storage buckets...$(NC)"
-	@cd supabase && supabase seed buckets 2>/dev/null || echo "$(YELLOW)Storage buckets already seeded or not available$(NC)"
 	@echo "$(YELLOW)Finding available ports and starting Backend...$(NC)"
 	@backend_port=$(call find_next_port,8000); \
 	echo "$(GREEN)Backend will run on port $$backend_port$(NC)"; \
@@ -64,13 +62,15 @@ runl:
 	@echo "$(YELLOW)Press Ctrl+C to stop all services or run 'make stop'$(NC)"
 	@wait
 
-# Run all services locally without seeding buckets
-.PHONY: runl-nobuckets
-runl-nobuckets:
-	@echo "$(GREEN)Starting all services locally (without bucket seeding)...$(NC)"
+# Run all services locally with storage bucket seeding
+.PHONY: runl-buckets
+runl-buckets:
+	@echo "$(GREEN)Starting all services locally...$(NC)"
 	@echo "$(YELLOW)Starting Supabase...$(NC)"
 	@cd supabase && supabase start &
 	@sleep 5
+	@echo "$(YELLOW)Seeding storage buckets...$(NC)"
+	@cd supabase && supabase seed buckets 2>/dev/null || echo "$(YELLOW)Storage buckets already seeded or not available$(NC)"
 	@echo "$(YELLOW)Finding available ports and starting Backend...$(NC)"
 	@backend_port=$(call find_next_port,8000); \
 	echo "$(GREEN)Backend will run on port $$backend_port$(NC)"; \

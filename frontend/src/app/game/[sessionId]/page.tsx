@@ -119,33 +119,36 @@ export default function GamePage(): React.ReactElement {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
       {/* Exit Button */}
-      <div className="fixed top-4 right-4">
+      <div className="fixed top-4 right-4 z-10">
         <Link href="/">
           <Button variant="ghost">Exit</Button>
         </Link>
       </div>
 
-      {/* Scene Display */}
-      <div className="max-w-4xl mx-auto">
-        {/* Scene Image Area */}
-        <div className="h-64 bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center mb-8 rounded-lg overflow-hidden">
-          {scene?.image_url ? (
-            <img 
-              src={scene.image_url} 
-              alt="Scene" 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-6xl opacity-30">🌙</div>
-          )}
-        </div>
+      {/* Scene Image Area - Takes up most of the screen */}
+      <div className="flex-1 relative bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center overflow-hidden">
+        {scene?.image_url ? (
+          <img 
+            src={scene.image_url} 
+            alt="Scene" 
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="text-6xl opacity-30">🌙</div>
+        )}
+        
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+      </div>
 
+      {/* Story Text and Choices - Bottom section */}
+      <div className="flex-shrink-0 bg-black/95 backdrop-blur-sm border-t border-red-500/20">
         {/* Story Text */}
         {scene && (
-          <div className="bg-black/90 border border-red-500/30 rounded-lg p-6 mb-8">
-            <p className="text-red-100 text-xl font-fantasy leading-relaxed">
+          <div className="px-6 py-4 max-w-6xl mx-auto">
+            <p className="text-red-100 text-lg font-fantasy leading-relaxed text-center">
               {scene.narration}
             </p>
           </div>
@@ -153,25 +156,29 @@ export default function GamePage(): React.ReactElement {
 
         {/* Choices */}
         {scene && scene.choices && scene.choices.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {scene.choices.map((choice, index) => (
-              <button
-                key={choice.id}
-                className="bg-red-900/50 border border-red-600/50 rounded-lg p-4 text-white hover:bg-red-800/50 transition-colors"
-                onClick={() => handleChoiceSelection(choice)}
-              >
-                <div className="text-left">
-                  <div className="text-sm text-red-300 mb-2">Option {index + 1}</div>
-                  <div className="font-fantasy">{choice.text}</div>
-                </div>
-              </button>
-            ))}
+          <div className="px-6 pb-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {scene.choices.map((choice, index) => (
+                <button
+                  key={choice.id}
+                  className="bg-red-900/50 border border-red-600/50 rounded-lg p-4 text-white hover:bg-red-800/50 transition-all duration-200 hover:scale-[1.02]"
+                  onClick={() => handleChoiceSelection(choice)}
+                >
+                  <div className="text-left">
+                    <div className="text-sm text-red-300 mb-2">Option {index + 1}</div>
+                    <div className="font-fantasy text-sm">{choice.text}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Debug Info */}
-        <div className="mt-8 text-gray-500 text-sm">
-          Session: {sessionId}
+        <div className="px-6 pb-2 text-center">
+          <div className="text-gray-500 text-xs">
+            Session: {sessionId}
+          </div>
         </div>
       </div>
     </div>
