@@ -23,6 +23,20 @@ interface GameStateUpdate {
   scene_data?: Record<string, unknown>;
 }
 
+interface BackendSceneResponse {
+  scene_id?: string;
+  id?: string;
+  narration?: string;
+  image_url?: string;
+  imageUrl?: string;
+  audio_url?: string;
+  audioUrl?: string;
+  choices?: Array<{ id: string; text: string }>;
+  is_combat?: boolean;
+  is_checkpoint?: boolean;
+  is_final?: boolean;
+}
+
 class StoryService {
   private async fetchWithError<T>(
     url: string,
@@ -45,7 +59,7 @@ class StoryService {
   }
 
   async generateStoryScene(request: StoryGenerateRequest): Promise<Scene> {
-    const backendScene = await this.fetchWithError<any>('/api/stories/generate', {
+    const backendScene = await this.fetchWithError<BackendSceneResponse>('/api/stories/generate', {
       method: 'POST',
       body: JSON.stringify(request),
     });

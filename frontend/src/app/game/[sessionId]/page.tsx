@@ -24,7 +24,7 @@ export default function GamePage(): React.ReactElement {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChoiceSelection = async (choice: Choice) => {
+  const handleChoiceSelection = async (choice: Choice): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -48,7 +48,7 @@ export default function GamePage(): React.ReactElement {
       } else {
         setError('Failed to generate next scene');
       }
-    } catch (err) {
+    } catch {
       setError('Network error');
     }
     
@@ -56,7 +56,7 @@ export default function GamePage(): React.ReactElement {
   };
 
   useEffect(() => {
-    const loadScene = async () => {
+    const loadScene = async (): Promise<void> => {
       try {
         // Get the story scene directly
         const response = await fetch('http://localhost:8000/api/stories/generate', {
@@ -77,7 +77,7 @@ export default function GamePage(): React.ReactElement {
         } else {
           setError('Failed to load scene');
         }
-      } catch (err) {
+      } catch {
         setError('Network error');
       }
       setIsLoading(false);

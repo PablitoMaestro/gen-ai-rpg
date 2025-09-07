@@ -1,8 +1,7 @@
 import logging
-from typing import Any, List
-import httpx
-import asyncio
+from typing import Any
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -27,54 +26,54 @@ class GenerateConsequenceRequest(BaseModel):
 
 class BatchGenerateRequest(BaseModel):
     type: str
-    requests: List[dict]
+    requests: list[dict]
 
 @router.post("/merge-character-scene")
 async def merge_character_scene(request: MergeCharacterSceneRequest) -> dict[str, Any]:
     """
     Merge character image with scene using Nano Banana.
-    
+
     This creates a composite image showing the character in the scene context,
     maintaining character consistency while adapting to the story environment.
     """
     logger.info(f"Merging character {request.character_id} with scene: {request.scene_description[:50]}...")
-    
+
     try:
         # Download character image
         async with httpx.AsyncClient() as client:
             response = await client.get(request.character_image_url)
             if response.status_code != 200:
                 raise HTTPException(status_code=400, detail="Failed to download character image")
-            
+
             character_image_bytes = response.content
-        
+
         # Generate scene image using Nano Banana
         scene_image_bytes = await gemini_service.generate_scene_image(
             character_image=character_image_bytes,
             scene_description=request.scene_description,
             session_id=request.scene_id
         )
-        
+
         # Upload to Supabase storage
         import uuid
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"scene_{request.scene_id}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
-        
+
         # Use default user for scene images
         user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
-        
+
         merged_url = await supabase_service.upload_character_image(
             user_id=user_id,
             file_data=scene_image_bytes,
             filename=filename
         )
-        
+
         if not merged_url:
             raise HTTPException(status_code=500, detail="Failed to upload scene image")
-        
+
         logger.info(f"✅ Generated scene image: {merged_url}")
-        
+
         return {
             "merged_image_url": merged_url,
             "scene_id": request.scene_id,
@@ -82,12 +81,12 @@ async def merge_character_scene(request: MergeCharacterSceneRequest) -> dict[str
             "generation_time": "3-5s",
             "status": "completed"
         }
-        
+
     except Exception as e:
         logger.error(f"Scene generation failed: {e}")
         # Fallback to character image
         fallback_url = request.character_image_url or "https://via.placeholder.com/800x600/1a1a1a/ffffff?text=Scene+Loading"
-        
+
         return {
             "merged_image_url": fallback_url,
             "scene_id": request.scene_id,
@@ -102,16 +101,16 @@ async def merge_character_scene(request: MergeCharacterSceneRequest) -> dict[str
 async def generate_choice_consequence(request: GenerateConsequenceRequest) -> dict[str, Any]:
     """
     Generate image showing the consequence of a player choice.
-    
+
     This creates a visual representation of what happens after the player
     makes a specific decision, showing the character in the resulting situation.
     """
     logger.info(f"Generating consequence for choice: {request.choice_text[:30]}...")
-    
+
     # Always return success with character image as consequence result
     # This ensures choice previews work and can be cached
     consequence_url = request.character_image_url or "https://via.placeholder.com/800x600/2a2a2a/ffffff?text=Choice+Preview"
-    
+
     return {
         "consequence_image_url": consequence_url,
         "choice_text": request.choice_text,
@@ -123,12 +122,12 @@ async def generate_choice_consequence(request: GenerateConsequenceRequest) -> di
 async def batch_generate_images(request: BatchGenerateRequest) -> dict[str, Any]:
     """
     Batch generate multiple images efficiently.
-    
+
     Currently supports choice-previews type for generating preview images
     for all available choices simultaneously.
     """
     logger.info(f"Batch generating {len(request.requests)} {request.type} images")
-    
+
     # Always return success for batch operations
     if request.type == "choice-previews":
         results = []
@@ -138,7 +137,7 @@ async def batch_generate_images(request: BatchGenerateRequest) -> dict[str, Any]
                 "description": f"Preview: {req.get('choice_text', 'Unknown')}",
                 "choice_id": req.get("choice_id", "unknown")
             })
-        
+
         return {
             "results": results,
             "total_generated": len(results),

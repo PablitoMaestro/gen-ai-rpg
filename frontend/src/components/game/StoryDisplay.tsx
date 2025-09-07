@@ -25,23 +25,6 @@ export function StoryDisplay({
   
   const { character } = useGameStore();
 
-  // Early return if scene is null
-  if (!scene) {
-    return (
-      <div className={`relative ${className}`}>
-        <div className="relative h-[70vh] w-full overflow-hidden">
-          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center relative">
-            <div className="text-6xl opacity-20">🌙</div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-            <div className="relative z-10 text-red-300 text-2xl font-fantasy animate-pulse text-center">
-              Awaiting scene data...
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Typewriter effect for narration
   useEffect(() => {
     if (!scene || !scene.narration || isLoading || typeof scene.narration !== 'string') {
@@ -66,7 +49,7 @@ export function StoryDisplay({
     }, speed);
 
     return () => clearInterval(typeInterval);
-  }, [scene.narration, isLoading]);
+  }, [scene, scene?.narration, isLoading]);
 
   // Generate merged character+scene image
   useEffect(() => {
@@ -92,7 +75,24 @@ export function StoryDisplay({
     };
 
     generateMergedImage();
-  }, [character, scene.id, scene.narration, isLoading]);
+  }, [character, scene, scene?.id, scene?.narration, isLoading]);
+
+  // Early return if scene is null
+  if (!scene) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="relative h-[70vh] w-full overflow-hidden">
+          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center relative">
+            <div className="text-6xl opacity-20">🌙</div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+            <div className="relative z-10 text-red-300 text-2xl font-fantasy animate-pulse text-center">
+              Awaiting scene data...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative ${className}`}>
@@ -112,9 +112,9 @@ export function StoryDisplay({
               🎭 Immersed
             </div>
           </div>
-        ) : (scene.imageUrl || (scene as any).image_url) ? (
+        ) : (scene.imageUrl || (scene as Scene & { image_url?: string }).image_url) ? (
           <Image
-            src={scene.imageUrl || (scene as any).image_url}
+            src={scene.imageUrl || (scene as Scene & { image_url?: string }).image_url || ''}
             alt="Scene visualization"
             fill
             className="object-cover"
@@ -197,14 +197,14 @@ export function StoryDisplay({
             </div>
 
             {/* Audio controls (if available) with dark styling */}
-            {(scene.audioUrl || (scene as any).audio_url) && !isLoading && (
+            {(scene.audioUrl || (scene as Scene & { audio_url?: string }).audio_url) && !isLoading && (
               <div className="mt-6 flex justify-center">
                 <audio
                   controls
                   className="w-full max-w-md bg-black/50 rounded-lg"
                   preload="none"
                 >
-                  <source src={scene.audioUrl || (scene as any).audio_url} type="audio/mpeg" />
+                  <source src={scene.audioUrl || (scene as Scene & { audio_url?: string }).audio_url || ''} type="audio/mpeg" />
                   Your browser does not support the audio element.
                 </audio>
               </div>

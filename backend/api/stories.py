@@ -2,6 +2,7 @@ import logging
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel as PydanticBaseModel
 
 from models import (
     GameSession,
@@ -181,8 +182,6 @@ async def get_game_session(session_id: UUID) -> GameSession:
 
     return session
 
-
-from pydantic import BaseModel as PydanticBaseModel
 
 class SessionCreateRequest(PydanticBaseModel):
     """Request model for creating a game session."""

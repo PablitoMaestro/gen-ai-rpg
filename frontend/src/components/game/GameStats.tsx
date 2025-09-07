@@ -70,6 +70,21 @@ export function GameStats({ character, className = '' }: GameStatsProps): React.
   const [isExpanded, setIsExpanded] = useState(false);
   const [pulseHeart, setPulseHeart] = useState(false);
   
+  // Calculate max HP based on level (simple formula)
+  const maxHp = character ? 100 + (character.level - 1) * 20 : 100;
+  
+  // Calculate XP progress within current level
+  const currentLevelXp = character ? character.xp % 100 : 0; // XP progress within current level
+
+  // Pulse heart when HP is low
+  useEffect(() => {
+    if (!character) {
+      return;
+    }
+    const isLowHp = (character.hp / maxHp) < 0.3;
+    setPulseHeart(isLowHp);
+  }, [character, maxHp]);
+  
   // Early return if character is null
   if (!character) {
     return (
@@ -89,18 +104,6 @@ export function GameStats({ character, className = '' }: GameStatsProps): React.
       </div>
     );
   }
-  
-  // Calculate max HP based on level (simple formula)
-  const maxHp = 100 + (character.level - 1) * 20;
-  
-  // Calculate XP progress within current level
-  const currentLevelXp = character.xp % 100; // XP progress within current level
-
-  // Pulse heart when HP is low
-  useEffect(() => {
-    const isLowHp = (character.hp / maxHp) < 0.3;
-    setPulseHeart(isLowHp);
-  }, [character.hp, maxHp]);
   
   return (
     <div className={`fixed top-4 left-4 z-40 transition-all duration-300 ${className}`}>
