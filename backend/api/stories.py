@@ -82,40 +82,39 @@ async def generate_story_scene(
 
     except Exception as e:
         logger.error(f"Story generation failed: {e}")
-        # Fallback to default scene
+        # Fallback to intense first-person default scene
         choices = [
             StoryChoice(
                 id="choice_1",
-                text="Stand up and look around carefully",
-                preview="Survey your surroundings",
-                consequence_hint="+5 XP"
+                text="Get up and scan for threats like a paranoid fool",
+                preview="Full panic mode",
+                consequence_hint="Heart attack risk"
             ),
             StoryChoice(
                 id="choice_2",
-                text="Call out to see if anyone is nearby",
-                preview="Seek help",
-                consequence_hint="Might attract attention"
+                text="Scream into the void and see what screams back",
+                preview="Terrible idea",
+                consequence_hint="Attract EVERYTHING"
             ),
             StoryChoice(
                 id="choice_3",
-                text="Check your belongings and equipment",
-                preview="Assess resources",
-                consequence_hint="Find useful items"
+                text="Pat myself down frantically for weapons",
+                preview="Desperate prep",
+                consequence_hint="Find something awful"
             ),
             StoryChoice(
                 id="choice_4",
-                text="Stay still and listen for danger",
-                preview="Remain cautious",
-                consequence_hint="Avoid immediate danger"
+                text="Just lay here and pretend I'm dead",
+                preview="Peak cowardice",
+                consequence_hint="Avoid immediate doom"
             )
         ]
 
         scene = StoryScene(
             scene_id="scene_001",
             narration=(
-                "You wake up in a misty forest, the sound of rustling leaves all around you. "
-                "The morning dew glistens on ancient tree bark, and somewhere in the distance, "
-                "you hear the faint echo of a horn."
+                "What the hell?! My eyes snap open. Everything's wrong. "
+                "This isn't my bed. Where AM I?!"
             ),
             image_url="/scenes/forest_awakening.jpg",
             choices=choices,

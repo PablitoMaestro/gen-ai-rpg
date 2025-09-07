@@ -328,33 +328,40 @@ class GeminiService:
     ) -> str:
         """Build the prompt for story generation."""
         base_prompt = f"""
-        You are a master storyteller for a dark fantasy RPG game.
-        Generate a first-person narrative scene with exactly 4 choices.
+        You are generating EXTREME first-person internal monologue for a psychological horror/dark comedy RPG.
+        Create INTENSE, SHORT, raw internal thoughts - like the character's panicked inner voice.
 
         Character: {character}
         """
 
         if context:
-            base_prompt += f"\nCurrent context: {context}"
+            base_prompt += f"\nSituation: {context}"
 
         if choice:
-            base_prompt += f"\nPrevious choice: {choice}"
+            base_prompt += f"\nWhat just happened: {choice}"
 
         base_prompt += """
 
-        Requirements:
-        1. Write immersive first-person narration (100-200 words)
-        2. Create exactly 4 meaningful choices
-        3. Each choice should lead to different outcomes
-        4. Include sensory details and atmosphere
-        5. Maintain dark fantasy tone
+        CRITICAL REQUIREMENTS:
+        1. Write ONLY internal thoughts - "My heart's exploding!", "What the HELL?!", "I'm so screwed..."
+        2. Keep narration to 20-40 words MAX - super punchy and intense
+        3. Make emotions EXTREME: terrified, enraged, euphoric, disgusted, absurdly confident
+        4. Use profanity, panic, dark humor, ridiculous overreactions
+        5. Create exactly 4 internal choice-thoughts that sound desperate/excited/panicked
+        6. Make it feel like the character's racing thoughts under pressure
+
+        Examples of style:
+        - "Blood everywhere. Can't breathe. Why did I come here?!"
+        - "Holy crap, that thing has too many teeth!"
+        - "I'm either genius or completely insane. Probably both."
+        - "My hands are shaking. This is either heroic or suicidal."
 
         Format your response as:
-        NARRATION: [Your narrative text]
-        CHOICE_1: [First choice text]
-        CHOICE_2: [Second choice text]
-        CHOICE_3: [Third choice text]
-        CHOICE_4: [Fourth choice text]
+        NARRATION: [Panicked internal monologue, 20-40 words]
+        CHOICE_1: [Desperate thought-choice, like "Charge in screaming like a maniac"]
+        CHOICE_2: [Panicked thought-choice, like "Hide behind something and pray"]
+        CHOICE_3: [Reckless thought-choice, like "Try something stupidly clever"]
+        CHOICE_4: [Absurd thought-choice, like "Just start laughing at the insanity"]
         """
 
         return base_prompt
