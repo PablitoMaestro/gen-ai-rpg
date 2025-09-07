@@ -18,6 +18,11 @@ interface GameState {
   isLoading: boolean;
   error: string | null;
   
+  // Pre-generation state
+  pregeneratedBranches: Map<string, Scene>;
+  isPregenerating: boolean;
+  pregenerationProgress: { [key: string]: boolean }; // choice_id -> is_ready
+  
   // Navigation and history
   choiceHistory: ChoiceHistoryItem[];
   sceneHistory: Scene[];
@@ -29,6 +34,13 @@ interface GameState {
   setCurrentScene: (scene: Scene) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  
+  // Pre-generation actions
+  setPregeneratedBranch: (choiceId: string, scene: Scene) => void;
+  getPregeneratedBranch: (choiceId: string) => Scene | null;
+  clearPregeneratedBranches: () => void;
+  setPregeneratingStatus: (status: boolean) => void;
+  updatePregenerationProgress: (choiceId: string, isReady: boolean) => void;
   
   // Navigation actions
   addChoice: (choice: SceneChoice, sceneId: string) => void;
@@ -53,6 +65,12 @@ export const useGameStore = create<GameState>()(
       currentScene: null,
       isLoading: false,
       error: null,
+      
+      // Pre-generation state
+      pregeneratedBranches: new Map(),
+      isPregenerating: false,
+      pregenerationProgress: {},
+      
       choiceHistory: [],
       sceneHistory: [],
       canGoBack: false,
@@ -82,6 +100,46 @@ export const useGameStore = create<GameState>()(
       
       setLoading: (loading) => set({ isLoading: loading }),
       setError: (error) => set({ error }),
+      
+      // Pre-generation actions
+      setPregeneratedBranch: (choiceId, scene) => {
+        const { pregeneratedBranches } = get();
+        const newBranches = new Map(pregeneratedBranches);
+        newBranches.set(choiceId, scene);
+        set({ 
+          pregeneratedBranches: newBranches,
+          pregenerationProgress: {
+            ...get().pregenerationProgress,
+            [choiceId]: true
+          }
+        });
+      },
+      
+      getPregeneratedBranch: (choiceId) => {
+        const { pregeneratedBranches } = get();
+        return pregeneratedBranches.get(choiceId) || null;
+      },
+      
+      clearPregeneratedBranches: () => {
+        set({ 
+          pregeneratedBranches: new Map(),
+          pregenerationProgress: {},
+          isPregenerating: false
+        });
+      },
+      
+      setPregeneratingStatus: (status) => {
+        set({ isPregenerating: status });
+      },
+      
+      updatePregenerationProgress: (choiceId, isReady) => {
+        set({
+          pregenerationProgress: {
+            ...get().pregenerationProgress,
+            [choiceId]: isReady
+          }
+        });
+      },
       
       // Navigation actions
       addChoice: (choice, sceneId) => {
@@ -133,6 +191,11 @@ export const useGameStore = create<GameState>()(
           canGoBack: false,
           error: null,
           isLoading: false,
+          
+          // Reset pre-generation state
+          pregeneratedBranches: new Map(),
+          isPregenerating: false,
+          pregenerationProgress: {},
         });
         get().saveGameState();
       },
@@ -147,6 +210,11 @@ export const useGameStore = create<GameState>()(
           choiceHistory: [],
           sceneHistory: [],
           canGoBack: false,
+          
+          // Reset pre-generation state
+          pregeneratedBranches: new Map(),
+          isPregenerating: false,
+          pregenerationProgress: {},
         });
         localStorage.removeItem('game-store');
       },
@@ -196,6 +264,7 @@ export const useGameStore = create<GameState>()(
         session: state.session,
         choiceHistory: state.choiceHistory,
         sceneHistory: state.sceneHistory,
+        // Note: pregeneratedBranches are not persisted as they're temporary
       }),
     }
   )

@@ -116,23 +116,22 @@ export function BuildSelector({
           `}>
             {/* Character Image */}
             <div className="relative aspect-[3/4] bg-gray-900">
-              {build.image_url.startsWith('/placeholder') ? (
-                <div className={`absolute inset-0 bg-gradient-to-br ${getBuildColor(build.build_type)} opacity-20`} />
-              ) : (
+              {build.image_url && !build.image_url.startsWith('/placeholder') ? (
                 <Image
                   src={build.image_url}
                   alt={`${build.build_type} build`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  unoptimized={build.image_url.startsWith('http://127.0.0.1')}
                 />
-              )}
-              
-              {/* Placeholder content if no image */}
-              {build.image_url.startsWith('/placeholder') && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-6xl">{getBuildIcon(build.build_type)}</span>
-                </div>
+              ) : (
+                <>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${getBuildColor(build.build_type)} opacity-20`} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-6xl">{getBuildIcon(build.build_type)}</span>
+                  </div>
+                </>
               )}
 
               {/* Selected overlay */}

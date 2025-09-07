@@ -103,7 +103,7 @@ class PortraitDialogueService:
             "f1": "AZnzlk1XvdvUeBnXmlld",  # Domi - young, hopeful (Young Hope)
             "f2": "EXAVITQu4vr4xnSDxMaL",  # Sarah - strong, serious (Hardened Survivor)
             "f3": "oWAxZDx7w5VEj9dCyTzz",  # Grace - soft, emotional (Sorrowful Soul)
-            "f4": "XB0fDUnXU5powFXDhCwa",  # Charlotte - epic grandmother voice (Elder Sage)
+            "f4": "VruXhdG8YF3HISipY3rg",  # Custom grandmother voice - warm, nurturing (Elder Sage)
         }
         
     def get_dialogue_line(self, portrait_id: str) -> Optional[Dict[str, Any]]:
