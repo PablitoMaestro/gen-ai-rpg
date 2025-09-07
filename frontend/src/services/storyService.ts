@@ -45,10 +45,22 @@ class StoryService {
   }
 
   async generateStoryScene(request: StoryGenerateRequest): Promise<Scene> {
-    return this.fetchWithError<Scene>('/api/stories/generate', {
+    const backendScene = await this.fetchWithError<any>('/api/stories/generate', {
       method: 'POST',
       body: JSON.stringify(request),
     });
+    
+    // Transform backend response to frontend format
+    return {
+      id: backendScene.scene_id || backendScene.id || 'unknown',
+      narration: backendScene.narration || '',
+      imageUrl: backendScene.image_url || backendScene.imageUrl || '',
+      audioUrl: backendScene.audio_url || backendScene.audioUrl,
+      choices: backendScene.choices || [],
+      is_combat: backendScene.is_combat,
+      is_checkpoint: backendScene.is_checkpoint,
+      is_final: backendScene.is_final
+    };
   }
 
   async prerenderBranches(

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Character } from '@/types';
 
 interface GameStatsProps {
-  character: Character;
+  character: Character | null;
   className?: string;
 }
 
@@ -69,6 +69,26 @@ function StatBar({ label, current, max, color, showMax = true, icon }: StatBarPr
 export function GameStats({ character, className = '' }: GameStatsProps): React.ReactElement {
   const [isExpanded, setIsExpanded] = useState(false);
   const [pulseHeart, setPulseHeart] = useState(false);
+  
+  // Early return if character is null
+  if (!character) {
+    return (
+      <div className={`fixed top-4 left-4 z-40 transition-all duration-300 ${className}`}>
+        <div className="bg-black/90 border border-red-500/30 rounded-xl backdrop-blur-md shadow-2xl">
+          <div className="p-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-gray-600 border-2 border-gray-500/50 flex items-center justify-center">
+                <span className="text-white font-fantasy font-bold text-sm">?</span>
+              </div>
+              <div className="space-y-1 min-w-[120px]">
+                <div className="text-white/60 font-fantasy text-xs">Loading character...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Calculate max HP based on level (simple formula)
   const maxHp = 100 + (character.level - 1) * 20;

@@ -26,10 +26,16 @@ export interface GameSession {
 
 export interface Scene {
   id: string;
+  scene_id?: string; // Backend compatibility
   narration: string;
-  imageUrl: string;
+  imageUrl?: string;
+  image_url?: string; // Backend compatibility
   audioUrl?: string;
+  audio_url?: string; // Backend compatibility
   choices: SceneChoice[];
+  is_combat?: boolean;
+  is_checkpoint?: boolean;
+  is_final?: boolean;
 }
 
 export interface SceneChoice {

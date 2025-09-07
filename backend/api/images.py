@@ -1,8 +1,13 @@
 import logging
 from typing import Any, List
+import httpx
+import asyncio
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
+from services.gemini import gemini_service
+from services.supabase import supabase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -34,17 +39,63 @@ async def merge_character_scene(request: MergeCharacterSceneRequest) -> dict[str
     """
     logger.info(f"Merging character {request.character_id} with scene: {request.scene_description[:50]}...")
     
-    # Always return success with character image as merged result
-    # This ensures the frontend gets a valid response and can display images
-    merged_url = request.character_image_url or "https://via.placeholder.com/800x600/1a1a1a/ffffff?text=Scene+Loading"
-    
-    return {
-        "merged_image_url": merged_url,
-        "scene_id": request.scene_id,
-        "character_id": request.character_id,
-        "generation_time": "instant",
-        "status": "completed"
-    }
+    try:
+        # Download character image
+        async with httpx.AsyncClient() as client:
+            response = await client.get(request.character_image_url)
+            if response.status_code != 200:
+                raise HTTPException(status_code=400, detail="Failed to download character image")
+            
+            character_image_bytes = response.content
+        
+        # Generate scene image using Nano Banana
+        scene_image_bytes = await gemini_service.generate_scene_image(
+            character_image=character_image_bytes,
+            scene_description=request.scene_description,
+            session_id=request.scene_id
+        )
+        
+        # Upload to Supabase storage
+        import uuid
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"scene_{request.scene_id}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
+        
+        # Use default user for scene images
+        user_id = uuid.UUID("00000000-0000-0000-0000-000000000000")
+        
+        merged_url = await supabase_service.upload_character_image(
+            user_id=user_id,
+            file_data=scene_image_bytes,
+            filename=filename
+        )
+        
+        if not merged_url:
+            raise HTTPException(status_code=500, detail="Failed to upload scene image")
+        
+        logger.info(f"✅ Generated scene image: {merged_url}")
+        
+        return {
+            "merged_image_url": merged_url,
+            "scene_id": request.scene_id,
+            "character_id": request.character_id,
+            "generation_time": "3-5s",
+            "status": "completed"
+        }
+        
+    except Exception as e:
+        logger.error(f"Scene generation failed: {e}")
+        # Fallback to character image
+        fallback_url = request.character_image_url or "https://via.placeholder.com/800x600/1a1a1a/ffffff?text=Scene+Loading"
+        
+        return {
+            "merged_image_url": fallback_url,
+            "scene_id": request.scene_id,
+            "character_id": request.character_id,
+            "generation_time": "instant",
+            "status": "fallback",
+            "error": str(e)
+        }
 
 
 @router.post("/generate-consequence")

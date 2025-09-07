@@ -25,9 +25,26 @@ export function StoryDisplay({
   
   const { character } = useGameStore();
 
+  // Early return if scene is null
+  if (!scene) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="relative h-[70vh] w-full overflow-hidden">
+          <div className="w-full h-full bg-gradient-to-br from-red-950 via-black to-red-900 flex items-center justify-center relative">
+            <div className="text-6xl opacity-20">🌙</div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+            <div className="relative z-10 text-red-300 text-2xl font-fantasy animate-pulse text-center">
+              Awaiting scene data...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Typewriter effect for narration
   useEffect(() => {
-    if (!scene.narration || isLoading || typeof scene.narration !== 'string') {
+    if (!scene || !scene.narration || isLoading || typeof scene.narration !== 'string') {
       return;
     }
     
@@ -53,7 +70,7 @@ export function StoryDisplay({
 
   // Generate merged character+scene image
   useEffect(() => {
-    if (!character || !scene.narration || isLoading) {
+    if (!character || !scene || !scene.narration || isLoading) {
       return;
     }
     
@@ -95,9 +112,9 @@ export function StoryDisplay({
               🎭 Immersed
             </div>
           </div>
-        ) : scene.imageUrl ? (
+        ) : (scene.imageUrl || (scene as any).image_url) ? (
           <Image
-            src={scene.imageUrl}
+            src={scene.imageUrl || (scene as any).image_url}
             alt="Scene visualization"
             fill
             className="object-cover"
@@ -180,14 +197,14 @@ export function StoryDisplay({
             </div>
 
             {/* Audio controls (if available) with dark styling */}
-            {scene.audioUrl && !isLoading && (
+            {(scene.audioUrl || (scene as any).audio_url) && !isLoading && (
               <div className="mt-6 flex justify-center">
                 <audio
                   controls
                   className="w-full max-w-md bg-black/50 rounded-lg"
                   preload="none"
                 >
-                  <source src={scene.audioUrl} type="audio/mpeg" />
+                  <source src={scene.audioUrl || (scene as any).audio_url} type="audio/mpeg" />
                   Your browser does not support the audio element.
                 </audio>
               </div>
