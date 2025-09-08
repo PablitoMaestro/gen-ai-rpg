@@ -10,7 +10,6 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -23,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def test_single_build() -> None:
+async def test_single_build() -> bool:
     """Test generating a single build for m1 warrior to verify the process."""
     logger.info("🧪 Testing single build generation...")
 

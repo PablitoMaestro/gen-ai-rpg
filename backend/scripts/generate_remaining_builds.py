@@ -8,7 +8,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Literal, cast
+from typing import Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def get_missing_portraits() -> list[tuple[str, str, str]]:
+async def get_missing_portraits() -> list[tuple[str, str, Literal['male', 'female']]]:
     """Get list of portraits that don't have complete builds (4 builds each)."""
     logger.info("🔍 Checking which portraits need builds...")
 
@@ -30,7 +30,7 @@ async def get_missing_portraits() -> list[tuple[str, str, str]]:
     existing_builds = result.data or []
 
     # Group builds by portrait_id
-    builds_by_portrait: Dict[str, List[str]] = {}
+    builds_by_portrait: dict[str, list[str]] = {}
     for build in existing_builds:
         portrait_id = build['portrait_id']
         if portrait_id not in builds_by_portrait:
@@ -41,7 +41,7 @@ async def get_missing_portraits() -> list[tuple[str, str, str]]:
     missing_portraits = []
     required_builds = ['warrior', 'mage', 'rogue', 'ranger']
 
-    for gender in cast(List[Literal['male', 'female']], ['male', 'female']):
+    for gender in cast(list[Literal['male', 'female']], ['male', 'female']):
         for portrait in PRESET_PORTRAITS[gender]:
             portrait_id = portrait['id']
             portrait_url = portrait['url']

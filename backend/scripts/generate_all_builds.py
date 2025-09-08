@@ -8,7 +8,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Literal, cast
+from typing import Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -76,14 +76,14 @@ async def generate_all_character_builds() -> None:
     final_result = supabase_service.client.table('character_builds').select('portrait_id, build_type').execute()
 
     # Group by portrait
-    portrait_counts: Dict[str, int] = {}
+    portrait_counts: dict[str, int] = {}
     for build in (final_result.data or []):
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1
 
     logger.info("📊 Final Build Summary:")
     all_complete = True
-    for gender in ["male", "female"]:
+    for gender in cast(list[Literal["male", "female"]], ["male", "female"]):
         for portrait in PRESET_PORTRAITS[gender]:
             pid = portrait["id"]
             count = portrait_counts.get(pid, 0)

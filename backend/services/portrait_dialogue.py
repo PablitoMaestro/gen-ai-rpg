@@ -353,7 +353,11 @@ class PortraitDialogueService:
             logger.info("✅ Successfully generated dialogues:")
             for portrait_id, result in results.items():
                 if result.get("success"):
-                    size_kb = int(result["audio_size"]) / 1024
+                    audio_size = result.get("audio_size", 0)
+                    if isinstance(audio_size, int):
+                        size_kb = audio_size / 1024
+                    else:
+                        size_kb = 0
                     logger.info(f"   {portrait_id}: {size_kb:.1f} KB")
 
         if failed > 0:

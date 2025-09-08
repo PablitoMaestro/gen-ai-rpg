@@ -8,7 +8,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Literal, cast
+from typing import Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -90,7 +90,7 @@ async def push_all_builds_to_production() -> None:
     final_result = supabase_service.client.table('character_builds').select('portrait_id, build_type').execute()
 
     # Group by portrait
-    portrait_counts: Dict[str, int] = {}
+    portrait_counts: dict[str, int] = {}
     for build in (final_result.data or []):
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1

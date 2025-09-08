@@ -128,7 +128,7 @@ async def generate_story_scene(
 
                         if character.user_id is None:
                             raise HTTPException(status_code=400, detail="Character must have a user_id")
-                        
+
                         uploaded_url = await supabase_service.upload_character_image(
                             user_id=character.user_id,
                             file_data=scene_image_bytes,
@@ -169,7 +169,7 @@ async def generate_story_scene(
 
                 if character.user_id is None:
                     raise HTTPException(status_code=400, detail="Character must have a user_id")
-                    
+
                 uploaded_audio_url = await supabase_service.upload_character_image(
                     user_id=character.user_id,
                     file_data=audio_data,
@@ -234,7 +234,7 @@ async def generate_story_scene(
                 "My head throbs as consciousness returns. Vision blurry, surrounded by broken wood and empty barrels. "
                 "Blood stains my clothes but I'm alive. Where am I? Who am I? Nothing comes back to me."
             ),
-            image_url="/scenes/forest_awakening.jpg",
+            image_url=None,
             audio_url=None,  # No audio for fallback scene
             choices=choices,
             is_combat=False,
@@ -333,7 +333,7 @@ async def prerender_story_branches(
 
                             if character.user_id is None:
                                 raise HTTPException(status_code=400, detail="Character must have a user_id")
-                            
+
                             uploaded_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=scene_image_bytes,
@@ -364,7 +364,7 @@ async def prerender_story_branches(
 
                     if character.user_id is None:
                         raise HTTPException(status_code=400, detail="Character must have a user_id")
-                    
+
                     uploaded_audio_url = await supabase_service.upload_character_image(
                         user_id=character.user_id,
                         file_data=audio_data,
@@ -715,7 +715,7 @@ async def generate_first_scene_with_fallback(
 
                             if character.user_id is None:
                                 raise HTTPException(status_code=400, detail="Character must have a user_id")
-                            
+
                             uploaded_audio_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=audio_data,
@@ -814,7 +814,7 @@ async def get_pregeneration_status() -> dict[str, Any]:
         )
 
     try:
-        status = {}
+        status: dict[str, dict[str, Any]] = {}
         total_combinations = 0
         successful_combinations = 0
 

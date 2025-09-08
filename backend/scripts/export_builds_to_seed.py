@@ -7,7 +7,6 @@ This preserves the builds for future database resets.
 import json
 import sys
 from pathlib import Path
-from typing import Dict
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -90,7 +89,7 @@ def export_builds_to_seed() -> None:
     print(f"✅ Exported {len(builds)} builds to {seed_path}")
 
     # Summary by portrait
-    portrait_counts: Dict[str, int] = {}
+    portrait_counts: dict[str, int] = {}
     for build in builds:
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1

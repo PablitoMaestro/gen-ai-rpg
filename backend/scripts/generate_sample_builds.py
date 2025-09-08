@@ -55,7 +55,7 @@ async def generate_sample_builds() -> None:
     logger.info("🔍 Final verification that preset portraits are preserved...")
     import httpx
     async with httpx.AsyncClient() as client:
-        for gender in ["male", "female"]:
+        for gender in cast(list[Literal["male", "female"]], ["male", "female"]):
             for portrait in PRESET_PORTRAITS[gender]:
                 response = await client.get(portrait["url"])
                 if response.status_code == 200:

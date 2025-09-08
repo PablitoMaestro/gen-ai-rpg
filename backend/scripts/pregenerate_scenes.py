@@ -8,7 +8,7 @@ import logging
 import sys
 import time
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 # Add the backend directory to the Python path
 backend_dir = Path(__file__).parent.parent
@@ -164,7 +164,7 @@ async def main() -> None:
         print(f"❌ Failed: {summary['failed']}")
         print(f"⏱️  Duration: {summary['duration_seconds']:.1f} seconds")
 
-        if summary['newly_generated'] > 0:
+        if cast(int, summary['newly_generated']) > 0:
             avg_time = cast(float, summary['duration_seconds']) / max(cast(int, summary['newly_generated']), 1)
             print(f"📈 Average time per scene: {avg_time:.1f} seconds")
 
@@ -186,7 +186,7 @@ async def main() -> None:
                 print(f"  ... and {len(failed_results) - 5} more failures")
             print()
 
-        success_rate = (cast(int, summary['newly_generated']) / max(cast(int, total_combinations) - cast(int, summary.get('already_generated', 0)), 1)) * 100
+        success_rate = (cast(int, summary['newly_generated']) / max(total_combinations - cast(int, summary.get('already_generated', 0)), 1)) * 100
 
         if summary['failed'] == 0:
             print("🎉 All scenes generated successfully!")
