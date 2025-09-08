@@ -326,18 +326,20 @@
 
 ## Daily Checklist
 - [x] Update plan.md with completed tasks ✅ (Updated September 8, 2025)
-- [x] Review and adjust priorities ✅ (Phase 4 - Advanced Features & Polish)  
-- [x] Test latest changes ✅ (Core game loop functioning)
-- [x] Commit code with clear messages ✅ (Recent voice and scene fixes)
-- [ ] Document any blockers or changes
+- [x] Review and adjust priorities ✅ (Phase 4 voice system complete, MVP focus shift)  
+- [x] Test latest changes ✅ (Voice narration, volume controls, scene improvements)
+- [x] Commit code with clear messages ✅ (Voice system implementation and bug fixes)
+- [x] Document voice system achievements ✅ (Character voices, audio controls, pregeneration)
+- [ ] Plan save/load system implementation
+- [ ] Prepare deployment strategy for production
 
 ### Current Focus: Phase 4 - Advanced Features & Polish
-- **Status**: Core gameplay loop COMPLETE ✅
-- **Implemented**: Full game from character creation to story progression
-- **Backend Status**: Production-ready with all APIs tested ✅
-- **Frontend Status**: Complete UI with story, choices, and character builds ✅
-- **Storage System**: Automated reseeding solution for local development ✅
-- **Next Steps**: Save/load system, deployment to production
+- **Status**: Voice system and UI polish COMPLETE ✅
+- **Implemented**: Full immersive game with voice narration and advanced audio controls
+- **Backend Status**: Production-ready with all APIs, voice services, and scene pregeneration ✅
+- **Frontend Status**: Complete UI with voice system, volume controls, and enhanced UX ✅
+- **Audio System**: Full ElevenLabs integration with character-specific voices ✅
+- **Next Steps**: Save/load system implementation, production deployment preparation
 
 ### Phase 3 Completed Features ✅
 1. **Story Display UI** ✅
@@ -361,13 +363,21 @@
    - Audio narration via Sound Manager (ElevenLabs/system TTS)
 
 ### Remaining Tasks for MVP
-1. **Save/Load System** 🔴
-   - Persist game state to Supabase
-   - Resume from last checkpoint
-   - Multiple save slots
+1. **Save/Load System** 🔴 (Priority 1)
+   - Persist game state to Supabase database
+   - Resume from last scene/choice checkpoint
+   - Character progression and stat persistence
+   - Game session continuation across browser sessions
 
-2. **Deployment** 🔴
-   - Configure production environment variables
-   - Deploy frontend to Vercel
-   - Deploy backend to Scaleway
-   - Set up production Supabase
+2. **Production Deployment** 🔴 (Priority 2)
+   - Configure production environment variables and API keys
+   - Deploy frontend to Vercel with proper build configuration
+   - Deploy backend to Scaleway container with all services
+   - Set up production Supabase with migration sync
+   - Configure domain routing and CORS policies
+
+3. **Final Testing & Polish** 🟡 (Priority 3)
+   - End-to-end testing of complete game flow
+   - Performance optimization for voice loading
+   - Mobile responsiveness testing
+   - Cross-browser compatibility verification
