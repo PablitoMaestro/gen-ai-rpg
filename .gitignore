@@ -85,3 +85,6 @@ temp/
 *.key
 *.pem
 secrets/
+
+# Claude Code instructions
+CLAUDE.md
