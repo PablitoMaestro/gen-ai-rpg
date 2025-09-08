@@ -19,6 +19,7 @@ import logging
 import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add the backend directory to the path so we can import our services
 sys.path.append(str(Path(__file__).parent.parent))
@@ -34,11 +35,11 @@ logger = logging.getLogger(__name__)
 class DialogueAudioManager:
     """Manager for generating and organizing portrait dialogue audio files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.output_dir = Path("portrait_dialogues")
         self.frontend_audio_dir = Path("../frontend/public/audio/portraits")
 
-    async def generate_single_dialogue(self, character_id: str) -> dict[str, any]:
+    async def generate_single_dialogue(self, character_id: str) -> dict[str, Any]:
         """Generate dialogue audio for a single character."""
         logger.info(f"🎭 Generating dialogue for character: {character_id}")
 
@@ -75,7 +76,7 @@ class DialogueAudioManager:
             logger.error(f"💥 Exception generating dialogue for {character_id}: {e}")
             return {"error": str(e)}
 
-    async def generate_all_dialogues(self, voice_mappings_file: str | None = None) -> dict[str, any]:
+    async def generate_all_dialogues(self, voice_mappings_file: str | None = None) -> dict[str, Any]:
         """Generate dialogue audio for all characters."""
         logger.info("🎙️  PORTRAIT DIALOGUE GENERATOR")
         logger.info("=" * 60)
@@ -166,7 +167,7 @@ class DialogueAudioManager:
             logger.error(f"💥 Failed to generate audio index: {e}")
 
 
-async def main():
+async def main() -> None:
     """Main entry point for dialogue generation script."""
     parser = argparse.ArgumentParser(description="Generate portrait dialogue audio files")
     parser.add_argument(

@@ -59,7 +59,7 @@ export default function BuildsPage(): React.ReactElement {
 
       } catch (err) {
         console.error('Failed to load character or generate builds:', err);
-        setError('Failed to generate character builds. Please try again.');
+        setError('This feature is currently under development. Please check back later.');
       } finally {
         setIsLoading(false);
         setIsGenerating(false);
@@ -130,7 +130,7 @@ export default function BuildsPage(): React.ReactElement {
 
     } catch (err) {
       console.error('Failed to create character with selected build:', err);
-      setError('Failed to create character. Please try again.');
+      setError('This feature is currently under development. Please check back later.');
     } finally {
       setIsConfirming(false);
     }
@@ -148,9 +148,9 @@ export default function BuildsPage(): React.ReactElement {
     return (
       <BackgroundLayout>
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <div className="glass-morphism p-8 rounded-xl border border-red-500/30 bg-red-900/20">
-            <h2 className="text-red-300 font-fantasy text-2xl mb-4">Build Generation Failed</h2>
-            <p className="text-red-200 font-fantasy mb-6">{error}</p>
+          <div className="glass-morphism p-8 rounded-xl border border-amber-500/30 bg-amber-900/20">
+            <h2 className="text-amber-300 font-fantasy text-2xl mb-4">Page Under Development</h2>
+            <p className="text-amber-200 font-fantasy mb-6">{error}</p>
             <div className="space-x-4">
               <Button onClick={handleBackToCharacterCreation} variant="primary">
                 Back to Character Creation
@@ -315,8 +315,8 @@ export default function BuildsPage(): React.ReactElement {
           {/* Error Display */}
           {error && (
             <div className="flex justify-center">
-              <div className="glass-morphism p-4 rounded-lg border border-red-500/30 bg-red-900/20 max-w-2xl">
-                <p className="text-red-400 font-fantasy text-center">{error}</p>
+              <div className="glass-morphism p-4 rounded-lg border border-amber-500/30 bg-amber-900/20 max-w-2xl">
+                <p className="text-amber-400 font-fantasy text-center">{error}</p>
               </div>
             </div>
           )}

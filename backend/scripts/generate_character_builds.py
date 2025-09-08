@@ -10,7 +10,7 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import httpx
 
@@ -173,7 +173,7 @@ async def generate_all_character_builds() -> None:
     total_builds_stored = 0
 
     # Process each gender
-    for gender in ["male", "female"]:
+    for gender in cast(list[Literal["male", "female"]], ["male", "female"]):
         portraits = PRESET_PORTRAITS.get(gender, [])
         logger.info(f"🎭 Processing {len(portraits)} {gender} portraits...")
 

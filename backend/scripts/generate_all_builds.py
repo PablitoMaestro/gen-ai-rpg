@@ -8,6 +8,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from typing import Dict, Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -33,7 +34,7 @@ async def generate_all_character_builds() -> None:
     total_stored = 0
 
     # Process all portraits
-    for gender in ["male", "female"]:
+    for gender in cast(list[Literal["male", "female"]], ["male", "female"]):
         portraits = PRESET_PORTRAITS.get(gender, [])
         logger.info(f"🎭 Processing {len(portraits)} {gender} portraits...")
 
@@ -75,7 +76,7 @@ async def generate_all_character_builds() -> None:
     final_result = supabase_service.client.table('character_builds').select('portrait_id, build_type').execute()
 
     # Group by portrait
-    portrait_counts = {}
+    portrait_counts: Dict[str, int] = {}
     for build in (final_result.data or []):
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1
@@ -98,7 +99,8 @@ async def generate_all_character_builds() -> None:
     else:
         logger.warning("⚠️  Some characters are missing builds!")
 
-    return portrait_counts
+    # Print summary without returning it since function is declared -> None
+    pass
 
 
 if __name__ == "__main__":

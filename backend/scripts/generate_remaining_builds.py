@@ -8,6 +8,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from typing import Dict, List, Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -29,7 +30,7 @@ async def get_missing_portraits() -> list[tuple[str, str, str]]:
     existing_builds = result.data or []
 
     # Group builds by portrait_id
-    builds_by_portrait = {}
+    builds_by_portrait: Dict[str, List[str]] = {}
     for build in existing_builds:
         portrait_id = build['portrait_id']
         if portrait_id not in builds_by_portrait:
@@ -40,7 +41,7 @@ async def get_missing_portraits() -> list[tuple[str, str, str]]:
     missing_portraits = []
     required_builds = ['warrior', 'mage', 'rogue', 'ranger']
 
-    for gender in ['male', 'female']:
+    for gender in cast(List[Literal['male', 'female']], ['male', 'female']):
         for portrait in PRESET_PORTRAITS[gender]:
             portrait_id = portrait['id']
             portrait_url = portrait['url']

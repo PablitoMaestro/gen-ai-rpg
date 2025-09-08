@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 class VoiceGenerationManager:
     """Manager for generating and storing character voices."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.voice_mappings: dict[str, str] = {}
 
     async def generate_single_voice(self, character_id: str, preview_only: bool = False) -> dict[str, Any]:
@@ -155,7 +155,7 @@ class VoiceGenerationManager:
         logger.info(f"💾 Voice mappings saved to: {output_path}")
 
 
-async def main():
+async def main() -> None:
     """Main entry point for voice generation script."""
     parser = argparse.ArgumentParser(description="Generate character voices using ElevenLabs")
     parser.add_argument(

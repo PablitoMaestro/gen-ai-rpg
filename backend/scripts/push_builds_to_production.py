@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from typing import Dict, Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -39,7 +40,7 @@ async def push_all_builds_to_production() -> None:
 
     # Process all 8 portraits
     all_portraits = []
-    for gender in ["male", "female"]:
+    for gender in cast(list[Literal["male", "female"]], ["male", "female"]):
         for portrait in PRESET_PORTRAITS[gender]:
             all_portraits.append({
                 'id': portrait['id'],
@@ -73,7 +74,7 @@ async def push_all_builds_to_production() -> None:
         builds = await generate_builds_for_portrait(
             portrait_id=portrait_id,
             portrait_url=portrait['url'],
-            gender=portrait['gender']
+            gender=cast(Literal["male", "female"], portrait['gender'])
         )
 
         if builds:
@@ -89,7 +90,7 @@ async def push_all_builds_to_production() -> None:
     final_result = supabase_service.client.table('character_builds').select('portrait_id, build_type').execute()
 
     # Group by portrait
-    portrait_counts = {}
+    portrait_counts: Dict[str, int] = {}
     for build in (final_result.data or []):
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1

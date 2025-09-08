@@ -134,7 +134,7 @@ class CharacterService {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to create character: ${response.statusText}`);
+        throw new Error(`This feature is currently under development: ${response.statusText}`);
       }
 
       return await response.json();

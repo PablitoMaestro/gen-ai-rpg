@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class BuildDialogueGenerator:
     """Manager for generating character build-specific dialogues."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.characters = ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']
         self.build_types = ['warrior', 'mage', 'rogue', 'ranger']
 
@@ -172,7 +172,7 @@ class BuildDialogueGenerator:
         logger.info(f"   Total combinations: {len(self.characters) * len(self.build_types)}")
 
 
-async def main():
+async def main() -> None:
     """Main function to handle command line arguments and run generation."""
     parser = argparse.ArgumentParser(description="Generate build-specific dialogue audio")
     parser.add_argument("--character", help="Generate for specific character ID (m1, m2, f1, etc.)")

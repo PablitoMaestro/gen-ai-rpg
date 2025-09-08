@@ -27,7 +27,7 @@ class PreGenerationService:
     RETRY_DELAYS = [2, 5, 10]  # Exponential backoff delays in seconds
     BATCH_SIZE = 4  # Process 4 scenes at once to avoid rate limits
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the pre-generation service."""
         self.successful_generations = 0
         self.failed_generations = 0

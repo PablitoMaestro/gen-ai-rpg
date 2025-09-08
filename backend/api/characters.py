@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 import httpx
@@ -427,7 +427,7 @@ class VoicePreviewRequest(BaseModel):
     text: str = Field(..., min_length=10, max_length=1000)
 
 @router.get("/voice/configs")
-async def get_all_voice_configs() -> dict[str, any]:
+async def get_all_voice_configs() -> dict[str, Any]:
     """
     Get all character voice configurations.
 
@@ -438,7 +438,7 @@ async def get_all_voice_configs() -> dict[str, any]:
 
 
 @router.get("/voice/config/{character_id}")
-async def get_voice_config(character_id: str) -> dict[str, any]:
+async def get_voice_config(character_id: str) -> dict[str, Any]:
     """
     Get voice configuration for a specific character.
 
@@ -455,7 +455,7 @@ async def get_voice_config(character_id: str) -> dict[str, any]:
 
 
 @router.post("/voice/design")
-async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
+async def design_character_voice(request: VoiceDesignRequest) -> dict[str, Any]:
     """
     Design a voice for a specific character using ElevenLabs.
 
@@ -478,7 +478,7 @@ async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
 
 
 @router.post("/voice/design/all")
-async def design_all_character_voices(save_previews: bool = True) -> dict[str, any]:
+async def design_all_character_voices(save_previews: bool = True) -> dict[str, Any]:
     """
     Design voices for all character archetypes.
 
@@ -548,7 +548,7 @@ async def update_character_voice(character_id: UUID, voice_id: str) -> dict[str,
 # ============================================
 
 @router.get("/portrait/dialogue/{portrait_id}")
-async def get_portrait_dialogue(portrait_id: str) -> dict[str, any]:
+async def get_portrait_dialogue(portrait_id: str) -> dict[str, Any]:
     """
     Get dialogue information for a specific portrait.
 
@@ -573,7 +573,7 @@ async def get_portrait_dialogue(portrait_id: str) -> dict[str, any]:
 
 
 @router.get("/portrait/dialogues")
-async def get_all_portrait_dialogues() -> dict[str, any]:
+async def get_all_portrait_dialogues() -> dict[str, Any]:
     """
     Get dialogue information for all portraits.
 
@@ -599,7 +599,7 @@ async def get_all_portrait_dialogues() -> dict[str, any]:
 async def generate_portrait_dialogue_audio(
     portrait_id: str,
     voice_id: str | None = None
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """
     Generate dialogue audio for a specific portrait.
 

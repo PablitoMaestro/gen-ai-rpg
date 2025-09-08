@@ -7,6 +7,7 @@ This preserves the builds for future database resets.
 import json
 import sys
 from pathlib import Path
+from typing import Dict
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -14,7 +15,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from services.supabase import supabase_service
 
 
-def export_builds_to_seed():
+def export_builds_to_seed() -> None:
     """Export all character builds to a SQL seed file."""
     print("📦 Exporting character builds to seed file...")
 
@@ -89,7 +90,7 @@ def export_builds_to_seed():
     print(f"✅ Exported {len(builds)} builds to {seed_path}")
 
     # Summary by portrait
-    portrait_counts = {}
+    portrait_counts: Dict[str, int] = {}
     for build in builds:
         pid = build['portrait_id']
         portrait_counts[pid] = portrait_counts.get(pid, 0) + 1

@@ -6,6 +6,7 @@ This ensures builds are preserved when running supabase db reset.
 
 import sys
 from pathlib import Path
+from typing import Any, List
 
 import httpx
 
@@ -15,7 +16,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from services.supabase import supabase_service
 
 
-def save_builds_to_seed():
+def save_builds_to_seed() -> None:
     """Download all build images and save to seed directory."""
     print("📦 Saving character build images to seed directory...")
 
@@ -78,7 +79,7 @@ def save_builds_to_seed():
     # Now update the seed SQL to use consistent filenames
     update_seed_sql(builds, seed_builds_dir)
 
-def update_seed_sql(builds, seed_builds_dir):
+def update_seed_sql(builds: List[Any], seed_builds_dir: Path) -> None:
     """Update the seed SQL file with consistent image URLs."""
     print("\n📝 Updating seed SQL with consistent URLs...")
 

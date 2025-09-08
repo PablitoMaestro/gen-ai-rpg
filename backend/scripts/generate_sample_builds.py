@@ -8,6 +8,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from typing import Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -25,8 +26,8 @@ async def generate_sample_builds() -> None:
 
     # Just test with first portrait of each gender
     test_portraits = [
-        ("m1", PRESET_PORTRAITS["male"][0]["url"], "male"),
-        ("f1", PRESET_PORTRAITS["female"][0]["url"], "female")
+        ("m1", PRESET_PORTRAITS["male"][0]["url"], cast(Literal["male", "female"], "male")),
+        ("f1", PRESET_PORTRAITS["female"][0]["url"], cast(Literal["male", "female"], "female"))
     ]
 
     total_generated = 0

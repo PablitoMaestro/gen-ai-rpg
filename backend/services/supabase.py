@@ -304,7 +304,7 @@ class SupabaseService:
             ).eq("build_type", build_type).single().execute()
 
             if response.data:
-                return response.data
+                return dict(response.data)
             return None
 
         except Exception as e:
@@ -412,7 +412,7 @@ class SupabaseService:
             ).single().execute()
 
             if response.data:
-                return response.data
+                return dict(response.data)
             return None
 
         except Exception as e:
