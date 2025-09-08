@@ -6,7 +6,7 @@ import { useAudioStore } from '@/store/audioStore';
 
 export function AudioManager(): null {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { isMuted, volume, setPlaying } = useAudioStore();
+  const { isMuted, musicVolume, isMusicMuted, setPlaying } = useAudioStore();
 
   useEffect(() => {
     // Create audio element
@@ -62,19 +62,19 @@ export function AudioManager(): null {
     };
   }, [setPlaying]);
 
-  // Handle mute/unmute
+  // Handle mute/unmute - respect both global and music-specific mute
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.muted = isMuted;
+      audioRef.current.muted = isMuted || isMusicMuted;
     }
-  }, [isMuted]);
+  }, [isMuted, isMusicMuted]);
 
-  // Handle volume changes
+  // Handle music volume changes
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      audioRef.current.volume = musicVolume;
     }
-  }, [volume]);
+  }, [musicVolume]);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -118,7 +118,7 @@ class StoryService {
   }
 
   async generateFirstSceneWithFallback(characterId: string): Promise<Scene> {
-    return this.fetchWithError<Scene>('/api/stories/generate-first-scene', {
+    const backendScene = await this.fetchWithError<BackendSceneResponse>('/api/stories/generate-first-scene', {
       method: 'POST',
       body: JSON.stringify({
         character_id: characterId,
@@ -126,6 +126,18 @@ class StoryService {
         previous_choice: undefined,
       }),
     });
+    
+    // Transform backend response to frontend format
+    return {
+      id: backendScene.scene_id || backendScene.id || 'unknown',
+      narration: backendScene.narration || '',
+      imageUrl: backendScene.image_url || backendScene.imageUrl || '',
+      audioUrl: backendScene.audio_url || backendScene.audioUrl,
+      choices: backendScene.choices || [],
+      is_combat: backendScene.is_combat,
+      is_checkpoint: backendScene.is_checkpoint,
+      is_final: backendScene.is_final
+    };
   }
 
   // Convenience method for starting a new story with pre-generated scene support

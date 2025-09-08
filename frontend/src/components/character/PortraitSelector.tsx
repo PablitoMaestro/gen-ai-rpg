@@ -10,12 +10,6 @@ interface Portrait {
   url: string;
 }
 
-interface CustomPortrait {
-  id: string;
-  url: string;
-  file: File;
-}
-
 type Gender = 'male' | 'female';
 
 interface PortraitSelectorProps {
@@ -26,6 +20,7 @@ interface PortraitSelectorProps {
   isLoading?: boolean;
   selectedGender?: Gender;
   isFiltering?: boolean;
+  customPortraits?: Portrait[];
 }
 
 export function PortraitSelector({
@@ -35,9 +30,9 @@ export function PortraitSelector({
   onUploadCustom,
   isLoading = false,
   selectedGender: _selectedGender,
-  isFiltering = false
+  isFiltering = false,
+  customPortraits = []
 }: PortraitSelectorProps): React.ReactElement {
-  const [customPortraits, setCustomPortraits] = useState<CustomPortrait[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Portrait audio hook for dialogue playback
@@ -101,22 +96,7 @@ export function PortraitSelector({
       return;
     }
 
-    // Create preview and add to custom portraits
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const customId = `custom_${Date.now()}`;
-      const newCustomPortrait: CustomPortrait = {
-        id: customId,
-        url: reader.result as string,
-        file
-      };
-      
-      setCustomPortraits(prev => [...prev, newCustomPortrait]);
-      onSelectPortrait(customId, reader.result as string);
-    };
-    reader.readAsDataURL(file);
-
-    // Call upload handler if provided
+    // Call upload handler - parent component handles state management
     if (onUploadCustom) {
       onUploadCustom(file);
     }

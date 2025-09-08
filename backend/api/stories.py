@@ -2,6 +2,7 @@ import asyncio
 import logging
 import time
 import uuid
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
@@ -631,18 +632,43 @@ async def generate_first_scene_with_fallback(
 
     if is_first_scene:
         # Try to determine portrait_id from character data
-        # This assumes character has a portrait_url or similar field that can help identify the portrait
         portrait_id = None
+        is_custom_portrait = False
         
-        # Look for portrait ID in character portrait_url
+        # Check if this is a custom portrait first
         if character.portrait_url:
-            for pid in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
-                if pid in character.portrait_url:
-                    portrait_id = pid
-                    break
+            # Identify custom portraits by specific patterns
+            if ('custom_portrait_' in character.portrait_url or 
+                'uploads/' in character.portrait_url or
+                (character.portrait_url.startswith('http') and 
+                 'supabase.co' in character.portrait_url and 
+                 'presets' not in character.portrait_url)):
+                is_custom_portrait = True
+                logger.info(f"🎨 Custom portrait detected for character {request.character_id}, will generate new scene")
+            else:
+                # Map from full filename format to short portrait IDs
+                import re
+                
+                # First try the new format: female_portrait_04.png -> f4, male_portrait_01.png -> m1
+                portrait_match = re.search(r'(female|male)_portrait_0?(\d)', character.portrait_url)
+                if portrait_match:
+                    gender_prefix = 'f' if portrait_match.group(1) == 'female' else 'm'
+                    number = portrait_match.group(2)
+                    portrait_id = f"{gender_prefix}{number}"
+                    logger.info(f"🎯 Mapped {portrait_match.group(0)} to {portrait_id} for character {request.character_id}")
+                else:
+                    # Fallback to original detection logic
+                    for pid in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
+                        if (f"/{pid}/" in character.portrait_url or 
+                            f"_{pid}." in character.portrait_url or
+                            f"{pid}.png" in character.portrait_url or
+                            character.portrait_url.endswith(f"/{pid}")):
+                            portrait_id = pid
+                            logger.info(f"🎯 Detected preset portrait {pid} for character {request.character_id}")
+                            break
         
-        # If we found a portrait_id, try to get pre-generated scene
-        if portrait_id:
+        # Only try pre-generated scene for preset portraits
+        if not is_custom_portrait and portrait_id and portrait_id in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
             try:
                 scene_data = await scene_pregenerator.get_first_scene(portrait_id, character.build_type)
                 
@@ -657,21 +683,57 @@ async def generate_first_scene_with_fallback(
                             consequence_hint=""
                         ))
 
+                    # Always generate fresh narration audio with character's voice
+                    audio_url = None
+                    try:
+                        voice_id_to_use = character.voice_id if character.voice_id else None
+                        logger.info(f"Generating fresh narration with voice_id: {voice_id_to_use or 'default (Rachel)'}")
+                        
+                        audio_data = await elevenlabs_service.generate_narration(
+                            text=scene_data["narration"],
+                            voice_id=voice_id_to_use
+                        )
+                        
+                        if audio_data:
+                            from datetime import datetime
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            filename = f"first_scene_audio_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
+                            
+                            uploaded_audio_url = await supabase_service.upload_character_image(
+                                user_id=character.user_id,
+                                file_data=audio_data,
+                                filename=filename
+                            )
+                            
+                            if uploaded_audio_url:
+                                audio_url = uploaded_audio_url
+                                logger.info(f"✅ Generated fresh narration for first scene")
+                        
+                    except Exception as e:
+                        logger.warning(f"First scene voice generation failed: {e}")
+
                     scene = StoryScene(
                         scene_id=f"first_scene_{request.character_id}",
                         narration=scene_data["narration"],
                         image_url=scene_data["image_url"] or "/scenes/default.jpg",
-                        audio_url=scene_data["audio_url"],
+                        audio_url=audio_url,  # Use fresh audio with character voice
                         choices=choices,
                         is_combat=False,
                         is_checkpoint=True
                     )
                     
-                    logger.info(f"✅ Used pre-generated first scene for character {request.character_id}")
+                    logger.info(f"✅ Used pre-generated first scene for character {request.character_id} with portrait {portrait_id}")
                     return scene
+                else:
+                    logger.warning(f"⚠️  No pre-generated scene found for {portrait_id}_{character.build_type}, falling back to generation")
                     
             except Exception as e:
-                logger.warning(f"Failed to get pre-generated scene, falling back to generation: {e}")
+                logger.warning(f"Failed to get pre-generated scene for {portrait_id}_{character.build_type}: {e}")
+        
+        elif is_custom_portrait:
+            logger.info(f"🔥 Custom portrait - skipping pre-generation check, will generate fresh scene")
+        else:
+            logger.warning(f"⚠️  Could not determine portrait type for character {request.character_id}, portrait_url: {character.portrait_url}")
 
     # Fall back to regular scene generation
     logger.info(f"Falling back to regular scene generation for character {request.character_id}")

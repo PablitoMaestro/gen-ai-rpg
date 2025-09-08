@@ -3,11 +3,17 @@ import { persist } from 'zustand/middleware';
 
 interface AudioState {
   isMuted: boolean;
-  volume: number;
+  musicVolume: number;
+  narrationVolume: number;
+  isMusicMuted: boolean;
+  isNarrationMuted: boolean;
   isPlaying: boolean;
   
   toggleMute: () => void;
-  setVolume: (volume: number) => void;
+  setMusicVolume: (volume: number) => void;
+  setNarrationVolume: (volume: number) => void;
+  toggleMusicMute: () => void;
+  toggleNarrationMute: () => void;
   setPlaying: (playing: boolean) => void;
   mute: () => void;
   unmute: () => void;
@@ -17,7 +23,10 @@ export const useAudioStore = create<AudioState>()(
   persist(
     (set, get) => ({
       isMuted: false,
-      volume: 0.5,
+      musicVolume: 0.5,
+      narrationVolume: 0.7,
+      isMusicMuted: false,
+      isNarrationMuted: false,
       isPlaying: false,
       
       toggleMute: () => {
@@ -25,8 +34,22 @@ export const useAudioStore = create<AudioState>()(
         set({ isMuted: !isMuted });
       },
       
-      setVolume: (volume: number) => {
-        set({ volume: Math.max(0, Math.min(1, volume)) });
+      setMusicVolume: (volume: number) => {
+        set({ musicVolume: Math.max(0, Math.min(1, volume)) });
+      },
+      
+      setNarrationVolume: (volume: number) => {
+        set({ narrationVolume: Math.max(0, Math.min(1, volume)) });
+      },
+      
+      toggleMusicMute: () => {
+        const { isMusicMuted } = get();
+        set({ isMusicMuted: !isMusicMuted });
+      },
+      
+      toggleNarrationMute: () => {
+        const { isNarrationMuted } = get();
+        set({ isNarrationMuted: !isNarrationMuted });
       },
       
       setPlaying: (playing: boolean) => {
@@ -41,7 +64,10 @@ export const useAudioStore = create<AudioState>()(
       name: 'rpg-audio-settings',
       partialize: (state) => ({
         isMuted: state.isMuted,
-        volume: state.volume,
+        musicVolume: state.musicVolume,
+        narrationVolume: state.narrationVolume,
+        isMusicMuted: state.isMusicMuted,
+        isNarrationMuted: state.isNarrationMuted,
       }),
     }
   )

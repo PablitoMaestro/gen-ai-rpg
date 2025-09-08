@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { imageGenerationService, type MergedSceneImage } from '@/services/imageGenerationService';
+import { useAudioStore } from '@/store/audioStore';
 import { useGameStore } from '@/store/gameStore';
 import { Scene } from '@/types';
 
@@ -22,8 +23,10 @@ export function StoryDisplay({
   const [isTypewriting, setIsTypewriting] = useState(false);
   const [mergedSceneImage, setMergedSceneImage] = useState<MergedSceneImage | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   const { character } = useGameStore();
+  const { narrationVolume, isNarrationMuted, isMuted } = useAudioStore();
 
   // Parse mixed narration into third-person and first-person segments
   const parseMixedNarration = (text: string): React.ReactNode => {
@@ -132,6 +135,20 @@ export function StoryDisplay({
 
     generateMergedImage();
   }, [character, scene, scene?.id, scene?.narration, isLoading]);
+
+  // Handle narration volume changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = narrationVolume;
+    }
+  }, [narrationVolume]);
+
+  // Handle narration mute/unmute - respect both global and narration-specific mute
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted || isNarrationMuted;
+    }
+  }, [isMuted, isNarrationMuted]);
 
   // Early return if scene is null
   if (!scene) {
@@ -256,6 +273,7 @@ export function StoryDisplay({
             {(scene.audioUrl || (scene as Scene & { audio_url?: string }).audio_url) && !isLoading && (
               <div className="mt-6 flex justify-center">
                 <audio
+                  ref={audioRef}
                   controls
                   className="w-full max-w-md bg-black/50 rounded-lg"
                   preload="none"

@@ -41,8 +41,8 @@ export default function BuildsPage(): React.ReactElement {
         setIsGenerating(true);
 
         // Generate character builds using the portrait
-        // Pass portrait_id for preset detection, or 'custom' for uploads
-        const portraitId = characterData.portrait_id === characterData.portrait_url ? 'custom' : characterData.portrait_id;
+        // Pass portrait_id for preset detection, or undefined for custom uploads
+        const portraitId = characterData.portrait_id && characterData.portrait_id.startsWith('custom_') ? undefined : characterData.portrait_id;
         
         const generatedBuilds = await characterService.generateCharacterBuilds(
           characterData.gender,
@@ -116,7 +116,7 @@ export default function BuildsPage(): React.ReactElement {
       const createdCharacter: Character = await characterService.createCharacter({
         name: character.name,
         gender: character.gender,
-        portrait_id: character.portrait_url, // Use portrait_url as the ID
+        portrait_id: character.portrait_id && character.portrait_id.startsWith('custom_') ? character.portrait_url : character.portrait_id,
         build_id: selectedBuild,
         build_type: selectedBuildData.build_type,
         personality: character.description // Pass personality from localStorage

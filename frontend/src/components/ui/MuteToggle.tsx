@@ -1,14 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useAudioStore } from '@/store/audioStore';
 
+import { VolumeControl } from './VolumeControl';
+
 export function MuteToggle(): React.ReactElement {
   const { isMuted, toggleMute } = useAudioStore();
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <button
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <VolumeControl isVisible={isHovered} />
+      <button
       onClick={toggleMute}
       className="fixed bottom-4 left-4 z-50 p-3 rounded-lg 
                  bg-dark-900/80 border border-amber-500/30 
@@ -62,6 +71,7 @@ export function MuteToggle(): React.ReactElement {
                       whitespace-nowrap shadow-golden-sm">
         {isMuted ? '🎵 Restore the tavern songs' : '🔇 Silence the bards'}
       </div>
-    </button>
+      </button>
+    </div>
   );
 }

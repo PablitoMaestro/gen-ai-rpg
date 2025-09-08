@@ -61,6 +61,7 @@ export default function CreateCharacterPage(): React.ReactElement {
   const [characterName, setCharacterName] = useState('');
   const [characterDescription, setCharacterDescription] = useState('');
   const [_customPortraitFile, setCustomPortraitFile] = useState<File | null>(null);
+  const [customPortraits, setCustomPortraits] = useState<Portrait[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [portraits, setPortraits] = useState<Portrait[]>([]);
   const [isLoadingPortraits, setIsLoadingPortraits] = useState(false);
@@ -82,7 +83,21 @@ export default function CreateCharacterPage(): React.ReactElement {
         
         // Check for stored character data (when coming back from build page)
         const storedCharacter = localStorage.getItem('current_character');
+        const storedCustomPortraits = localStorage.getItem('custom_portraits');
         let restoredSelection = false;
+        
+        // Restore custom portraits from localStorage
+        if (storedCustomPortraits) {
+          try {
+            const customPortraitData = JSON.parse(storedCustomPortraits);
+            if (Array.isArray(customPortraitData)) {
+              setCustomPortraits(customPortraitData);
+            }
+          } catch (error) {
+            console.error('Failed to restore custom portraits:', error);
+            localStorage.removeItem('custom_portraits');
+          }
+        }
         
         if (storedCharacter) {
           try {
@@ -101,19 +116,35 @@ export default function CreateCharacterPage(): React.ReactElement {
               const targetGender = characterData.gender as Gender;
               const targetPortraits = targetGender === 'male' ? malePortraits : femalePortraits;
               
-              // Find the portrait in the loaded portraits
-              const targetPortrait = targetPortraits.find(p => p.id === characterData.portrait_id);
+              // Check if it's a custom portrait first
+              const restoredCustoms = storedCustomPortraits ? JSON.parse(storedCustomPortraits) : [];
+              const customPortrait = Array.isArray(restoredCustoms) ? restoredCustoms.find((p: Portrait) => p.id === characterData.portrait_id) : null;
               
-              if (targetPortrait) {
-                // Restore all the previous selections
+              if (customPortrait) {
+                // Restore custom portrait selection
                 setSelectedGender(targetGender);
                 setPortraits(targetPortraits);
-                setSelectedPortrait(targetPortrait.id);
-                setSelectedPortraitUrl(targetPortrait.url);
+                setSelectedPortrait(customPortrait.id);
+                setSelectedPortraitUrl(customPortrait.url);
                 setCharacterName(characterData.name);
                 setCharacterDescription(characterData.description || '');
                 
                 restoredSelection = true;
+              } else {
+                // Find the portrait in the loaded preset portraits
+                const targetPortrait = targetPortraits.find(p => p.id === characterData.portrait_id);
+                
+                if (targetPortrait) {
+                  // Restore all the previous selections
+                  setSelectedGender(targetGender);
+                  setPortraits(targetPortraits);
+                  setSelectedPortrait(targetPortrait.id);
+                  setSelectedPortraitUrl(targetPortrait.url);
+                  setCharacterName(characterData.name);
+                  setCharacterDescription(characterData.description || '');
+                  
+                  restoredSelection = true;
+                }
               }
             }
           } catch (error) {
@@ -199,8 +230,21 @@ export default function CreateCharacterPage(): React.ReactElement {
     
     try {
       const result = await characterService.uploadCustomPortrait(file);
+      const customId = `custom_${Date.now()}`;
+      
+      // Create new custom portrait entry
+      const newCustomPortrait: Portrait = {
+        id: customId,
+        url: result.url
+      };
+      
+      // Update custom portraits state and localStorage
+      const updatedCustomPortraits = [...customPortraits, newCustomPortrait];
+      setCustomPortraits(updatedCustomPortraits);
+      localStorage.setItem('custom_portraits', JSON.stringify(updatedCustomPortraits));
+      
       setSelectedPortraitUrl(result.url);
-      setSelectedPortrait('custom');
+      setSelectedPortrait(customId);
     } catch (error) {
       console.error('Failed to upload custom portrait:', error);
       alert('Failed to upload portrait. Please try again.');
@@ -221,7 +265,7 @@ export default function CreateCharacterPage(): React.ReactElement {
       const characterData = {
         name: characterName,
         gender: selectedGender,
-        portrait_id: selectedPortrait === 'custom' ? selectedPortraitUrl : selectedPortrait,
+        portrait_id: selectedPortrait,
         portrait_url: selectedPortraitUrl,
         description: characterDescription
       };
@@ -297,6 +341,7 @@ export default function CreateCharacterPage(): React.ReactElement {
                     isLoading={isLoading}
                     selectedGender={selectedGender}
                     isFiltering={isFiltering}
+                    customPortraits={customPortraits}
                   />
                 )}
               </div>

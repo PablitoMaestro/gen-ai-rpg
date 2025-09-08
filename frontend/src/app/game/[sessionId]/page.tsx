@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { BackgroundLayout } from '@/components/layout/BackgroundLayout';
 import { Button } from '@/components/ui/Button';
+import { storyService } from '@/services/storyService';
 import { useGameStore } from '@/store/gameStore';
 import { Scene, SceneChoice } from '@/types';
 
@@ -219,29 +220,18 @@ export default function GamePage(): React.ReactElement {
       }
       
       try {
-        // Get the story scene directly
-        const response = await fetch('http://localhost:8000/api/stories/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            character_id: character.id,
-            scene_context: "Awakening in forest after bandit attack"
-          })
-        });
+        // Use the storyService to get first scene (which checks for pre-generated scenes)
+        const firstScene = await storyService.generateFirstSceneWithFallback(character.id);
         
-        if (response.ok) {
-          const data = await response.json();
-          setScene({
-            narration: data.narration,
-            image_url: data.image_url,
-            audio_url: data.audio_url,
-            choices: data.choices || []
-          });
-        } else {
-          setError('Failed to load scene');
-        }
-      } catch {
-        setError('Network error');
+        setScene({
+          narration: firstScene.narration,
+          image_url: firstScene.imageUrl,
+          audio_url: firstScene.audioUrl,
+          choices: firstScene.choices || []
+        });
+      } catch (error) {
+        console.error('Failed to load first scene:', error);
+        setError('Failed to load scene');
       }
       setIsLoading(false);
     };
