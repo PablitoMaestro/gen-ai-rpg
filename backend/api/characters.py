@@ -284,7 +284,7 @@ async def create_character(
         "f1": "AZnzlk1XvdvUeBnXmlld",  # Domi - young, hopeful (Young Hope)
         "f2": "EXAVITQu4vr4xnSDxMaL",  # Sarah - strong, serious (Hardened Survivor)
         "f3": "oWAxZDx7w5VEj9dCyTzz",  # Grace - soft, emotional (Sorrowful Soul)
-        "f4": "XB0fDUnXU5powFXDhCwa",  # Alice - warm, nurturing elder (Elder Sage)
+        "f4": "VruXhdG8YF3HISipY3rg",  # Grandma - warm, nurturing elder (Elder Sage)
     }
 
     # Get voice_id for preset portraits

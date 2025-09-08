@@ -3,11 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { BackgroundLayout } from '@/components/layout/BackgroundLayout';
 import { Button } from '@/components/ui/Button';
 import { storyService } from '@/services/storyService';
+import { useAudioStore } from '@/store/audioStore';
 import { useGameStore } from '@/store/gameStore';
 import { Scene, SceneChoice } from '@/types';
 
@@ -43,6 +44,10 @@ export default function GamePage(): React.ReactElement {
     isPregenerating,
     pregenerationProgress
   } = useGameStore();
+  const { narrationVolume, isNarrationMuted, isMuted } = useAudioStore();
+  const audioRef1 = useRef<HTMLAudioElement>(null);
+  const audioRef2 = useRef<HTMLAudioElement>(null);
+  
   const [scene, setScene] = useState<GamePageScene | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isChoiceLoading, setIsChoiceLoading] = useState(false);
@@ -275,6 +280,27 @@ export default function GamePage(): React.ReactElement {
     return () => clearInterval(messageTimer);
   }, [isChoiceLoading]);
 
+  // Handle narration volume changes
+  useEffect(() => {
+    if (audioRef1.current) {
+      audioRef1.current.volume = narrationVolume;
+    }
+    if (audioRef2.current) {
+      audioRef2.current.volume = narrationVolume;
+    }
+  }, [narrationVolume]);
+
+  // Handle narration mute/unmute
+  useEffect(() => {
+    const shouldMute = isMuted || isNarrationMuted;
+    if (audioRef1.current) {
+      audioRef1.current.muted = shouldMute;
+    }
+    if (audioRef2.current) {
+      audioRef2.current.muted = shouldMute;
+    }
+  }, [isMuted, isNarrationMuted]);
+
   if (isLoading) {
     return (
       <BackgroundLayout>
@@ -339,6 +365,7 @@ export default function GamePage(): React.ReactElement {
                       {scene.audio_url && (
                         <div className="mt-2 sm:mt-3 flex flex-col items-center space-y-2">
                           <audio
+                            ref={audioRef1}
                             src={scene.audio_url}
                             autoPlay
                             controls
@@ -393,6 +420,7 @@ export default function GamePage(): React.ReactElement {
                       {scene.audio_url && (
                         <div className="mt-2 sm:mt-3 flex flex-col items-center space-y-2">
                           <audio
+                            ref={audioRef2}
                             src={scene.audio_url}
                             autoPlay
                             controls

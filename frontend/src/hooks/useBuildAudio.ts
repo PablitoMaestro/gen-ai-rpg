@@ -228,7 +228,7 @@ export function useBuildAudio(): UseBuildAudioResult {
     } finally {
       setIsLoading(false);
     }
-  }, [buildDialogues, isMuted, isNarrationMuted, preloadBuildDialogue, stopCurrentDialogue]);
+  }, [buildDialogues, isMuted, isNarrationMuted, narrationVolume, preloadBuildDialogue, stopCurrentDialogue]);
   
   // Handle mute changes
   useEffect(() => {

@@ -219,7 +219,7 @@ export function usePortraitAudio(): UsePortraitAudioResult {
     } finally {
       setIsLoading(false);
     }
-  }, [dialogues, isMuted, isNarrationMuted, preloadDialogue, stopCurrentDialogue]);
+  }, [dialogues, isMuted, isNarrationMuted, narrationVolume, preloadDialogue, stopCurrentDialogue]);
   
   // Handle mute changes
   useEffect(() => {
