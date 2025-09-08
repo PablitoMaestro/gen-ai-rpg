@@ -357,20 +357,20 @@ ARTISTIC STYLE:
             AMNESIA SCENARIO: The character wakes up unconscious in a forest. Their head is in severe pain, vision is blurry, and they can barely see. They've been robbed by bandits and hit hard in the head. They cannot remember who they really are or where they came from. Around them are pieces of broken wood, some robbed barrels, and they're lying in a pool of dry blood. They are very weak, level 1, and can barely do anything potent. They start only with basic items from their character build.
 
             CRITICAL REQUIREMENTS:
-            1. Write ONLY confused internal thoughts - "Where... where am I?", "My head is splitting...", "I can't remember anything..."
-            2. Keep narration to 40-60 words - describe the disorientation and pain
+            1. Write mixed narration: Third-person environment description PLUS first-person thoughts in parentheses
+            2. Keep narration to 40-60 words total - split between third-person and first-person elements
             3. Make emotions realistic: confused, scared, weak, disoriented, trying to piece things together
             4. NO vulgar language - keep it clean and atmospheric
             5. Create exactly 4 choice-thoughts that reflect their weakened, confused state
             6. Remember they're level 1 - choices should be simple survival actions
 
             Examples of appropriate style:
-            - "My vision blurs as I try to focus. Everything hurts. What happened to me?"
-            - "These broken barrels... was I traveling? I can't remember anything before waking up here."
-            - "Blood on my clothes, but I'm alive. Barely. Need to figure out what to do next."
+            - "The character lies among scattered wood and broken barrels, blood staining torn clothes. (Where... where am I? Everything hurts so much.)"
+            - "Sunlight filters through dense tree branches, revealing debris from what might have been a caravan. (I can't remember anything before waking up here.)"
+            - "The figure struggles to focus, vision swimming as they survey the aftermath. (Need to figure out what to do next - but I'm so weak.)"
 
             Format your response as:
-            NARRATION: [Confused, disoriented internal monologue, 40-60 words describing the amnesia awakening]
+            NARRATION: [Mixed narration: third-person scene description with first-person thoughts in parentheses, 40-60 words total]
             VISUAL_SCENE: [Environmental description for scene image: forest clearing with broken barrels, scattered debris, morning light, weathered ground, 30-50 words]
             CHOICE_1: [Weak survival choice, like "Try to stand up slowly and look around"]
             CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]  
@@ -394,21 +394,21 @@ ARTISTIC STYLE:
             base_prompt += """
 
             CRITICAL REQUIREMENTS:
-            1. Write ONLY internal thoughts - "My heart's racing!", "What is that thing?!", "I'm in trouble..."
-            2. Keep narration to 40-60 words - more descriptive than before but still punchy
+            1. Write mixed narration: Third-person environment/action description PLUS first-person thoughts in parentheses  
+            2. Keep narration to 40-60 words total - split between third-person and first-person elements
             3. Make emotions EXTREME: terrified, determined, confused, desperate, cautiously optimistic
             4. NO vulgar language - keep it clean but intense and atmospheric
             5. Create exactly 4 internal choice-thoughts that sound desperate/excited/determined
-            6. Make it feel like the character's thoughts under pressure but with more context
+            6. Make it feel immersive with both external situation and internal reaction
 
             Examples of style:
-            - "Blood everywhere. Can't breathe properly. Why did I come to this cursed place?!"
-            - "That creature has way too many teeth! My weapon feels so small in my hands right now."
-            - "I'm either brilliant or completely insane. Probably both, but I have to try something."
-            - "My hands are shaking. This is either heroic or suicidal, but I can't back down now."
+            - "Blood pools around the fallen beast, its massive claws still twitching. (Can't breathe properly - why did I come to this cursed place?!)"
+            - "The creature towers overhead, rows of gleaming fangs exposed in a threatening snarl. (My weapon feels so small right now!)"
+            - "The ancient mechanism clicks into place, gears grinding after centuries of silence. (I'm either brilliant or completely insane, but I have to try something.)"
+            - "Torchlight flickers across the narrow ledge, revealing the chasm's deadly depths below. (My hands are shaking - this is either heroic or suicidal.)"
 
             Format your response as:
-            NARRATION: [Emotional internal monologue, 40-60 words with more atmosphere and context]
+            NARRATION: [Mixed narration: third-person environment/action with first-person thoughts in parentheses, 40-60 words total]
             VISUAL_SCENE: [Environmental description for scene image: current location, lighting, atmosphere, objects, mood indicators, 30-50 words]
             CHOICE_1: [Desperate thought-choice, like "Charge forward with everything I have"]
             CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]  

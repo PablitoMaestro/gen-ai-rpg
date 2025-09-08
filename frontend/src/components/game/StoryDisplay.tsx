@@ -25,6 +25,62 @@ export function StoryDisplay({
   
   const { character } = useGameStore();
 
+  // Parse mixed narration into third-person and first-person segments
+  const parseMixedNarration = (text: string): React.ReactNode => {
+    if (!text) {
+      return null;
+    }
+    
+    const segments: React.ReactNode[] = [];
+    let currentIndex = 0;
+    
+    // Find all parentheses pairs
+    const parenthesesRegex = /\(([^)]+)\)/g;
+    let match;
+    
+    while ((match = parenthesesRegex.exec(text)) !== null) {
+      // Add third-person text before parentheses
+      if (match.index > currentIndex) {
+        const thirdPersonText = text.slice(currentIndex, match.index).trim();
+        if (thirdPersonText) {
+          segments.push(
+            <span key={`third-${currentIndex}`} className="text-red-100">
+              {thirdPersonText}{' '}
+            </span>
+          );
+        }
+      }
+      
+      // Add first-person text (in parentheses) with italic styling
+      segments.push(
+        <span key={`first-${match.index}`} className="text-red-200 italic font-light">
+          ({match[1]})
+        </span>
+      );
+      
+      currentIndex = match.index + match[0].length;
+    }
+    
+    // Add any remaining third-person text
+    if (currentIndex < text.length) {
+      const remainingText = text.slice(currentIndex).trim();
+      if (remainingText) {
+        segments.push(
+          <span key={`third-${currentIndex}`} className="text-red-100">
+            {remainingText}
+          </span>
+        );
+      }
+    }
+    
+    // If no parentheses found, return original text as third-person
+    if (segments.length === 0) {
+      return <span className="text-red-100">{text}</span>;
+    }
+    
+    return <>{segments}</>;
+  };
+
   // Typewriter effect for narration
   useEffect(() => {
     if (!scene || !scene.narration || isLoading || typeof scene.narration !== 'string') {
@@ -172,8 +228,8 @@ export function StoryDisplay({
                 </div>
               ) : (
                 <div className="w-full">
-                  <p className="text-red-100 font-fantasy text-2xl leading-relaxed font-semibold">
-                    {displayedText}
+                  <p className="font-fantasy text-2xl leading-relaxed font-semibold">
+                    {parseMixedNarration(displayedText)}
                     {isTypewriting && (
                       <span className="inline-block w-0.5 h-8 bg-red-400 ml-1 animate-pulse"></span>
                     )}

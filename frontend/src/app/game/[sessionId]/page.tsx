@@ -331,22 +331,22 @@ export default function GamePage(): React.ReactElement {
                   fill
                   className="object-contain rounded-xl"
                 />
-                {/* Narration overlay at bottom of container */}
+                {/* Narration overlay at bottom of container with proper containment */}
                 {scene && (
-                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 md:p-6">
-                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto">
-                      <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
+                  <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 md:p-4 max-h-[45%] overflow-y-auto">
+                    <div className="bg-black/85 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto shadow-lg">
+                      <p className="text-gold-200 text-xs sm:text-sm md:text-base font-fantasy leading-relaxed text-center max-h-32 sm:max-h-40 md:max-h-48 overflow-y-auto custom-scrollbar">
                         {scene.narration}
                       </p>
                       
                       {/* Voice narration audio */}
                       {scene.audio_url && (
-                        <div className="mt-3 flex justify-center">
+                        <div className="mt-2 sm:mt-3 flex justify-center">
                           <audio
                             src={scene.audio_url}
                             autoPlay
                             controls
-                            className="w-full max-w-md bg-black/30 rounded-lg"
+                            className="w-full max-w-xs sm:max-w-md bg-black/30 rounded-lg scale-75 sm:scale-90 md:scale-100"
                             onError={(e) => {
                               console.error('Audio playback error:', e);
                             }}
@@ -361,23 +361,23 @@ export default function GamePage(): React.ReactElement {
                 )}
               </div>
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-black/50 rounded-xl">
-                <div className="text-center">
+              <div className="w-full h-full flex items-center justify-center bg-black/50 rounded-xl overflow-hidden">
+                <div className="text-center max-h-full overflow-y-auto p-2 sm:p-4">
                   <div className="text-4xl sm:text-5xl md:text-6xl opacity-30 text-gold-400 mb-4">🌙</div>
                   {scene && (
-                    <div className="bg-black/80 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto">
-                      <p className="text-gold-200 text-sm sm:text-base md:text-lg font-fantasy leading-relaxed text-center">
+                    <div className="bg-black/85 backdrop-blur-sm rounded-lg p-3 sm:p-4 max-w-4xl mx-auto shadow-lg max-h-96 overflow-y-auto">
+                      <p className="text-gold-200 text-xs sm:text-sm md:text-base font-fantasy leading-relaxed text-center max-h-64 overflow-y-auto custom-scrollbar">
                         {scene.narration}
                       </p>
                       
                       {/* Voice narration audio */}
                       {scene.audio_url && (
-                        <div className="mt-3 flex justify-center">
+                        <div className="mt-2 sm:mt-3 flex justify-center">
                           <audio
                             src={scene.audio_url}
                             autoPlay
                             controls
-                            className="w-full max-w-md bg-black/30 rounded-lg"
+                            className="w-full max-w-xs sm:max-w-md bg-black/30 rounded-lg scale-75 sm:scale-90 md:scale-100"
                             onError={(e) => {
                               console.error('Audio playback error:', e);
                             }}

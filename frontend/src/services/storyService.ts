@@ -113,7 +113,22 @@ class StoryService {
     });
   }
 
-  // Convenience method for starting a new story
+  async getPreGeneratedFirstScene(portraitId: string, buildType: string): Promise<Scene> {
+    return this.fetchWithError<Scene>(`/api/stories/first-scene/${portraitId}/${buildType}`);
+  }
+
+  async generateFirstSceneWithFallback(characterId: string): Promise<Scene> {
+    return this.fetchWithError<Scene>('/api/stories/generate-first-scene', {
+      method: 'POST',
+      body: JSON.stringify({
+        character_id: characterId,
+        scene_context: "Beginning of adventure",
+        previous_choice: undefined,
+      }),
+    });
+  }
+
+  // Convenience method for starting a new story with pre-generated scene support
   async startNewStory(characterId: string): Promise<{
     session: GameSession;
     firstScene: Scene;
@@ -121,14 +136,48 @@ class StoryService {
     // Create game session
     const session = await this.createGameSession(characterId);
 
-    // Generate first scene
-    const firstScene = await this.generateStoryScene({
-      character_id: characterId,
-      scene_context: "Beginning of adventure",
-      previous_choice: undefined,
-    });
+    // Try to use the new endpoint that checks for pre-generated scenes
+    try {
+      const firstScene = await this.generateFirstSceneWithFallback(characterId);
+      return { session, firstScene };
+    } catch (error) {
+      console.warn('Failed to get first scene with pre-generated fallback, using regular generation:', error);
+      
+      // Fall back to regular scene generation
+      const firstScene = await this.generateStoryScene({
+        character_id: characterId,
+        scene_context: "Beginning of adventure",
+        previous_choice: undefined,
+      });
+      
+      return { session, firstScene };
+    }
+  }
 
-    return { session, firstScene };
+  // Alternative method that directly requests pre-generated scenes if character data is available
+  async startNewStoryWithPreGenerated(
+    characterId: string, 
+    portraitId?: string, 
+    buildType?: string
+  ): Promise<{
+    session: GameSession;
+    firstScene: Scene;
+  }> {
+    // Create game session
+    const session = await this.createGameSession(characterId);
+
+    // If we have portrait and build info, try pre-generated scene first
+    if (portraitId && buildType) {
+      try {
+        const firstScene = await this.getPreGeneratedFirstScene(portraitId, buildType);
+        return { session, firstScene };
+      } catch (error) {
+        console.warn('Pre-generated scene not available, falling back to regular generation:', error);
+      }
+    }
+
+    // Fall back to regular generation
+    return this.startNewStory(characterId);
   }
 
   // Make a choice and get the next scene

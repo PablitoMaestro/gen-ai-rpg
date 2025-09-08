@@ -18,6 +18,7 @@ from models import (
 from services.gemini import gemini_service
 from services.supabase import supabase_service
 from services.elevenlabs import elevenlabs_service
+from services.scene_pregenerator import scene_pregenerator
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -519,3 +520,242 @@ async def update_game_session(
         raise HTTPException(status_code=500, detail="Failed to update game state")
 
     return {"status": "updated", "session_id": str(session_id)}
+
+
+# ========== Pre-generated Scene Endpoints ==========
+
+@router.get("/first-scene/{portrait_id}/{build_type}", response_model=StoryScene)
+async def get_pregenerated_first_scene(
+    portrait_id: str,
+    build_type: str
+) -> StoryScene:
+    """
+    Get a pre-generated first scene for a specific portrait and build combination.
+
+    Args:
+        portrait_id: Portrait ID (e.g., 'm1', 'f2')
+        build_type: Build type ('warrior', 'mage', 'rogue', 'ranger')
+
+    Returns:
+        Pre-generated first scene
+    """
+    logger.info(f"Fetching pre-generated first scene for {portrait_id}_{build_type}")
+
+    # Validate input parameters
+    valid_portraits = ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']
+    valid_builds = ['warrior', 'mage', 'rogue', 'ranger']
+    
+    if portrait_id not in valid_portraits:
+        raise HTTPException(status_code=400, detail=f"Invalid portrait_id. Must be one of: {valid_portraits}")
+    
+    if build_type not in valid_builds:
+        raise HTTPException(status_code=400, detail=f"Invalid build_type. Must be one of: {valid_builds}")
+
+    try:
+        # Try to get pre-generated scene first
+        scene_data = await scene_pregenerator.get_first_scene(portrait_id, build_type)
+        
+        if scene_data:
+            # Convert to StoryScene format
+            choices = []
+            for choice_data in scene_data.get("choices", []):
+                choices.append(StoryChoice(
+                    id=choice_data.get("id", "unknown"),
+                    text=choice_data.get("text", ""),
+                    preview="",
+                    consequence_hint=""
+                ))
+
+            scene = StoryScene(
+                scene_id=f"first_scene_{portrait_id}_{build_type}",
+                narration=scene_data["narration"],
+                image_url=scene_data["image_url"] or "/scenes/default.jpg",
+                audio_url=scene_data["audio_url"],
+                choices=choices,
+                is_combat=False,
+                is_checkpoint=True
+            )
+            
+            logger.info(f"✅ Returned pre-generated scene for {portrait_id}_{build_type}")
+            return scene
+        
+        else:
+            # No pre-generated scene found
+            logger.warning(f"No pre-generated scene found for {portrait_id}_{build_type}")
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No pre-generated first scene available for {portrait_id}_{build_type}"
+            )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get pre-generated scene for {portrait_id}_{build_type}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve pre-generated scene"
+        )
+
+
+@router.post("/generate-first-scene", response_model=StoryScene)
+async def generate_first_scene_with_fallback(
+    request: StoryGenerateRequest
+) -> StoryScene:
+    """
+    Generate first scene with pre-generated fallback support.
+    
+    This endpoint first tries to use a pre-generated scene if the request
+    matches a first scene pattern, otherwise falls back to regular generation.
+
+    Args:
+        request: Story generation request
+
+    Returns:
+        First scene (pre-generated or newly generated)
+    """
+    logger.info(f"Generating first scene for character {request.character_id}")
+
+    # Get character from database to determine portrait and build
+    character = await supabase_service.get_character(request.character_id)
+    if not character:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    # Check if this is a first scene request (amnesia scenario)
+    is_first_scene = (
+        request.scene_context and 
+        ("Beginning of adventure" in request.scene_context or 
+         "Awakening in forest" in request.scene_context or
+         request.previous_choice is None)
+    )
+
+    if is_first_scene:
+        # Try to determine portrait_id from character data
+        # This assumes character has a portrait_url or similar field that can help identify the portrait
+        portrait_id = None
+        
+        # Look for portrait ID in character portrait_url
+        if character.portrait_url:
+            for pid in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
+                if pid in character.portrait_url:
+                    portrait_id = pid
+                    break
+        
+        # If we found a portrait_id, try to get pre-generated scene
+        if portrait_id:
+            try:
+                scene_data = await scene_pregenerator.get_first_scene(portrait_id, character.build_type)
+                
+                if scene_data:
+                    # Use pre-generated scene
+                    choices = []
+                    for choice_data in scene_data.get("choices", []):
+                        choices.append(StoryChoice(
+                            id=choice_data.get("id", "unknown"),
+                            text=choice_data.get("text", ""),
+                            preview="",
+                            consequence_hint=""
+                        ))
+
+                    scene = StoryScene(
+                        scene_id=f"first_scene_{request.character_id}",
+                        narration=scene_data["narration"],
+                        image_url=scene_data["image_url"] or "/scenes/default.jpg",
+                        audio_url=scene_data["audio_url"],
+                        choices=choices,
+                        is_combat=False,
+                        is_checkpoint=True
+                    )
+                    
+                    logger.info(f"✅ Used pre-generated first scene for character {request.character_id}")
+                    return scene
+                    
+            except Exception as e:
+                logger.warning(f"Failed to get pre-generated scene, falling back to generation: {e}")
+
+    # Fall back to regular scene generation
+    logger.info(f"Falling back to regular scene generation for character {request.character_id}")
+    return await generate_story_scene(request)
+
+
+# ========== Admin Endpoints (Development Only) ==========
+
+@router.post("/admin/pregenerate-scenes")
+async def trigger_scene_pregeneration(
+    force_regenerate: bool = False
+) -> dict[str, Any]:
+    """
+    Admin endpoint to trigger pre-generation of all first scenes.
+    Only available in development environment.
+
+    Args:
+        force_regenerate: Whether to regenerate existing scenes
+
+    Returns:
+        Generation summary
+    """
+    from config.settings import settings
+    
+    if settings.environment != "development":
+        raise HTTPException(
+            status_code=403, 
+            detail="Pre-generation endpoint only available in development"
+        )
+
+    logger.info(f"Triggering scene pre-generation (force={force_regenerate})")
+    
+    try:
+        summary = await scene_pregenerator.generate_all_first_scenes(
+            force_regenerate=force_regenerate
+        )
+        
+        logger.info(f"Pre-generation completed: {summary['newly_generated']} successful, {summary['failed']} failed")
+        return summary
+        
+    except Exception as e:
+        logger.error(f"Pre-generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Pre-generation failed: {e}")
+
+
+@router.get("/admin/pregenerate-status")
+async def get_pregeneration_status() -> dict[str, Any]:
+    """
+    Get status of pre-generated scenes.
+    Only available in development environment.
+
+    Returns:
+        Status summary of all portrait-build combinations
+    """
+    from config.settings import settings
+    
+    if settings.environment != "development":
+        raise HTTPException(
+            status_code=403, 
+            detail="Pre-generation status endpoint only available in development"
+        )
+
+    try:
+        status = {}
+        total_combinations = 0
+        successful_combinations = 0
+        
+        for portrait_id in scene_pregenerator.PORTRAIT_IDS:
+            status[portrait_id] = {}
+            for build_type in scene_pregenerator.BUILD_TYPES:
+                total_combinations += 1
+                exists = await supabase_service.check_first_scene_exists(portrait_id, build_type)
+                status[portrait_id][build_type] = "generated" if exists else "missing"
+                if exists:
+                    successful_combinations += 1
+        
+        return {
+            "total_combinations": total_combinations,
+            "successful_combinations": successful_combinations,
+            "missing_combinations": total_combinations - successful_combinations,
+            "completion_percentage": (successful_combinations / total_combinations) * 100,
+            "status": status
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get pre-generation status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get status: {e}")

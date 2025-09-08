@@ -285,11 +285,167 @@ class SupabaseService:
             logger.error(f"Failed to save scene: {e}")
             return False
 
+    # ========== Character Build Operations ==========
+
+    async def get_character_build(self, portrait_id: str, build_type: str) -> dict[str, Any] | None:
+        """
+        Get character build data for a specific portrait and build type.
+        
+        Args:
+            portrait_id: Portrait ID (e.g., 'm1', 'f2')
+            build_type: Build type ('warrior', 'mage', 'rogue', 'ranger')
+            
+        Returns:
+            Build data dictionary or None
+        """
+        try:
+            response = self.client.table("character_builds").select("*").eq(
+                "portrait_id", portrait_id
+            ).eq("build_type", build_type).single().execute()
+            
+            if response.data:
+                return response.data
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get character build for {portrait_id}_{build_type}: {e}")
+            return None
+
+    # ========== Raw Query Operations ==========
+
+    async def execute_raw_query(self, query: str, params: list[Any] | None = None) -> list[dict[str, Any]] | None:
+        """
+        Execute a raw SQL query with optional parameters.
+        
+        Args:
+            query: SQL query string
+            params: Optional query parameters
+            
+        Returns:
+            Query results as list of dictionaries
+        """
+        try:
+            # For now, use RPC to execute raw queries
+            # This is a workaround since the Python client doesn't directly support raw SQL
+            if params:
+                # Use RPC call for parameterized queries
+                logger.warning("Parameterized raw queries not fully supported, using table operations")
+                return None
+            else:
+                # For simple queries, we'll need to use table operations instead
+                # This is a limitation of the current Supabase Python client
+                logger.warning("Raw SQL queries require RPC functions, using table operations instead")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Failed to execute raw query: {e}")
+            return None
+
+    async def upsert_first_scene(
+        self,
+        portrait_id: str,
+        build_type: str,
+        narration: str,
+        visual_scene: str,
+        image_url: str | None,
+        audio_url: str | None,
+        choices: list[dict[str, str]],
+        retry_count: int,
+        last_error: str | None = None,
+        is_successful: bool = False
+    ) -> bool:
+        """
+        Upsert a first scene record.
+        
+        Args:
+            portrait_id: Portrait ID
+            build_type: Build type
+            narration: Scene narration
+            visual_scene: Visual scene description
+            image_url: Generated image URL
+            audio_url: Generated audio URL
+            choices: Available choices
+            retry_count: Number of retries attempted
+            last_error: Last error message if failed
+            is_successful: Whether generation was successful
+            
+        Returns:
+            Success boolean
+        """
+        try:
+            data = {
+                "portrait_id": portrait_id,
+                "build_type": build_type,
+                "narration": narration,
+                "visual_scene": visual_scene,
+                "image_url": image_url,
+                "audio_url": audio_url,
+                "choices": choices,
+                "retry_count": retry_count,
+                "last_error": last_error,
+                "is_successful": is_successful
+            }
+            
+            response = self.client.table("first_scenes").upsert(data).execute()
+            return bool(response.data)
+            
+        except Exception as e:
+            logger.error(f"Failed to upsert first scene for {portrait_id}_{build_type}: {e}")
+            return False
+
+    async def get_first_scene(self, portrait_id: str, build_type: str) -> dict[str, Any] | None:
+        """
+        Get a pre-generated first scene.
+        
+        Args:
+            portrait_id: Portrait ID
+            build_type: Build type
+            
+        Returns:
+            Scene data or None
+        """
+        try:
+            response = self.client.table("first_scenes").select(
+                "narration, visual_scene, image_url, audio_url, choices, is_successful"
+            ).eq("portrait_id", portrait_id).eq("build_type", build_type).eq(
+                "is_successful", True
+            ).single().execute()
+            
+            if response.data:
+                return response.data
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get first scene for {portrait_id}_{build_type}: {e}")
+            return None
+
+    async def check_first_scene_exists(self, portrait_id: str, build_type: str) -> bool:
+        """
+        Check if a successful first scene exists for the given combination.
+        
+        Args:
+            portrait_id: Portrait ID
+            build_type: Build type
+            
+        Returns:
+            True if successful scene exists, False otherwise
+        """
+        try:
+            response = self.client.table("first_scenes").select("is_successful").eq(
+                "portrait_id", portrait_id
+            ).eq("build_type", build_type).eq("is_successful", True).execute()
+            
+            return bool(response.data)
+            
+        except Exception as e:
+            logger.error(f"Failed to check first scene existence for {portrait_id}_{build_type}: {e}")
+            return False
+
     # ========== Storage Operations ==========
 
     async def upload_character_image(
         self,
-        user_id: UUID,
+        user_id: UUID | str,
         file_data: bytes,
         filename: str
     ) -> str | None:

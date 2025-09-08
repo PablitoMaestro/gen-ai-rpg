@@ -134,8 +134,10 @@ export function usePortraitAudio(): UsePortraitAudioResult {
   
   // Play dialogue for a specific portrait
   const playPortraitDialogue = useCallback(async (portraitId: string): Promise<void> => {
+    console.log(`🔊 Attempting to play dialogue for ${portraitId}`, { isMuted, dialogue: dialogues[portraitId] });
     
     if (isMuted) {
+      console.log(`🔇 Audio is muted, skipping playback for ${portraitId}`);
       return;
     }
     
@@ -203,7 +205,9 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       
       // Reset audio to beginning and play
       audio.currentTime = 0;
+      console.log(`🎵 Playing audio for ${portraitId}:`, audio.src);
       await audio.play();
+      console.log(`✅ Audio playback started for ${portraitId}`);
       
       
     } catch (error) {
