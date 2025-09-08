@@ -59,14 +59,34 @@ class ElevenLabsService:
 
         try:
             async with httpx.AsyncClient() as client:
+                logger.info(f"Making ElevenLabs API call to: {url}")
+                logger.info(f"Using voice_id: {voice_id}")
+                logger.info(f"Text length: {len(text)} characters")
+
                 response = await client.post(
                     url,
                     json=data,
                     headers=headers,
                     timeout=30.0
                 )
+
+                logger.info(f"ElevenLabs API response status: {response.status_code}")
+
+                if response.status_code != 200:
+                    response_text = response.text
+                    logger.error(f"ElevenLabs API error {response.status_code}: {response_text}")
+                    return b""
+
                 response.raise_for_status()
+                audio_size = len(response.content)
+                logger.info(f"✅ Generated {audio_size} bytes of audio data")
                 return response.content
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error from ElevenLabs API: {e.response.status_code} - {e.response.text}")
+            return b""
+        except httpx.TimeoutException:
+            logger.error("ElevenLabs API request timed out")
+            return b""
         except Exception as e:
             logger.error(f"Failed to generate narration: {e}")
             return b""

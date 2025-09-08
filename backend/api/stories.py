@@ -16,10 +16,10 @@ from models import (
     StoryGenerateRequest,
     StoryScene,
 )
-from services.gemini import gemini_service
-from services.supabase import supabase_service
 from services.elevenlabs import elevenlabs_service
+from services.gemini import gemini_service
 from services.scene_pregenerator import scene_pregenerator
+from services.supabase import supabase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -85,9 +85,10 @@ async def generate_story_scene(
         if character.full_body_url:
             try:
                 # Generate scene image with character
-                import httpx
                 import uuid
-                
+
+                import httpx
+
                 # Prepare character image URL - add base URL only for relative paths
                 character_image_url = character.full_body_url
                 if not character_image_url.startswith(('http://', 'https://')):
@@ -102,35 +103,35 @@ async def generate_story_scene(
                         character_image_url = f"{base_url}{character_image_url}"
                     else:
                         character_image_url = f"{base_url}/{character_image_url}"
-                
+
                 logger.info(f"🔍 Downloading character image from: {character_image_url}")
-                
+
                 # Download character image
                 async with httpx.AsyncClient() as client:
                     response = await client.get(character_image_url)
                     if response.status_code == 200:
                         character_image_bytes = response.content
-                        
+
                         # Generate scene image using Nano Banana
                         # Use visual scene description if available, otherwise fallback to narration
                         scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
-                        
+
                         scene_image_bytes = await gemini_service.generate_scene_image(
                             character_image=character_image_bytes,
                             scene_description=scene_description_for_image
                         )
-                        
+
                         # Upload to storage
                         from datetime import datetime
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                         filename = f"scene_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
-                        
+
                         uploaded_url = await supabase_service.upload_character_image(
                             user_id=character.user_id,
                             file_data=scene_image_bytes,
                             filename=filename
                         )
-                        
+
                         if uploaded_url:
                             image_url = uploaded_url
                             logger.info(f"✅ Generated scene image: {image_url}")
@@ -138,7 +139,7 @@ async def generate_story_scene(
                             raise Exception("Failed to upload scene image")
                     else:
                         raise Exception(f"Failed to download character image from {character_image_url}: {response.status_code}")
-                        
+
             except Exception as e:
                 logger.warning(f"Scene image generation failed: {e}")
                 image_url = character.full_body_url
@@ -148,27 +149,27 @@ async def generate_story_scene(
         try:
             # Use character's voice if available, otherwise use default narrator (Rachel)
             voice_id_to_use = character.voice_id if character.voice_id else None
-            
+
             logger.info(f"Generating narration with voice_id: {voice_id_to_use or 'default (Rachel)'}")
-            
+
             # Generate audio using the character's voice or default narrator
             audio_data = await elevenlabs_service.generate_narration(
                 text=story_data["narration"],
                 voice_id=voice_id_to_use  # Will use default "Rachel" voice if None
             )
-            
+
             if audio_data:
                 # Upload audio to storage
                 from datetime import datetime
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"narration_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
-                
+
                 uploaded_audio_url = await supabase_service.upload_character_image(
                     user_id=character.user_id,
                     file_data=audio_data,
                     filename=filename
                 )
-                
+
                 if uploaded_audio_url:
                     audio_url = uploaded_audio_url
                     logger.info(f"✅ Generated scene narration: {audio_url}")
@@ -176,7 +177,7 @@ async def generate_story_scene(
                     logger.warning("Failed to upload narration audio")
             else:
                 logger.warning("No audio data generated")
-                
+
         except Exception as e:
             logger.warning(f"Voice narration generation failed: {e}")
 
@@ -251,22 +252,22 @@ async def prerender_story_branches(
         Pre-rendered scenes for each choice (up to 4)
     """
     logger.info(f"Pre-rendering {len(request.choices)} branches for character {request.character_id}")
-    
+
     # Get character from database
     character = await supabase_service.get_character(request.character_id)
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
-    
+
     # Build character description for consistency
     character_desc = f"{character.name}, a {character.build_type} {character.gender}"
     if character.personality:
         character_desc += f" with personality: {character.personality}"
-    
+
     async def generate_single_branch(choice_text: str, choice_index: int) -> StoryBranch:
         """Generate a single story branch."""
         start_time = time.time()
         choice_id = f"choice_{choice_index + 1}"
-        
+
         try:
             # Generate story content with Gemini
             story_data = await gemini_service.generate_story_scene(
@@ -274,7 +275,7 @@ async def prerender_story_branches(
                 scene_context=request.scene_context,
                 previous_choice=choice_text
             )
-            
+
             # Create story choices from generated data
             choices = []
             for i, choice_text_inner in enumerate(story_data["choices"], 1):
@@ -284,13 +285,13 @@ async def prerender_story_branches(
                     preview="",
                     consequence_hint=""
                 ))
-            
+
             # Generate scene image if character has full body image
             image_url = None
             if character.full_body_url:
                 try:
                     import httpx
-                    
+
                     # Prepare character image URL - add base URL only for relative paths
                     character_image_url = character.full_body_url
                     if not character_image_url.startswith(('http://', 'https://')):
@@ -304,40 +305,40 @@ async def prerender_story_branches(
                             character_image_url = f"{base_url}{character_image_url}"
                         else:
                             character_image_url = f"{base_url}/{character_image_url}"
-                    
+
                     logger.info(f"🔍 Branch {choice_index}: Downloading character image from: {character_image_url}")
-                    
+
                     # Download character image and generate scene
                     async with httpx.AsyncClient() as client:
                         response = await client.get(character_image_url)
                         if response.status_code == 200:
                             character_image_bytes = response.content
-                            
+
                             scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
                             scene_image_bytes = await gemini_service.generate_scene_image(
                                 character_image=character_image_bytes,
                                 scene_description=scene_description_for_image
                             )
-                            
+
                             # Upload to storage
                             from datetime import datetime
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             filename = f"branch_{request.character_id}_{choice_index}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
-                            
+
                             uploaded_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=scene_image_bytes,
                                 filename=filename
                             )
-                            
+
                             if uploaded_url:
                                 image_url = uploaded_url
                                 logger.info(f"✅ Generated branch {choice_index} image: {image_url}")
-                
+
                 except Exception as e:
                     logger.warning(f"Branch {choice_index} image generation failed: {e}")
                     image_url = character.full_body_url
-            
+
             # Generate voice narration for the branch
             audio_url = None
             try:
@@ -346,25 +347,25 @@ async def prerender_story_branches(
                     text=story_data["narration"],
                     voice_id=voice_id_to_use
                 )
-                
+
                 if audio_data:
                     from datetime import datetime
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename = f"branch_audio_{request.character_id}_{choice_index}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
-                    
+
                     uploaded_audio_url = await supabase_service.upload_character_image(
                         user_id=character.user_id,
                         file_data=audio_data,
                         filename=filename
                     )
-                    
+
                     if uploaded_audio_url:
                         audio_url = uploaded_audio_url
                         logger.info(f"✅ Generated branch {choice_index} narration")
-                        
+
             except Exception as e:
                 logger.warning(f"Branch {choice_index} voice narration failed: {e}")
-            
+
             # Create the pre-rendered scene
             scene = StoryScene(
                 scene_id=f"branch_{request.character_id}_{choice_index}_{int(time.time())}",
@@ -375,17 +376,17 @@ async def prerender_story_branches(
                 is_combat=False,
                 is_checkpoint=True
             )
-            
+
             generation_time = time.time() - start_time
             logger.info(f"✅ Branch {choice_index} generated in {generation_time:.2f}s")
-            
+
             return StoryBranch(
                 choice_id=choice_id,
                 scene=scene,
                 is_ready=True,
                 generation_time=generation_time
             )
-            
+
         except Exception as e:
             logger.error(f"Branch {choice_index} generation failed: {e}")
             return StoryBranch(
@@ -394,18 +395,18 @@ async def prerender_story_branches(
                 is_ready=False,
                 generation_time=time.time() - start_time
             )
-    
+
     # Generate all branches in parallel using asyncio.gather
     # Use timeout to prevent hanging for too long
     try:
         branches = await asyncio.wait_for(
             asyncio.gather(*[
-                generate_single_branch(choice, i) 
+                generate_single_branch(choice, i)
                 for i, choice in enumerate(request.choices)
             ], return_exceptions=True),
             timeout=30.0  # 30 second timeout for all branches
         )
-        
+
         # Filter out any exceptions and convert to StoryBranch objects
         final_branches = []
         for i, result in enumerate(branches):
@@ -420,13 +421,13 @@ async def prerender_story_branches(
                     is_ready=False,
                     generation_time=None
                 ))
-        
+
         success_count = sum(1 for branch in final_branches if branch.is_ready)
         logger.info(f"Pre-rendered {success_count}/{len(request.choices)} branches successfully")
-        
+
         return final_branches
-        
-    except asyncio.TimeoutError:
+
+    except TimeoutError:
         logger.warning("Branch pre-rendering timed out")
         # Return placeholder branches for timeout case
         return [
@@ -545,17 +546,17 @@ async def get_pregenerated_first_scene(
     # Validate input parameters
     valid_portraits = ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']
     valid_builds = ['warrior', 'mage', 'rogue', 'ranger']
-    
+
     if portrait_id not in valid_portraits:
         raise HTTPException(status_code=400, detail=f"Invalid portrait_id. Must be one of: {valid_portraits}")
-    
+
     if build_type not in valid_builds:
         raise HTTPException(status_code=400, detail=f"Invalid build_type. Must be one of: {valid_builds}")
 
     try:
         # Try to get pre-generated scene first
         scene_data = await scene_pregenerator.get_first_scene(portrait_id, build_type)
-        
+
         if scene_data:
             # Convert to StoryScene format
             choices = []
@@ -576,15 +577,15 @@ async def get_pregenerated_first_scene(
                 is_combat=False,
                 is_checkpoint=True
             )
-            
+
             logger.info(f"✅ Returned pre-generated scene for {portrait_id}_{build_type}")
             return scene
-        
+
         else:
             # No pre-generated scene found
             logger.warning(f"No pre-generated scene found for {portrait_id}_{build_type}")
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=f"No pre-generated first scene available for {portrait_id}_{build_type}"
             )
 
@@ -596,7 +597,7 @@ async def get_pregenerated_first_scene(
         raise HTTPException(
             status_code=500,
             detail="Failed to retrieve pre-generated scene"
-        )
+        ) from e
 
 
 @router.post("/generate-first-scene", response_model=StoryScene)
@@ -605,7 +606,7 @@ async def generate_first_scene_with_fallback(
 ) -> StoryScene:
     """
     Generate first scene with pre-generated fallback support.
-    
+
     This endpoint first tries to use a pre-generated scene if the request
     matches a first scene pattern, otherwise falls back to regular generation.
 
@@ -624,8 +625,8 @@ async def generate_first_scene_with_fallback(
 
     # Check if this is a first scene request (amnesia scenario)
     is_first_scene = (
-        request.scene_context and 
-        ("Beginning of adventure" in request.scene_context or 
+        request.scene_context and
+        ("Beginning of adventure" in request.scene_context or
          "Awakening in forest" in request.scene_context or
          request.previous_choice is None)
     )
@@ -634,21 +635,21 @@ async def generate_first_scene_with_fallback(
         # Try to determine portrait_id from character data
         portrait_id = None
         is_custom_portrait = False
-        
+
         # Check if this is a custom portrait first
         if character.portrait_url:
             # Identify custom portraits by specific patterns
-            if ('custom_portrait_' in character.portrait_url or 
+            if ('custom_portrait_' in character.portrait_url or
                 'uploads/' in character.portrait_url or
-                (character.portrait_url.startswith('http') and 
-                 'supabase.co' in character.portrait_url and 
+                (character.portrait_url.startswith('http') and
+                 'supabase.co' in character.portrait_url and
                  'presets' not in character.portrait_url)):
                 is_custom_portrait = True
                 logger.info(f"🎨 Custom portrait detected for character {request.character_id}, will generate new scene")
             else:
                 # Map from full filename format to short portrait IDs
                 import re
-                
+
                 # First try the new format: female_portrait_04.png -> f4, male_portrait_01.png -> m1
                 portrait_match = re.search(r'(female|male)_portrait_0?(\d)', character.portrait_url)
                 if portrait_match:
@@ -659,19 +660,19 @@ async def generate_first_scene_with_fallback(
                 else:
                     # Fallback to original detection logic
                     for pid in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
-                        if (f"/{pid}/" in character.portrait_url or 
+                        if (f"/{pid}/" in character.portrait_url or
                             f"_{pid}." in character.portrait_url or
                             f"{pid}.png" in character.portrait_url or
                             character.portrait_url.endswith(f"/{pid}")):
                             portrait_id = pid
                             logger.info(f"🎯 Detected preset portrait {pid} for character {request.character_id}")
                             break
-        
+
         # Only try pre-generated scene for preset portraits
         if not is_custom_portrait and portrait_id and portrait_id in ['m1', 'm2', 'm3', 'm4', 'f1', 'f2', 'f3', 'f4']:
             try:
                 scene_data = await scene_pregenerator.get_first_scene(portrait_id, character.build_type)
-                
+
                 if scene_data:
                     # Use pre-generated scene
                     choices = []
@@ -688,27 +689,27 @@ async def generate_first_scene_with_fallback(
                     try:
                         voice_id_to_use = character.voice_id if character.voice_id else None
                         logger.info(f"Generating fresh narration with voice_id: {voice_id_to_use or 'default (Rachel)'}")
-                        
+
                         audio_data = await elevenlabs_service.generate_narration(
                             text=scene_data["narration"],
                             voice_id=voice_id_to_use
                         )
-                        
+
                         if audio_data:
                             from datetime import datetime
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             filename = f"first_scene_audio_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
-                            
+
                             uploaded_audio_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=audio_data,
                                 filename=filename
                             )
-                            
+
                             if uploaded_audio_url:
                                 audio_url = uploaded_audio_url
-                                logger.info(f"✅ Generated fresh narration for first scene")
-                        
+                                logger.info("✅ Generated fresh narration for first scene")
+
                     except Exception as e:
                         logger.warning(f"First scene voice generation failed: {e}")
 
@@ -721,17 +722,17 @@ async def generate_first_scene_with_fallback(
                         is_combat=False,
                         is_checkpoint=True
                     )
-                    
+
                     logger.info(f"✅ Used pre-generated first scene for character {request.character_id} with portrait {portrait_id}")
                     return scene
                 else:
                     logger.warning(f"⚠️  No pre-generated scene found for {portrait_id}_{character.build_type}, falling back to generation")
-                    
+
             except Exception as e:
                 logger.warning(f"Failed to get pre-generated scene for {portrait_id}_{character.build_type}: {e}")
-        
+
         elif is_custom_portrait:
-            logger.info(f"🔥 Custom portrait - skipping pre-generation check, will generate fresh scene")
+            logger.info("🔥 Custom portrait - skipping pre-generation check, will generate fresh scene")
         else:
             logger.warning(f"⚠️  Could not determine portrait type for character {request.character_id}, portrait_url: {character.portrait_url}")
 
@@ -757,26 +758,26 @@ async def trigger_scene_pregeneration(
         Generation summary
     """
     from config.settings import settings
-    
+
     if settings.environment != "development":
         raise HTTPException(
-            status_code=403, 
+            status_code=403,
             detail="Pre-generation endpoint only available in development"
         )
 
     logger.info(f"Triggering scene pre-generation (force={force_regenerate})")
-    
+
     try:
         summary = await scene_pregenerator.generate_all_first_scenes(
             force_regenerate=force_regenerate
         )
-        
+
         logger.info(f"Pre-generation completed: {summary['newly_generated']} successful, {summary['failed']} failed")
         return summary
-        
+
     except Exception as e:
         logger.error(f"Pre-generation failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Pre-generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Pre-generation failed: {e}") from e
 
 
 @router.get("/admin/pregenerate-status")
@@ -789,10 +790,10 @@ async def get_pregeneration_status() -> dict[str, Any]:
         Status summary of all portrait-build combinations
     """
     from config.settings import settings
-    
+
     if settings.environment != "development":
         raise HTTPException(
-            status_code=403, 
+            status_code=403,
             detail="Pre-generation status endpoint only available in development"
         )
 
@@ -800,7 +801,7 @@ async def get_pregeneration_status() -> dict[str, Any]:
         status = {}
         total_combinations = 0
         successful_combinations = 0
-        
+
         for portrait_id in scene_pregenerator.PORTRAIT_IDS:
             status[portrait_id] = {}
             for build_type in scene_pregenerator.BUILD_TYPES:
@@ -809,7 +810,7 @@ async def get_pregeneration_status() -> dict[str, Any]:
                 status[portrait_id][build_type] = "generated" if exists else "missing"
                 if exists:
                     successful_combinations += 1
-        
+
         return {
             "total_combinations": total_combinations,
             "successful_combinations": successful_combinations,
@@ -817,7 +818,7 @@ async def get_pregeneration_status() -> dict[str, Any]:
             "completion_percentage": (successful_combinations / total_combinations) * 100,
             "status": status
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get pre-generation status: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to get status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get status: {e}") from e

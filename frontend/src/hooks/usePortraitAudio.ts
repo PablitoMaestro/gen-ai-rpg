@@ -26,7 +26,7 @@ interface UsePortraitAudioResult {
  * Handles preloading, playing, and managing multiple portrait audio files.
  */
 export function usePortraitAudio(): UsePortraitAudioResult {
-  const { isMuted } = useAudioStore();
+  const { isMuted, narrationVolume, isNarrationMuted } = useAudioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const preloadedAudios = useRef<Map<string, HTMLAudioElement>>(new Map());
   
@@ -71,6 +71,7 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       const audio = new Audio();
       audio.preload = 'auto';
       audio.src = dialogue.audio_url;
+      audio.volume = narrationVolume;
       
       
       // Wait for audio to be ready
@@ -120,7 +121,7 @@ export function usePortraitAudio(): UsePortraitAudioResult {
     } catch (error) {
       console.error(`❌ Failed to preload dialogue for ${portraitId}:`, error);
     }
-  }, [dialogues]);
+  }, [dialogues, narrationVolume]);
   
   // Stop currently playing dialogue
   const stopCurrentDialogue = useCallback((): void => {
@@ -134,10 +135,10 @@ export function usePortraitAudio(): UsePortraitAudioResult {
   
   // Play dialogue for a specific portrait
   const playPortraitDialogue = useCallback(async (portraitId: string): Promise<void> => {
-    console.log(`🔊 Attempting to play dialogue for ${portraitId}`, { isMuted, dialogue: dialogues[portraitId] });
+    // Attempting to play dialogue
     
-    if (isMuted) {
-      console.log(`🔇 Audio is muted, skipping playback for ${portraitId}`);
+    if (isMuted || isNarrationMuted) {
+      // Audio is muted, skipping playback
       return;
     }
     
@@ -203,11 +204,12 @@ export function usePortraitAudio(): UsePortraitAudioResult {
       // Store reference for stopping
       audioRef.current = audio;
       
-      // Reset audio to beginning and play
+      // Set volume and reset audio to beginning and play
+      audio.volume = narrationVolume;
       audio.currentTime = 0;
-      console.log(`🎵 Playing audio for ${portraitId}:`, audio.src);
+      // Playing audio
       await audio.play();
-      console.log(`✅ Audio playback started for ${portraitId}`);
+      // Audio playback started
       
       
     } catch (error) {
@@ -217,24 +219,37 @@ export function usePortraitAudio(): UsePortraitAudioResult {
     } finally {
       setIsLoading(false);
     }
-  }, [dialogues, isMuted, preloadDialogue, stopCurrentDialogue]);
+  }, [dialogues, isMuted, isNarrationMuted, preloadDialogue, stopCurrentDialogue]);
   
   // Handle mute changes
   useEffect(() => {
-    if (isMuted && isPlaying) {
+    if ((isMuted || isNarrationMuted) && isPlaying) {
       stopCurrentDialogue();
     }
-  }, [isMuted, isPlaying, stopCurrentDialogue]);
+  }, [isMuted, isNarrationMuted, isPlaying, stopCurrentDialogue]);
+
+  // Handle narration volume changes
+  useEffect(() => {
+    // Update volume for currently playing audio
+    if (audioRef.current) {
+      audioRef.current.volume = narrationVolume;
+    }
+    // Update volume for all preloaded audio
+    preloadedAudios.current.forEach((audio) => {
+      audio.volume = narrationVolume;
+    });
+  }, [narrationVolume]);
   
   // Cleanup on unmount
   useEffect(() => {
+    const audios = preloadedAudios.current;
     return () => {
       stopCurrentDialogue();
       // Clean up all preloaded audio
-      preloadedAudios.current.forEach((audio) => {
+      audios.forEach((audio) => {
         audio.src = '';
       });
-      preloadedAudios.current.clear();
+      audios.clear();
     };
   }, [stopCurrentDialogue]);
   

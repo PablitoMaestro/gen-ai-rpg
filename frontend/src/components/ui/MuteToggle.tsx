@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import { useAudioStore } from '@/store/audioStore';
 
@@ -9,17 +9,33 @@ import { VolumeControl } from './VolumeControl';
 export function MuteToggle(): React.ReactElement {
   const { isMuted, toggleMute } = useAudioStore();
   const [isHovered, setIsHovered] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (): void => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = (): void => {
+    // Small delay to allow moving to volume panel
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 150);
+  };
 
   return (
     <div 
-      className="relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="fixed bottom-4 left-4 z-50"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <VolumeControl isVisible={isHovered} />
       <button
       onClick={toggleMute}
-      className="fixed bottom-4 left-4 z-50 p-3 rounded-lg 
+      className="p-3 rounded-lg 
                  bg-dark-900/80 border border-amber-500/30 
                  hover:border-amber-400/60 hover:bg-dark-800/90
                  backdrop-blur-sm transition-all duration-300 
@@ -61,15 +77,6 @@ export function MuteToggle(): React.ReactElement {
             : 'bg-blood-400 group-hover:opacity-50'
           }`} 
         />
-      </div>
-      
-      {/* Tooltip on hover */}
-      <div className="absolute bottom-full left-0 mb-2 px-3 py-1 bg-dark-900/95 
-                      border border-amber-500/30 rounded-md backdrop-blur-sm
-                      text-sm text-amber-200 opacity-0 group-hover:opacity-100 
-                      transition-opacity duration-200 pointer-events-none
-                      whitespace-nowrap shadow-golden-sm">
-        {isMuted ? '🎵 Restore the tavern songs' : '🔇 Silence the bards'}
       </div>
       </button>
     </div>

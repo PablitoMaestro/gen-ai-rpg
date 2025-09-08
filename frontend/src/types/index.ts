@@ -6,6 +6,8 @@ export interface Character {
   portrait_url: string;
   full_body_url: string;
   build_type: 'warrior' | 'mage' | 'rogue' | 'ranger';
+  voice_id: string | null; // ElevenLabs voice ID for character narration
+  personality: string | null; // Character personality description for story generation
   hp: number;
   xp: number;
   level: number;

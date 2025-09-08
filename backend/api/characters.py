@@ -14,11 +14,11 @@ from models import (
     get_portrait_characteristics,
     get_preset_portraits,
 )
+from services.elevenlabs import elevenlabs_service
 from services.gemini import gemini_service
+from services.portrait_dialogue import portrait_dialogue_service
 from services.supabase import supabase_service
 from services.voice_design import voice_design_service
-from services.elevenlabs import elevenlabs_service
-from services.portrait_dialogue import portrait_dialogue_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -85,16 +85,16 @@ async def generate_character_builds(
                     break
             if portrait_id:
                 break
-    
+
     # Check if this is a custom portrait (contains custom indicators or is null/None)
     is_custom_portrait = (
         portrait_id is None or
-        not portrait_id or 
+        not portrait_id or
         portrait_id == 'custom' or
         (portrait_url and ('custom_portrait_' in portrait_url or 'uploads/' in portrait_url)) or
         (portrait_id and portrait_id.startswith('http'))
     )
-    
+
     # Check if this is a preset portrait (has valid preset ID and not custom)
     valid_preset_ids = [p["id"] for portraits in [get_preset_portraits("male"), get_preset_portraits("female")] for p in portraits]
     if not is_custom_portrait and portrait_id and portrait_id in valid_preset_ids:
@@ -276,32 +276,48 @@ async def create_character(
     voice_mappings = {
         # Male Characters
         "m1": "TxGEqnHWrfWFTfGW9XjX",  # Josh - energetic young male (Young Rogue)
-        "m2": "D38z5RcWu1voky8WS1ja",  # Ethan - mature, emotional depth (Weary Warrior)  
+        "m2": "D38z5RcWu1voky8WS1ja",  # Ethan - mature, emotional depth (Weary Warrior)
         "m3": "IKne3meq5aSn9XLyUdCD",  # Charlie - strong, assertive (Fierce Fighter)
         "m4": "onwK4e9ZLuTAKqWW03F9",  # Daniel - epic deep old male voice (Wise Elder)
-        
+
         # Female Characters
         "f1": "AZnzlk1XvdvUeBnXmlld",  # Domi - young, hopeful (Young Hope)
         "f2": "EXAVITQu4vr4xnSDxMaL",  # Sarah - strong, serious (Hardened Survivor)
         "f3": "oWAxZDx7w5VEj9dCyTzz",  # Grace - soft, emotional (Sorrowful Soul)
         "f4": "XB0fDUnXU5powFXDhCwa",  # Alice - warm, nurturing elder (Elder Sage)
     }
-    
+
     # Get voice_id for preset portraits
     voice_id = None
-    if request.portrait_id.startswith(('m', 'f')) and len(request.portrait_id) <= 2:
-        voice_id = voice_mappings.get(request.portrait_id)
+
+    # Extract portrait_id from URL or use direct ID
+    extracted_portrait_id = request.portrait_id
+
+    # If it's a URL, extract the portrait ID
+    if request.portrait_id.startswith('http') and 'presets' in request.portrait_id:
+        import re
+        # Extract from URLs like female_portrait_04.png -> f4, male_portrait_01.png -> m1
+        portrait_match = re.search(r'(female|male)_portrait_0?(\d)', request.portrait_id)
+        if portrait_match:
+            gender_prefix = 'f' if portrait_match.group(1) == 'female' else 'm'
+            number = portrait_match.group(2)
+            extracted_portrait_id = f"{gender_prefix}{number}"
+            logger.info(f"Extracted portrait ID {extracted_portrait_id} from URL: {request.portrait_id}")
+
+    # Check if it's a preset portrait ID and assign voice
+    if extracted_portrait_id.startswith(('m', 'f')) and len(extracted_portrait_id) <= 2:
+        voice_id = voice_mappings.get(extracted_portrait_id)
         if voice_id:
-            logger.info(f"Assigned voice {voice_id} to character with portrait {request.portrait_id}")
+            logger.info(f"Assigned voice {voice_id} to character with portrait {extracted_portrait_id}")
         else:
-            logger.warning(f"No voice mapping found for portrait {request.portrait_id}")
-    elif request.portrait_id == 'custom' or request.portrait_id.startswith('http'):
-        # Auto-assign voice based on gender for custom portraits
+            logger.warning(f"No voice mapping found for portrait {extracted_portrait_id}")
+    elif request.portrait_id == 'custom' or (request.portrait_id.startswith('http') and 'presets' not in request.portrait_id):
+        # Auto-assign voice based on gender for custom portraits (non-preset)
         if request.gender == "male":
             voice_id = "TxGEqnHWrfWFTfGW9XjX"  # Josh - young energetic male
             logger.info("Auto-assigned Josh voice for male custom portrait")
         else:
-            voice_id = "AZnzlk1XvdvUeBnXmlld"  # Domi - young hopeful female  
+            voice_id = "AZnzlk1XvdvUeBnXmlld"  # Domi - young hopeful female
             logger.info("Auto-assigned Domi voice for female custom portrait")
 
     # Create character model
@@ -414,7 +430,7 @@ class VoicePreviewRequest(BaseModel):
 async def get_all_voice_configs() -> dict[str, any]:
     """
     Get all character voice configurations.
-    
+
     Returns:
         Dictionary of all character voice configurations
     """
@@ -425,10 +441,10 @@ async def get_all_voice_configs() -> dict[str, any]:
 async def get_voice_config(character_id: str) -> dict[str, any]:
     """
     Get voice configuration for a specific character.
-    
+
     Args:
         character_id: Character portrait ID (m1, m2, f1, f2, etc.)
-        
+
     Returns:
         Character voice configuration
     """
@@ -442,10 +458,10 @@ async def get_voice_config(character_id: str) -> dict[str, any]:
 async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
     """
     Design a voice for a specific character using ElevenLabs.
-    
+
     Args:
         request: Voice design request with character_id and optional custom text
-        
+
     Returns:
         Voice design results with preview information
     """
@@ -454,10 +470,10 @@ async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
         custom_text=request.custom_text,
         save_previews=True
     )
-    
+
     if result.get("error"):
         raise HTTPException(status_code=400, detail=result["error"])
-        
+
     return result
 
 
@@ -465,10 +481,10 @@ async def design_character_voice(request: VoiceDesignRequest) -> dict[str, any]:
 async def design_all_character_voices(save_previews: bool = True) -> dict[str, any]:
     """
     Design voices for all character archetypes.
-    
+
     Args:
         save_previews: Whether to save preview files
-        
+
     Returns:
         Results for all character voice designs
     """
@@ -480,10 +496,10 @@ async def design_all_character_voices(save_previews: bool = True) -> dict[str, a
 async def preview_voice(request: VoicePreviewRequest) -> bytes:
     """
     Generate a voice preview using an existing ElevenLabs voice ID.
-    
+
     Args:
         request: Voice preview request with voice_id and text
-        
+
     Returns:
         Audio data as bytes (MP3 format)
     """
@@ -491,10 +507,10 @@ async def preview_voice(request: VoicePreviewRequest) -> bytes:
         text=request.text,
         voice_id=request.voice_id
     )
-    
+
     if not audio_data:
         raise HTTPException(status_code=500, detail="Failed to generate voice preview")
-        
+
     return audio_data
 
 
@@ -502,11 +518,11 @@ async def preview_voice(request: VoicePreviewRequest) -> bytes:
 async def update_character_voice(character_id: UUID, voice_id: str) -> dict[str, str]:
     """
     Update the voice_id for a character.
-    
+
     Args:
         character_id: Character UUID
         voice_id: ElevenLabs voice ID
-        
+
     Returns:
         Success confirmation
     """
@@ -515,16 +531,16 @@ async def update_character_voice(character_id: UUID, voice_id: str) -> dict[str,
         result = supabase_service.client.table('characters').update({
             'voice_id': voice_id
         }).eq('id', str(character_id)).execute()
-        
+
         if not result.data:
             raise HTTPException(status_code=404, detail="Character not found")
-            
+
         logger.info(f"Updated character {character_id} voice to {voice_id}")
         return {"status": "success", "voice_id": voice_id}
-        
+
     except Exception as e:
         logger.error(f"Failed to update character voice: {e}")
-        raise HTTPException(status_code=500, detail="Failed to update character voice")
+        raise HTTPException(status_code=500, detail="Failed to update character voice") from e
 
 
 # ============================================
@@ -535,17 +551,17 @@ async def update_character_voice(character_id: UUID, voice_id: str) -> dict[str,
 async def get_portrait_dialogue(portrait_id: str) -> dict[str, any]:
     """
     Get dialogue information for a specific portrait.
-    
+
     Args:
         portrait_id: Character portrait ID (m1, m2, f1, f2, etc.)
-        
+
     Returns:
         Dialogue information with text and audio URL
     """
     dialogue = portrait_dialogue_service.get_dialogue_line(portrait_id)
     if not dialogue:
         raise HTTPException(status_code=404, detail=f"No dialogue found for portrait: {portrait_id}")
-    
+
     return {
         "portrait_id": portrait_id,
         "name": dialogue["name"],
@@ -560,13 +576,13 @@ async def get_portrait_dialogue(portrait_id: str) -> dict[str, any]:
 async def get_all_portrait_dialogues() -> dict[str, any]:
     """
     Get dialogue information for all portraits.
-    
+
     Returns:
         Dictionary of all portrait dialogues
     """
     all_dialogues = portrait_dialogue_service.get_all_dialogue_lines()
     result = {}
-    
+
     for portrait_id, dialogue in all_dialogues.items():
         result[portrait_id] = {
             "name": dialogue["name"],
@@ -575,7 +591,7 @@ async def get_all_portrait_dialogues() -> dict[str, any]:
             "duration_estimate": dialogue["duration_estimate"],
             "audio_url": f"/audio/portraits/{portrait_id}_dialogue.mp3"
         }
-    
+
     return result
 
 
@@ -586,28 +602,28 @@ async def generate_portrait_dialogue_audio(
 ) -> dict[str, any]:
     """
     Generate dialogue audio for a specific portrait.
-    
+
     Args:
         portrait_id: Character portrait ID
         voice_id: Optional ElevenLabs voice ID
-        
+
     Returns:
         Generation result with audio information
     """
     dialogue = portrait_dialogue_service.get_dialogue_line(portrait_id)
     if not dialogue:
         raise HTTPException(status_code=404, detail=f"No dialogue found for portrait: {portrait_id}")
-    
+
     try:
         audio_data = await portrait_dialogue_service.generate_dialogue_audio(
             portrait_id=portrait_id,
             voice_id=voice_id,
             save_file=True
         )
-        
+
         if not audio_data:
             raise HTTPException(status_code=500, detail="Failed to generate dialogue audio")
-        
+
         return {
             "success": True,
             "portrait_id": portrait_id,
@@ -615,7 +631,7 @@ async def generate_portrait_dialogue_audio(
             "audio_url": f"/audio/portraits/{portrait_id}_dialogue.mp3",
             "dialogue": dialogue
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to generate dialogue audio for {portrait_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate dialogue audio: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate dialogue audio: {str(e)}") from e

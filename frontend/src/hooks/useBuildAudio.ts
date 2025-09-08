@@ -26,7 +26,7 @@ interface UseBuildAudioResult {
  * Handles preloading, playing, and managing build audio files based on character and build selection.
  */
 export function useBuildAudio(): UseBuildAudioResult {
-  const { isMuted } = useAudioStore();
+  const { isMuted, narrationVolume, isNarrationMuted } = useAudioStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const preloadedAudios = useRef<Map<string, HTMLAudioElement>>(new Map());
   
@@ -84,6 +84,7 @@ export function useBuildAudio(): UseBuildAudioResult {
       const audio = new Audio();
       audio.preload = 'auto';
       audio.src = dialogue.audio_url;
+      audio.volume = narrationVolume;
       
       
       // Wait for audio to be ready
@@ -126,7 +127,7 @@ export function useBuildAudio(): UseBuildAudioResult {
     } catch (error) {
       console.error(`❌ Failed to preload build dialogue for ${buildKey}:`, error);
     }
-  }, [buildDialogues]);
+  }, [buildDialogues, narrationVolume]);
   
   // Stop currently playing dialogue
   const stopCurrentDialogue = useCallback((): void => {
@@ -142,7 +143,7 @@ export function useBuildAudio(): UseBuildAudioResult {
   const playBuildDialogue = useCallback(async (characterId: string, buildType: string): Promise<void> => {
     const buildKey = getBuildKey(characterId, buildType);
     
-    if (isMuted) {
+    if (isMuted || isNarrationMuted) {
       return;
     }
     
@@ -214,7 +215,8 @@ export function useBuildAudio(): UseBuildAudioResult {
       // Store reference for stopping
       audioRef.current = audio;
       
-      // Reset audio to beginning and play
+      // Set volume and reset audio to beginning and play
+      audio.volume = narrationVolume;
       audio.currentTime = 0;
       await audio.play();
       
@@ -226,24 +228,37 @@ export function useBuildAudio(): UseBuildAudioResult {
     } finally {
       setIsLoading(false);
     }
-  }, [buildDialogues, isMuted, preloadBuildDialogue, stopCurrentDialogue]);
+  }, [buildDialogues, isMuted, isNarrationMuted, preloadBuildDialogue, stopCurrentDialogue]);
   
   // Handle mute changes
   useEffect(() => {
-    if (isMuted && isPlaying) {
+    if ((isMuted || isNarrationMuted) && isPlaying) {
       stopCurrentDialogue();
     }
-  }, [isMuted, isPlaying, stopCurrentDialogue]);
+  }, [isMuted, isNarrationMuted, isPlaying, stopCurrentDialogue]);
+
+  // Handle narration volume changes
+  useEffect(() => {
+    // Update volume for currently playing audio
+    if (audioRef.current) {
+      audioRef.current.volume = narrationVolume;
+    }
+    // Update volume for all preloaded audio
+    preloadedAudios.current.forEach((audio) => {
+      audio.volume = narrationVolume;
+    });
+  }, [narrationVolume]);
   
   // Cleanup on unmount
   useEffect(() => {
+    const audios = preloadedAudios.current;
     return () => {
       stopCurrentDialogue();
       // Clean up all preloaded audio
-      preloadedAudios.current.forEach((audio) => {
+      audios.forEach((audio) => {
         audio.src = '';
       });
-      preloadedAudios.current.clear();
+      audios.clear();
     };
   }, [stopCurrentDialogue]);
   

@@ -219,9 +219,15 @@ export default function GamePage(): React.ReactElement {
         return;
       }
       
+      if (!character.voice_id) {
+        console.warn('⚠️ No voice_id assigned to character:', character.name);
+      }
+      
       try {
         // Use the storyService to get first scene (which checks for pre-generated scenes)
         const firstScene = await storyService.generateFirstSceneWithFallback(character.id);
+        
+        // First scene loaded
         
         setScene({
           narration: firstScene.narration,
@@ -331,7 +337,7 @@ export default function GamePage(): React.ReactElement {
                       
                       {/* Voice narration audio */}
                       {scene.audio_url && (
-                        <div className="mt-2 sm:mt-3 flex justify-center">
+                        <div className="mt-2 sm:mt-3 flex flex-col items-center space-y-2">
                           <audio
                             src={scene.audio_url}
                             autoPlay
@@ -339,11 +345,34 @@ export default function GamePage(): React.ReactElement {
                             className="w-full max-w-xs sm:max-w-md bg-black/30 rounded-lg scale-75 sm:scale-90 md:scale-100"
                             onError={(e) => {
                               console.error('Audio playback error:', e);
+                              console.error('Failed audio URL:', scene.audio_url);
+                            }}
+                            onLoadStart={() => {
+                              // Audio loading started
+                            }}
+                            onCanPlay={() => {
+                              // Audio ready to play
+                            }}
+                            onPlay={() => {
+                              // Audio started playing
+                            }}
+                            onPause={() => {
+                              // Audio paused
+                            }}
+                            onEnded={() => {
+                              // Audio finished
                             }}
                           >
                             <source src={scene.audio_url} type="audio/mpeg" />
                             Your browser does not support the audio element.
                           </audio>
+                          
+                          {/* Voice indicator */}
+                          {character?.voice_id && (
+                            <div className="text-xs text-amber-300/70 italic">
+                              🎤 {character.name}&apos;s voice
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -362,7 +391,7 @@ export default function GamePage(): React.ReactElement {
                       
                       {/* Voice narration audio */}
                       {scene.audio_url && (
-                        <div className="mt-2 sm:mt-3 flex justify-center">
+                        <div className="mt-2 sm:mt-3 flex flex-col items-center space-y-2">
                           <audio
                             src={scene.audio_url}
                             autoPlay
@@ -370,11 +399,34 @@ export default function GamePage(): React.ReactElement {
                             className="w-full max-w-xs sm:max-w-md bg-black/30 rounded-lg scale-75 sm:scale-90 md:scale-100"
                             onError={(e) => {
                               console.error('Audio playback error:', e);
+                              console.error('Failed audio URL:', scene.audio_url);
+                            }}
+                            onLoadStart={() => {
+                              // Audio loading started
+                            }}
+                            onCanPlay={() => {
+                              // Audio ready to play
+                            }}
+                            onPlay={() => {
+                              // Audio started playing
+                            }}
+                            onPause={() => {
+                              // Audio paused
+                            }}
+                            onEnded={() => {
+                              // Audio finished
                             }}
                           >
                             <source src={scene.audio_url} type="audio/mpeg" />
                             Your browser does not support the audio element.
                           </audio>
+                          
+                          {/* Voice indicator */}
+                          {character?.voice_id && (
+                            <div className="text-xs text-amber-300/70 italic">
+                              🎤 {character.name}&apos;s voice
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

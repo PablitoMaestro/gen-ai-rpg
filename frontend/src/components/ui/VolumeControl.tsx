@@ -63,39 +63,33 @@ function VolumeSlider({
         </span>
       </div>
 
-      {/* Vertical slider */}
-      <div className="relative h-24 w-4 flex flex-col items-center">
-        {/* Slider track */}
-        <div className={`w-2 h-full rounded-full ${colors.track} relative`}>
-          {/* Slider fill */}
-          <div 
-            className={`absolute bottom-0 w-full rounded-full transition-all duration-200 ${colors.slider}
-                       ${isMuted ? 'opacity-50' : 'opacity-100'}`}
-            style={{ height: `${volume * 100}%` }}
-          />
-          {/* Slider thumb */}
-          <div 
-            className={`absolute w-4 h-3 ${colors.slider} rounded-full border-2 border-dark-900
-                       transform -translate-x-1 cursor-pointer transition-all duration-200
-                       hover:scale-110 shadow-lg ${isMuted ? 'opacity-50' : 'opacity-100'}`}
-            style={{ bottom: `${volume * 100 - 6}%` }}
+      {/* Vertical slider using transform rotation */}
+      <div className="relative h-24 w-8 flex flex-col items-center justify-center">
+        {/* Rotated slider container */}
+        <div className="relative w-20 h-4 -rotate-90">
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+            className={`w-full h-2 rounded-lg appearance-none cursor-pointer
+                       ${colors.track} slider-thumb-${accentColor}`}
+            style={{
+              background: `linear-gradient(to right, ${
+                accentColor === 'amber' ? '#fbbf24' : '#f87171'
+              } 0%, ${
+                accentColor === 'amber' ? '#fbbf24' : '#f87171'
+              } ${volume * 100}%, ${
+                accentColor === 'amber' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(127, 29, 29, 0.3)'
+              } ${volume * 100}%, ${
+                accentColor === 'amber' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(127, 29, 29, 0.3)'
+              } 100%)`
+            }}
+            disabled={isMuted}
           />
         </div>
-        
-        {/* Hidden range input for accessibility and interaction */}
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={volume}
-          onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-          className="absolute inset-0 w-4 h-full opacity-0 cursor-pointer [writing-mode:bt-lr]"
-          style={{
-            WebkitAppearance: 'slider-vertical'
-          }}
-          disabled={isMuted}
-        />
       </div>
 
       {/* Volume percentage */}
@@ -123,13 +117,14 @@ export function VolumeControl({ isVisible, className = '' }: VolumeControlProps)
     toggleNarrationMute 
   } = useAudioStore();
 
-  if (!isVisible) {
-    return <div className="absolute" />;
-  }
+  // Always render but control visibility with opacity/transform for smoother transitions
+  // if (!isVisible) {
+  //   return <div className="absolute" />;
+  // }
 
   return (
-    <div className={`absolute bottom-full left-0 mb-2 transform transition-all duration-300
-                    ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+    <div className={`absolute bottom-full left-0 mb-2 z-[60] transform transition-all duration-300 pointer-events-auto
+                    ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}
                     ${className}`}>
       <div className="bg-dark-900/95 border border-amber-500/30 rounded-lg p-3 
                      backdrop-blur-sm shadow-golden-lg min-w-[180px]">

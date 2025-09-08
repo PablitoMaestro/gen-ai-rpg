@@ -13,7 +13,8 @@ from pathlib import Path
 backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
-from services.scene_pregenerator import scene_pregenerator
+# Import after path setup
+from services.scene_pregenerator import scene_pregenerator  # noqa: E402
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -40,7 +41,7 @@ def print_progress_bar(current: int, total: int, width: int = 50) -> None:
 async def main() -> None:
     """Main script execution."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description="Pre-generate first scenes for all character builds"
     )
@@ -68,20 +69,20 @@ async def main() -> None:
         action="store_true",
         help="Show what would be generated without actually generating"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Set up logging
     setup_logging(args.verbose)
     logger = logging.getLogger(__name__)
-    
+
     print("🎮 AI RPG First Scene Pre-Generation Tool")
     print("=" * 50)
-    
+
     if args.dry_run:
         print("🔍 DRY RUN MODE - No actual generation will occur")
         print()
-    
+
     # Check if we're filtering to specific combinations
     if args.portrait_id and args.build_type:
         print(f"🎯 Generating only for {args.portrait_id} {args.build_type}")
@@ -95,21 +96,21 @@ async def main() -> None:
     else:
         print("🎯 Generating all 32 character-build combinations")
         combinations = [
-            (portrait, build) 
-            for portrait in scene_pregenerator.PORTRAIT_IDS 
+            (portrait, build)
+            for portrait in scene_pregenerator.PORTRAIT_IDS
             for build in scene_pregenerator.BUILD_TYPES
         ]
-    
+
     total_combinations = len(combinations)
     print(f"📊 Total combinations to process: {total_combinations}")
-    
+
     if args.force:
         print("⚠️  Force mode enabled - will regenerate existing scenes")
     else:
         print("✅ Skipping existing successful scenes")
-    
+
     print()
-    
+
     if args.dry_run:
         print("📋 Combinations that would be processed:")
         for i, (portrait_id, build_type) in enumerate(combinations, 1):
@@ -118,11 +119,11 @@ async def main() -> None:
         print()
         print("Use --verbose to see what each step would do")
         return
-    
+
     try:
         print("🚀 Starting pre-generation...")
         start_time = time.time()
-        
+
         if total_combinations <= 4:
             # For small batches, process individually with progress
             results = []
@@ -131,12 +132,12 @@ async def main() -> None:
                 result = await scene_pregenerator.generate_single_first_scene(portrait_id, build_type)
                 results.append(result)
                 print_progress_bar(i + 1, total_combinations)
-            
+
             # Simulate the summary structure
             successful = sum(1 for r in results if r.get('success', False))
             failed = len(results) - successful
             duration = time.time() - start_time
-            
+
             summary = {
                 "status": "completed",
                 "total_combinations": total_combinations,
@@ -151,7 +152,7 @@ async def main() -> None:
             summary = await scene_pregenerator.generate_all_first_scenes(
                 force_regenerate=args.force
             )
-        
+
         print()  # New line after progress bar
         print()
         print("📊 Generation Summary")
@@ -161,17 +162,17 @@ async def main() -> None:
         print(f"🆕 Newly generated: {summary['newly_generated']}")
         print(f"❌ Failed: {summary['failed']}")
         print(f"⏱️  Duration: {summary['duration_seconds']:.1f} seconds")
-        
+
         if summary['newly_generated'] > 0:
             avg_time = summary['duration_seconds'] / max(summary['newly_generated'], 1)
             print(f"📈 Average time per scene: {avg_time:.1f} seconds")
-        
+
         print()
-        
+
         if summary['failed'] > 0:
             print("❌ Failed Generations:")
             failed_results = [
-                r for r in summary.get('results', []) 
+                r for r in summary.get('results', [])
                 if isinstance(r, dict) and not r.get('success', False)
             ]
             for result in failed_results[:5]:  # Show first 5 failures
@@ -179,13 +180,13 @@ async def main() -> None:
                 build_type = result.get('build_type', 'unknown')
                 error = result.get('error', 'Unknown error')[:100]
                 print(f"  • {portrait_id}_{build_type}: {error}")
-            
+
             if len(failed_results) > 5:
                 print(f"  ... and {len(failed_results) - 5} more failures")
             print()
-        
+
         success_rate = (summary['newly_generated'] / max(total_combinations - summary.get('already_generated', 0), 1)) * 100
-        
+
         if summary['failed'] == 0:
             print("🎉 All scenes generated successfully!")
         elif success_rate >= 80:
@@ -193,7 +194,7 @@ async def main() -> None:
         else:
             print(f"⚠️  Generation had issues ({success_rate:.1f}% success rate)")
             print("   Consider running again or checking API limits/configuration")
-        
+
         # Return appropriate exit code
         if summary['failed'] == 0:
             sys.exit(0)
@@ -201,7 +202,7 @@ async def main() -> None:
             sys.exit(1)  # Partial success
         else:
             sys.exit(2)  # Major failure
-            
+
     except KeyboardInterrupt:
         print("\n🛑 Generation interrupted by user")
         sys.exit(130)

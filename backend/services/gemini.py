@@ -122,7 +122,7 @@ class GeminiService:
 
             prompt = build_prompts.get(build_type, build_prompts["warrior"])
             prompt += " Maintain exact facial features from the portrait. Full body visible, game-ready character art."
-            
+
             # Sanitize prompt to avoid content filters
             sanitized_prompt = content_sanitizer.sanitize_for_image_generation(prompt)
 
@@ -352,14 +352,14 @@ ARTISTIC STYLE:
         """Build the prompt for story generation."""
         # Check if this is the initial amnesia scenario
         is_initial_scene = context and ("Beginning of adventure" in context or "Awakening in forest" in context)
-        
+
         if is_initial_scene:
             base_prompt = f"""
             You are generating first-person internal monologue for a dark fantasy RPG where the character has amnesia.
             Create confused, disoriented thoughts as the character wakes up after a bandit attack.
 
             Character: {character} (but they don't remember who they are yet)
-            
+
             AMNESIA SCENARIO: The character wakes up unconscious in a forest. Their head is in severe pain, vision is blurry, and they can barely see. They've been robbed by bandits and hit hard in the head. They cannot remember who they really are or where they came from. Around them are pieces of broken wood, some robbed barrels, and they're lying in a pool of dry blood. They are very weak, level 1, and can barely do anything potent. They start only with basic items from their character build.
 
             CRITICAL REQUIREMENTS:
@@ -379,7 +379,7 @@ ARTISTIC STYLE:
             NARRATION: [Mixed narration: third-person scene description with first-person thoughts in parentheses, 40-60 words total]
             VISUAL_SCENE: [Environmental description for scene image: forest clearing with broken barrels, scattered debris, morning light, weathered ground, 30-50 words]
             CHOICE_1: [Weak survival choice, like "Try to stand up slowly and look around"]
-            CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]  
+            CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]
             CHOICE_3: [Defensive choice, like "Listen carefully for any sounds or threats"]
             CHOICE_4: [Recovery choice, like "Rest a moment and try to remember something"]
             """
@@ -400,7 +400,7 @@ ARTISTIC STYLE:
             base_prompt += """
 
             CRITICAL REQUIREMENTS:
-            1. Write mixed narration: Third-person environment/action description PLUS first-person thoughts in parentheses  
+            1. Write mixed narration: Third-person environment/action description PLUS first-person thoughts in parentheses
             2. Keep narration to 40-60 words total - split between third-person and first-person elements
             3. Make emotions EXTREME: terrified, determined, confused, desperate, cautiously optimistic
             4. NO vulgar language - keep it clean but intense and atmospheric
@@ -417,7 +417,7 @@ ARTISTIC STYLE:
             NARRATION: [Mixed narration: third-person environment/action with first-person thoughts in parentheses, 40-60 words total]
             VISUAL_SCENE: [Environmental description for scene image: current location, lighting, atmosphere, objects, mood indicators, 30-50 words]
             CHOICE_1: [Desperate thought-choice, like "Charge forward with everything I have"]
-            CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]  
+            CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]
             CHOICE_3: [Creative thought-choice, like "Try something unexpected"]
             CHOICE_4: [Retreat thought-choice, like "Maybe discretion is the better part of valor"]
             """
@@ -428,7 +428,7 @@ ARTISTIC STYLE:
         """Generate a basic visual scene description as fallback."""
         # Simple keyword-based scene generation for common scenarios
         lower_narration = narration.lower()
-        
+
         if "forest" in lower_narration or "trees" in lower_narration:
             return "Dense forest with ancient trees towering overhead. Dappled sunlight filters through the canopy. Moss-covered ground with fallen logs."
         elif "dungeon" in lower_narration or "stone" in lower_narration or "chamber" in lower_narration:
