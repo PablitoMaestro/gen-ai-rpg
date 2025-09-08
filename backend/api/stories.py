@@ -624,11 +624,12 @@ async def generate_first_scene_with_fallback(
         raise HTTPException(status_code=404, detail="Character not found")
 
     # Check if this is a first scene request (amnesia scenario)
+    # Only treat it as first scene if there's no previous choice AND it's a beginning context
     is_first_scene = (
+        request.previous_choice is None and
         request.scene_context and
         ("Beginning of adventure" in request.scene_context or
-         "Awakening in forest" in request.scene_context or
-         request.previous_choice is None)
+         "Awakening in forest" in request.scene_context)
     )
 
     if is_first_scene:

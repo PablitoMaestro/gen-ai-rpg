@@ -350,8 +350,12 @@ ARTISTIC STYLE:
         choice: str | None
     ) -> str:
         """Build the prompt for story generation."""
-        # Check if this is the initial amnesia scenario
-        is_initial_scene = context and ("Beginning of adventure" in context or "Awakening in forest" in context)
+        # Check if this is the initial amnesia scenario - only if no previous choice was made
+        is_initial_scene = (
+            choice is None and
+            context and
+            ("Beginning of adventure" in context or "Awakening in forest" in context)
+        )
 
         if is_initial_scene:
             base_prompt = f"""

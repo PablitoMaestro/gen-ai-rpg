@@ -73,7 +73,7 @@ export default function GamePage(): React.ReactElement {
       
       console.warn('🚀 Starting pre-generation for', choiceTexts.length, 'branches');
       
-      const response = await fetch('http://localhost:8000/api/stories/branches/prerender', {
+      const response = await fetch('http://localhost:8006/api/stories/branches/prerender', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -170,13 +170,14 @@ export default function GamePage(): React.ReactElement {
         clearPregeneratedBranches();
         
         // Convert the stored scene format back to the expected format
-        setScene({
+        const newScene = {
           narration: pregeneratedScene.narration,
           image_url: pregeneratedScene.image_url || pregeneratedScene.imageUrl,
           audio_url: pregeneratedScene.audio_url || pregeneratedScene.audioUrl,
           choices: pregeneratedScene.choices || []
-        });
+        };
         
+        setScene(newScene);
         setIsChoiceLoading(false);
         return;
       }
@@ -184,7 +185,7 @@ export default function GamePage(): React.ReactElement {
       console.warn(`📡 No pre-generated scene found for ${choice.id}, generating live...`);
       
       // Fallback to live generation if no pre-generated branch exists
-      const response = await fetch('http://localhost:8000/api/stories/generate', {
+      const response = await fetch('http://localhost:8006/api/stories/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
