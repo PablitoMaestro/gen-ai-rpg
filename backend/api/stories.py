@@ -126,6 +126,9 @@ async def generate_story_scene(
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                         filename = f"scene_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
 
+                        if character.user_id is None:
+                            raise HTTPException(status_code=400, detail="Character must have a user_id")
+                        
                         uploaded_url = await supabase_service.upload_character_image(
                             user_id=character.user_id,
                             file_data=scene_image_bytes,
@@ -164,6 +167,9 @@ async def generate_story_scene(
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"narration_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
 
+                if character.user_id is None:
+                    raise HTTPException(status_code=400, detail="Character must have a user_id")
+                    
                 uploaded_audio_url = await supabase_service.upload_character_image(
                     user_id=character.user_id,
                     file_data=audio_data,
@@ -325,6 +331,9 @@ async def prerender_story_branches(
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             filename = f"branch_{request.character_id}_{choice_index}_{timestamp}_{uuid.uuid4().hex[:8]}.png"
 
+                            if character.user_id is None:
+                                raise HTTPException(status_code=400, detail="Character must have a user_id")
+                            
                             uploaded_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=scene_image_bytes,
@@ -353,6 +362,9 @@ async def prerender_story_branches(
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename = f"branch_audio_{request.character_id}_{choice_index}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
 
+                    if character.user_id is None:
+                        raise HTTPException(status_code=400, detail="Character must have a user_id")
+                    
                     uploaded_audio_url = await supabase_service.upload_character_image(
                         user_id=character.user_id,
                         file_data=audio_data,
@@ -701,6 +713,9 @@ async def generate_first_scene_with_fallback(
                             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                             filename = f"first_scene_audio_{request.character_id}_{timestamp}_{uuid.uuid4().hex[:8]}.mp3"
 
+                            if character.user_id is None:
+                                raise HTTPException(status_code=400, detail="Character must have a user_id")
+                            
                             uploaded_audio_url = await supabase_service.upload_character_image(
                                 user_id=character.user_id,
                                 file_data=audio_data,

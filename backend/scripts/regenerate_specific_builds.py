@@ -7,6 +7,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
+from typing import Literal, cast
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -27,7 +28,7 @@ async def regenerate_portrait_builds(portrait_id: str) -> None:
     portrait_info = None
     gender = None
 
-    for g in ['male', 'female']:
+    for g in cast(list[Literal['male', 'female']], ['male', 'female']):
         for p in PRESET_PORTRAITS[g]:
             if p['id'] == portrait_id:
                 portrait_info = p
@@ -52,7 +53,7 @@ async def regenerate_portrait_builds(portrait_id: str) -> None:
     builds = await generate_builds_for_portrait(
         portrait_id=portrait_id,
         portrait_url=portrait_info['url'],
-        gender=gender
+        gender=cast(Literal['male', 'female'], gender)
     )
 
     if builds:
