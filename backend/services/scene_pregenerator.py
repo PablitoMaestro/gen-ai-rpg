@@ -330,15 +330,24 @@ class PreGenerationService:
             logger.warning(f"Scene image generation failed for {portrait_id}_{build_type}: {e}")
             return None
 
-    async def _generate_voice_narration(self, narration: str) -> str | None:
-        """Generate and upload voice narration."""
-        try:
-            from services.elevenlabs import elevenlabs_service
+    async def _generate_voice_narration(
+        self,
+        narration: str,
+        hero_voice_id: str | None = None,
+    ) -> str | None:
+        """Generate and upload combined narrator+hero voice narration.
 
-            # Use default narrator voice for pre-generated scenes
-            audio_data = await elevenlabs_service.generate_narration(
-                text=narration,
-                voice_id=None  # Use default Rachel voice
+        Pre-generated first scenes have no character context, so callers
+        pass hero_voice_id=None and the composer uses narrator voice for
+        all parts. Fresh per-character narration is layered in by
+        api/stories.py when a real character plays the pre-rendered scene.
+        """
+        try:
+            from services.narration_composer import narration_composer
+
+            audio_data = await narration_composer.compose_scene_audio(
+                narration=narration,
+                hero_voice_id=hero_voice_id,
             )
 
             if not audio_data:
@@ -353,7 +362,7 @@ class PreGenerationService:
             uploaded_url = await supabase_service.upload_character_image(
                 user_id="00000000-0000-0000-0000-000000000001",  # Use test user
                 file_data=audio_data,
-                filename=filename
+                filename=filename,
             )
 
             return uploaded_url
