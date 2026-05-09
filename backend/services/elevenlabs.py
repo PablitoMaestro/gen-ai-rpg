@@ -20,7 +20,8 @@ class ElevenLabsService:
         self,
         text: str,
         voice_id: str | None = None,
-        model_id: str = "eleven_monolingual_v1"
+        model_id: str = "eleven_monolingual_v1",
+        voice_settings: dict[str, Any] | None = None,
     ) -> bytes:
         """
         Generate speech audio from text.
@@ -29,6 +30,9 @@ class ElevenLabsService:
             text: Text to convert to speech
             voice_id: ElevenLabs voice ID
             model_id: TTS model to use
+            voice_settings: Optional ElevenLabs voice_settings dict; defaults
+                to stability=0.75, similarity_boost=0.75, style=0.5,
+                use_speaker_boost=True.
 
         Returns:
             Audio data as bytes (MP3 format)
@@ -46,15 +50,17 @@ class ElevenLabsService:
             "xi-api-key": self.api_key
         }
 
+        effective_voice_settings = voice_settings or {
+            "stability": 0.75,
+            "similarity_boost": 0.75,
+            "style": 0.5,
+            "use_speaker_boost": True,
+        }
+
         data = {
             "text": text,
             "model_id": model_id,
-            "voice_settings": {
-                "stability": 0.75,
-                "similarity_boost": 0.75,
-                "style": 0.5,
-                "use_speaker_boost": True
-            }
+            "voice_settings": effective_voice_settings,
         }
 
         try:
@@ -118,10 +124,11 @@ class ElevenLabsService:
         self,
         text: str,
         voice_id: str | None = None,
-        model_id: str = "eleven_monolingual_v1"
+        model_id: str = "eleven_monolingual_v1",
+        voice_settings: dict[str, Any] | None = None,
     ) -> bytes:
         """Alias for generate_narration for backward compatibility."""
-        return await self.generate_narration(text, voice_id, model_id)
+        return await self.generate_narration(text, voice_id, model_id, voice_settings)
 
 
 # Singleton instance
