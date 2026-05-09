@@ -79,7 +79,8 @@ export default function GamePage(): React.ReactElement {
         body: JSON.stringify({
           character_id: character.id,
           scene_context: scene?.narration || "Continuing adventure",
-          choices: choiceTexts
+          choices: choiceTexts,
+          previous_scene_image_url: scene?.image_url || null
         })
       });
       
@@ -191,7 +192,8 @@ export default function GamePage(): React.ReactElement {
         body: JSON.stringify({
           character_id: character.id,
           scene_context: scene?.narration || "Continuing adventure",
-          previous_choice: choice.text
+          previous_choice: choice.text,
+          previous_scene_image_url: scene?.image_url || null
         })
       });
       

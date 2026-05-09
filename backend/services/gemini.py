@@ -143,18 +143,21 @@ class GeminiService:
         self,
         character_image: bytes,
         scene_description: str,
-        session_id: str | None = None
+        session_id: str | None = None,
+        anchor_image: bytes | None = None,
+        previous_image: bytes | None = None,
     ) -> bytes:
         """
         Generate a scene image with character integrated using Nano Banana.
 
-        Args:
-            character_image: Character image bytes
-            scene_description: Description of the scene
-            session_id: Optional session ID for maintaining consistency
-
-        Returns:
-            Generated scene image bytes
+        Multi-reference image inputs (in order, when supplied) are:
+            1. character_image — locks the hero's visual DNA across scenes
+            2. anchor_image    — the session's first scene; pins palette,
+               lighting, time-of-day, and atmosphere so the world stays
+               consistent and drift can't compound
+            3. previous_image  — the immediately preceding scene; carries
+               scene-to-scene continuity (place, weather, recent props).
+               Skipped when it would equal the anchor.
         """
         try:
             if not Image:
@@ -164,11 +167,33 @@ class GeminiService:
             # Open character image
             character_pil = Image.open(io.BytesIO(character_image))
 
+            # Open optional reference images, deduping previous == anchor
+            anchor_pil = Image.open(io.BytesIO(anchor_image)) if anchor_image else None
+            previous_pil = None
+            if previous_image and previous_image != anchor_image:
+                previous_pil = Image.open(io.BytesIO(previous_image))
+
             # Sanitize scene description for image generation
             sanitized_description = content_sanitizer.sanitize_for_image_generation(scene_description)
 
+            # Label each reference so the model knows what role each plays.
+            reference_labels = ["1. CHARACTER REFERENCE — preserve face, build, clothing, and equipment exactly."]
+            if anchor_pil is not None:
+                reference_labels.append(
+                    "2. WORLD ANCHOR — match this image's color palette, lighting key, "
+                    "time-of-day, weather, and overall atmosphere. This is the world's canonical look."
+                )
+            if previous_pil is not None:
+                reference_labels.append(
+                    f"{len(reference_labels) + 1}. PREVIOUS SCENE — preserve continuity of place, "
+                    "lighting direction, and props that should still be present."
+                )
+            references_block = "REFERENCE IMAGES:\n" + "\n".join(reference_labels)
+
             # Build comprehensive scene prompt
             prompt = f"""Create a first-person RPG scene image showing this character in an environment.
+
+{references_block}
 
 ENVIRONMENT DESCRIPTION:
 {sanitized_description}
@@ -195,14 +220,19 @@ ARTISTIC STYLE:
             # Apply additional sanitization to the complete prompt
             prompt = content_sanitizer.sanitize_for_image_generation(prompt)
 
+            # Assemble inputs in the same order as the labels above.
+            inputs: list[Any] = [prompt, character_pil]
+            if anchor_pil is not None:
+                inputs.append(anchor_pil)
+            if previous_pil is not None:
+                inputs.append(previous_pil)
+
             # Use chat session if available for consistency
             if session_id and session_id in self.chat_sessions:
                 chat = self.chat_sessions[session_id]
-                response = await chat.send_message_async([prompt, character_pil])
+                response = await chat.send_message_async(inputs)
             else:
-                response = await self.image_model.generate_content_async(
-                    [prompt, character_pil]
-                )
+                response = await self.image_model.generate_content_async(inputs)
 
             # Extract generated scene using common method
             return self._extract_image_from_response(response)

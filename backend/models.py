@@ -303,6 +303,9 @@ class StoryGenerateRequest(BaseModel):
     character_id: UUID
     previous_choice: str | None = None
     scene_context: str | None = None
+    # URL of the scene image the player is currently viewing. Passed back to
+    # Gemini as a continuity reference so palette/lighting carry forward.
+    previous_scene_image_url: str | None = None
 
     class Config:
         json_encoders = {UUID: str}
