@@ -84,6 +84,16 @@ def split_narration(narration: str) -> list[Segment]:
     return segments
 
 
+def _strip_for_tts(text: str) -> str:
+    """Remove characters ElevenLabs reads aloud literally.
+
+    ElevenLabs TTS speaks asterisks as the word "asterisk" rather than
+    treating them as emphasis markers, so any `*` Gemini emits in the
+    narration must be removed before sending text to the API.
+    """
+    return text.replace("*", "")
+
+
 class NarrationComposer:
     """Combines narrator + hero TTS chunks into a single scene MP3."""
 
@@ -113,14 +123,15 @@ class NarrationComposer:
         effective_hero_voice = hero_voice_id or narrator_voice
 
         async def gen(seg: Segment) -> bytes:
+            tts_text = _strip_for_tts(seg.text)
             if seg.voice == "narrator":
                 return await elevenlabs_service.generate_narration(
-                    text=seg.text,
+                    text=tts_text,
                     voice_id=narrator_voice,
                     voice_settings=NARRATOR_VOICE_SETTINGS,
                 )
             return await elevenlabs_service.generate_narration(
-                text=seg.text,
+                text=tts_text,
                 voice_id=effective_hero_voice,
                 voice_settings=HERO_VOICE_SETTINGS,
             )
@@ -133,7 +144,7 @@ class NarrationComposer:
                 "single-voice render of full narration"
             )
             return await elevenlabs_service.generate_narration(
-                text=narration,
+                text=_strip_for_tts(narration),
                 voice_id=narrator_voice,
                 voice_settings=NARRATOR_VOICE_SETTINGS,
             )
@@ -148,7 +159,7 @@ class NarrationComposer:
                 f"pydub decode failed: {e}; falling back to single-voice"
             )
             return await elevenlabs_service.generate_narration(
-                text=narration,
+                text=_strip_for_tts(narration),
                 voice_id=narrator_voice,
                 voice_settings=NARRATOR_VOICE_SETTINGS,
             )

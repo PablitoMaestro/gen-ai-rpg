@@ -234,3 +234,58 @@ def test_segment_dataclass_is_frozen() -> None:
     seg = Segment(voice="narrator", text="hello")
     with pytest.raises((AttributeError, Exception)):
         seg.text = "changed"  # type: ignore[misc]
+
+
+@pytest.mark.asyncio
+class TestAsteriskStripping:
+    """ElevenLabs reads `*` aloud literally, so it must be stripped before TTS."""
+
+    async def test_asterisks_stripped_from_narrator_text(self) -> None:
+        chunk = _make_silent_mp3(300)
+        with patch(
+            "services.narration_composer.elevenlabs_service.generate_narration",
+            new=AsyncMock(return_value=chunk),
+        ) as mock_gen:
+            await narration_composer.compose_scene_audio(
+                narration="The hero *suddenly* draws their blade.",
+                hero_voice_id="HERO_VOICE",
+            )
+
+        assert mock_gen.await_args.kwargs["text"] == "The hero suddenly draws their blade."
+
+    async def test_asterisks_stripped_from_hero_text(self) -> None:
+        chunk = _make_silent_mp3(300)
+        with patch(
+            "services.narration_composer.elevenlabs_service.generate_narration",
+            new=AsyncMock(return_value=chunk),
+        ) as mock_gen:
+            await narration_composer.compose_scene_audio(
+                narration="(*Whispers* my heart pounds.)",
+                hero_voice_id="HERO_VOICE",
+            )
+
+        assert mock_gen.await_args.kwargs["text"] == "Whispers my heart pounds."
+
+    async def test_asterisks_stripped_in_fallback_path(self) -> None:
+        good_chunk = _make_silent_mp3(400)
+
+        async def mock_generate(text: str, **_: object) -> bytes:
+            # Hero segment text has already had its asterisks stripped by
+            # the time it reaches the mock; matching the stripped form
+            # forces the fallback path.
+            if text == "I am lost.":
+                return b""
+            return good_chunk
+
+        with patch(
+            "services.narration_composer.elevenlabs_service.generate_narration",
+            new=AsyncMock(side_effect=mock_generate),
+        ) as mock_gen:
+            await narration_composer.compose_scene_audio(
+                narration="Wind *howls*. (I am *lost*.)",
+                hero_voice_id="HERO_VOICE",
+            )
+
+        # Last call is the fallback with the full original narration; assert
+        # it stripped asterisks before sending.
+        assert mock_gen.await_args.kwargs["text"] == "Wind howls. (I am lost.)"
