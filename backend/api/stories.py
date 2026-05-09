@@ -414,13 +414,12 @@ async def prerender_story_branches(
                     logger.warning(f"Branch {choice_index} image generation failed: {e}")
                     image_url = character.full_body_url
 
-            # Generate voice narration for the branch
+            # Generate dual-voice narration for the branch
             audio_url = None
             try:
-                voice_id_to_use = character.voice_id if character.voice_id else None
-                audio_data = await elevenlabs_service.generate_narration(
-                    text=story_data["narration"],
-                    voice_id=voice_id_to_use
+                audio_data = await narration_composer.compose_scene_audio(
+                    narration=story_data["narration"],
+                    hero_voice_id=character.voice_id,
                 )
 
                 if audio_data:
