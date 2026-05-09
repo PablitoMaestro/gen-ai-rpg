@@ -1,14 +1,17 @@
 import asyncio
 import logging
+import re
 import time
 import uuid
 from typing import Any
 from uuid import UUID
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel as PydanticBaseModel
 
 from models import (
+    Character,
     GameSession,
     GameStateUpdate,
     StoryBranch,
@@ -18,11 +21,54 @@ from models import (
 )
 from services.elevenlabs import elevenlabs_service
 from services.gemini import gemini_service
+from services.narration_composer import narration_composer
 from services.scene_pregenerator import scene_pregenerator
 from services.supabase import supabase_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+# Matches preset full-body build URLs like .../build_f4_ranger.png
+PORTRAIT_ID_PATTERN = re.compile(r"/build_([mf][1-4])_(?:warrior|mage|rogue|ranger)\.png")
+
+
+def _absolute_url(url: str) -> str:
+    """Resolve a relative storage URL to an absolute one using current settings."""
+    if url.startswith(("http://", "https://")):
+        return url
+    from config.settings import settings
+    base = "http://127.0.0.1:54331" if settings.environment == "development" else settings.supabase_url
+    return f"{base}{url}" if url.startswith("/") else f"{base}/{url}"
+
+
+async def _fetch_url_bytes(url: str | None) -> bytes | None:
+    """Best-effort download for an optional reference image; None on any failure."""
+    if not url:
+        return None
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(_absolute_url(url), timeout=15)
+        return response.content if response.status_code == 200 else None
+    except Exception as e:
+        logger.warning(f"Reference image fetch failed for {url}: {e}")
+        return None
+
+
+async def _fetch_anchor_bytes(character: Character) -> bytes | None:
+    """
+    Return bytes of the session's first scene image (the world anchor) for a
+    preset character, or None for custom portraits (no anchor exists).
+    """
+    if not character.full_body_url:
+        return None
+    match = PORTRAIT_ID_PATTERN.search(character.full_body_url)
+    if not match:
+        return None
+    portrait_id = match.group(1)
+    first_scene = await supabase_service.get_first_scene(portrait_id, character.build_type)
+    if not first_scene or not first_scene.get("image_url"):
+        return None
+    return await _fetch_url_bytes(first_scene["image_url"])
 
 
 class BranchPrerenderRequest(PydanticBaseModel):
@@ -30,6 +76,9 @@ class BranchPrerenderRequest(PydanticBaseModel):
     character_id: UUID
     scene_context: str
     choices: list[str]  # List of choice texts to generate branches for
+    # URL of the scene image preceding these branches; passed to Gemini as a
+    # continuity reference so all four branches share the parent's atmosphere.
+    previous_scene_image_url: str | None = None
 
 
 class SessionCreateRequest(PydanticBaseModel):
@@ -116,9 +165,18 @@ async def generate_story_scene(
                         # Use visual scene description if available, otherwise fallback to narration
                         scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
 
+                        # Visual continuity references: anchor (locks world look)
+                        # + previous scene (carries scene-to-scene atmosphere)
+                        anchor_bytes, previous_bytes = await asyncio.gather(
+                            _fetch_anchor_bytes(character),
+                            _fetch_url_bytes(request.previous_scene_image_url),
+                        )
+
                         scene_image_bytes = await gemini_service.generate_scene_image(
                             character_image=character_image_bytes,
-                            scene_description=scene_description_for_image
+                            scene_description=scene_description_for_image,
+                            anchor_image=anchor_bytes,
+                            previous_image=previous_bytes,
                         )
 
                         # Upload to storage
@@ -150,15 +208,14 @@ async def generate_story_scene(
         # Generate voice narration for the scene (always generate, use character voice or default narrator)
         audio_url = None
         try:
-            # Use character's voice if available, otherwise use default narrator (Rachel)
-            voice_id_to_use = character.voice_id if character.voice_id else None
+            logger.info(
+                f"Generating dual-voice narration (hero voice: "
+                f"{character.voice_id or 'fallback to narrator'})"
+            )
 
-            logger.info(f"Generating narration with voice_id: {voice_id_to_use or 'default (Rachel)'}")
-
-            # Generate audio using the character's voice or default narrator
-            audio_data = await elevenlabs_service.generate_narration(
-                text=story_data["narration"],
-                voice_id=voice_id_to_use  # Will use default "Rachel" voice if None
+            audio_data = await narration_composer.compose_scene_audio(
+                narration=story_data["narration"],
+                hero_voice_id=character.voice_id,
             )
 
             if audio_data:
@@ -269,6 +326,13 @@ async def prerender_story_branches(
     if character.personality:
         character_desc += f" with personality: {character.personality}"
 
+    # Fetch reference images once and share across all 4 parallel branches.
+    # Anchor pins world palette/atmosphere; previous holds adjacent-scene continuity.
+    anchor_bytes, previous_bytes = await asyncio.gather(
+        _fetch_anchor_bytes(character),
+        _fetch_url_bytes(request.previous_scene_image_url),
+    )
+
     async def generate_single_branch(choice_text: str, choice_index: int) -> StoryBranch:
         """Generate a single story branch."""
         start_time = time.time()
@@ -323,7 +387,9 @@ async def prerender_story_branches(
                             scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
                             scene_image_bytes = await gemini_service.generate_scene_image(
                                 character_image=character_image_bytes,
-                                scene_description=scene_description_for_image
+                                scene_description=scene_description_for_image,
+                                anchor_image=anchor_bytes,
+                                previous_image=previous_bytes,
                             )
 
                             # Upload to storage
