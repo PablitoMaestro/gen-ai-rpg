@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     api_title: str = "AI RPG Backend"
     api_description: str = "Backend API for AI-powered RPG game"
 
+    # Voice configuration
+    narrator_voice_id: str = "nPczCjzI2devNBz1zQrb"  # Brian — deep cinematic narrator
+
     class Config:
         env_file = get_env_file()
         env_file_encoding = "utf-8"
