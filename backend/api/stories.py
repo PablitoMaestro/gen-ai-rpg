@@ -191,7 +191,7 @@ async def generate_story_scene(
         scene = StoryScene(
             scene_id=f"scene_{request.character_id}_{len(request.scene_context or '')}",
             narration=story_data["narration"],
-            image_url=image_url or "/scenes/default.jpg",
+            image_url=image_url or "/scenes/forest_awakening.jpg",
             audio_url=audio_url,
             choices=choices,
             is_combat=False,
@@ -234,7 +234,7 @@ async def generate_story_scene(
                 "My head throbs as consciousness returns. Vision blurry, surrounded by broken wood and empty barrels. "
                 "Blood stains my clothes but I'm alive. Where am I? Who am I? Nothing comes back to me."
             ),
-            image_url="/scenes/default.jpg",
+            image_url="/scenes/forest_awakening.jpg",
             audio_url=None,  # No audio for fallback scene
             choices=choices,
             is_combat=False,
@@ -382,7 +382,7 @@ async def prerender_story_branches(
             scene = StoryScene(
                 scene_id=f"branch_{request.character_id}_{choice_index}_{int(time.time())}",
                 narration=story_data["narration"],
-                image_url=image_url or "/scenes/default.jpg",
+                image_url=image_url or "/scenes/forest_awakening.jpg",
                 audio_url=audio_url,
                 choices=choices,
                 is_combat=False,
@@ -583,7 +583,7 @@ async def get_pregenerated_first_scene(
             scene = StoryScene(
                 scene_id=f"first_scene_{portrait_id}_{build_type}",
                 narration=scene_data["narration"],
-                image_url=scene_data["image_url"] or "/scenes/default.jpg",
+                image_url=scene_data["image_url"] or "/scenes/forest_awakening.jpg",
                 audio_url=scene_data["audio_url"],
                 choices=choices,
                 is_combat=False,
@@ -732,7 +732,7 @@ async def generate_first_scene_with_fallback(
                     scene = StoryScene(
                         scene_id=f"first_scene_{request.character_id}",
                         narration=scene_data["narration"],
-                        image_url=scene_data["image_url"] or "/scenes/default.jpg",
+                        image_url=scene_data["image_url"] or "/scenes/forest_awakening.jpg",
                         audio_url=audio_url,  # Use fresh audio with character voice
                         choices=choices,
                         is_combat=False,

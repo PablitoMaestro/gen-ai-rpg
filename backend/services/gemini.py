@@ -24,7 +24,7 @@ class GeminiService:
         genai.configure(api_key=settings.gemini_api_key)
         self.story_model = genai.GenerativeModel('gemini-2.5-flash')
         # Nano Banana model for image generation
-        self.image_model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
+        self.image_model = genai.GenerativeModel('gemini-2.5-flash-image')
         self.chat_sessions: dict[str, Any] = {}  # Store chat sessions for consistency
 
     async def generate_story_scene(

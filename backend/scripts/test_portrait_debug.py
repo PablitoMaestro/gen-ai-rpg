@@ -17,7 +17,7 @@ async def test_portrait_generation() -> None:
 
     # Configure API
     genai.configure(api_key=settings.gemini_api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
+    model = genai.GenerativeModel('gemini-2.5-flash-image')
 
     prompt = ("A photorealistic portrait of a medieval knight from the neck up, "
               "wearing armor, neutral background. Medieval fantasy RPG character art style.")

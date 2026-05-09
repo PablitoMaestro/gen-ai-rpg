@@ -110,7 +110,7 @@ file_size_limit = "50MiB"
 [storage.buckets.character-images]
 public = true
 file_size_limit = "50MiB"
-allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp", "audio/mpeg"]
 objects_path = "./character-images"
 
 [auth]
