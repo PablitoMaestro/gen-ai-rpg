@@ -234,7 +234,7 @@ async def generate_story_scene(
                 "My head throbs as consciousness returns. Vision blurry, surrounded by broken wood and empty barrels. "
                 "Blood stains my clothes but I'm alive. Where am I? Who am I? Nothing comes back to me."
             ),
-            image_url=None,
+            image_url="/scenes/default.jpg",
             audio_url=None,  # No audio for fallback scene
             choices=choices,
             is_combat=False,

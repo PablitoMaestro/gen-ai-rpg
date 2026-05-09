@@ -196,15 +196,16 @@ export function useBuildAudio(): UseBuildAudioResult {
       };
       
       const handleError = (): void => {
+        // Cleanup teardown sets src='' which always triggers a benign error event — ignore it.
+        if (!audio || !audio.src || audio.src === window.location.href) {
+          return;
+        }
         console.error(`Error playing build dialogue for ${buildKey}`);
         setIsPlaying(false);
         setCurrentBuild(null);
-        // Clean up event listeners
-        if (audio) {
-          audio.removeEventListener('play', handlePlay);
-          audio.removeEventListener('ended', handleEnded);
-          audio.removeEventListener('error', handleError);
-        }
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('ended', handleEnded);
+        audio.removeEventListener('error', handleError);
       };
       
       // Add event listeners

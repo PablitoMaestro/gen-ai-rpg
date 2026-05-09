@@ -22,7 +22,7 @@ class GeminiService:
 
     def __init__(self) -> None:
         genai.configure(api_key=settings.gemini_api_key)
-        self.story_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        self.story_model = genai.GenerativeModel('gemini-2.5-flash')
         # Nano Banana model for image generation
         self.image_model = genai.GenerativeModel('gemini-2.5-flash-image-preview')
         self.chat_sessions: dict[str, Any] = {}  # Store chat sessions for consistency
