@@ -4,10 +4,11 @@ FROM python:3.13-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (ffmpeg required by pydub for audio concatenation)
 RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     build-essential \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
