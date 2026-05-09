@@ -176,6 +176,7 @@ async def generate_story_scene(
                             scene_description=scene_description_for_image,
                             anchor_image=anchor_bytes,
                             previous_image=previous_bytes,
+                            mood=story_data.get("mood"),
                         )
 
                         # Upload to storage
@@ -389,6 +390,7 @@ async def prerender_story_branches(
                                 scene_description=scene_description_for_image,
                                 anchor_image=anchor_bytes,
                                 previous_image=previous_bytes,
+                                mood=story_data.get("mood"),
                             )
 
                             # Upload to storage

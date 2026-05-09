@@ -309,7 +309,8 @@ class PreGenerationService:
             visual_scene = story_data.get('visual_scene', story_data.get('narration', ''))
             scene_image_bytes = await gemini_service.generate_scene_image(
                 character_image=character_image_bytes,
-                scene_description=visual_scene
+                scene_description=visual_scene,
+                mood=story_data.get('mood'),
             )
 
             # Upload to storage

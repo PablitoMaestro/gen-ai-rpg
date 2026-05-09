@@ -146,6 +146,7 @@ class GeminiService:
         session_id: str | None = None,
         anchor_image: bytes | None = None,
         previous_image: bytes | None = None,
+        mood: str | None = None,
     ) -> bytes:
         """
         Generate a scene image with character integrated using Nano Banana.
@@ -189,33 +190,51 @@ class GeminiService:
                     "lighting direction, and props that should still be present."
                 )
             references_block = "REFERENCE IMAGES:\n" + "\n".join(reference_labels)
+            tenor = (mood or "tense and atmospheric").strip() or "tense and atmospheric"
 
-            # Build comprehensive scene prompt
-            prompt = f"""Create a first-person RPG scene image showing this character in an environment.
+            # Build comprehensive scene prompt — art director's brief, not a description.
+            prompt = f"""You are rendering a single frame from a dark-fantasy CRPG cutscene.
+Treat this like a still from a cinematic film — every element should serve the
+emotional beat below, not just describe a place.
 
 {references_block}
 
-ENVIRONMENT DESCRIPTION:
+SCENE BRIEF (labeled clauses; consume them, do NOT render them as text):
 {sanitized_description}
 
-CHARACTER PLACEMENT:
-- Show the character from behind or at a 3/4 angle
-- Character positioned in lower third of the image
-- Character facing into the scene/environment
-- Maintain exact appearance, clothing, and equipment from reference image
+EMOTIONAL TENOR:
+{tenor}
 
-VISUAL COMPOSITION:
-- First-person RPG perspective (slightly behind and above character)
-- Cinematic wide shot showing both character and environment
-- Environmental storytelling through scene details
-- Create depth with foreground, midground, and background elements
+DIRECTION:
+- Translate the brief into cinematography. Build the image from the labeled
+  clauses (SETTING / LIGHT / KEY OBJECTS / ATMOSPHERE); do not rephrase prose.
+- Lighting drives the mood. Construct key/fill/rim from the LIGHT clause:
+    * dread / fear / loss / dread-tinted moods → push key low, shadows long,
+      cool spill on fills, rim only when narratively required.
+    * triumph / clarity / awe / hope → raise key, lift fills, allow warm rim
+      light to catch the character's silhouette and metal accents.
+    * tension / anticipation → harsh contrast, single hard key, deep blacks.
+- Foreground anchor is one of the KEY OBJECTS framed close; the character
+  occupies the lower third of frame, oriented into the scene.
+- Color grade: pull one accent hue from the LIGHT clause and contrast it
+  against a muted earth-tone or cool steel-gray base. No fully saturated
+  fields of color; restraint is the rule.
 
-ARTISTIC STYLE:
-- Medieval dark fantasy atmosphere
-- Dramatic lighting with strong contrast
-- Rich environmental details and textures
-- Game-ready cinematic art style
-- High-quality digital artwork"""
+CAMERA & FRAMING:
+- Third-person over-the-shoulder, slightly behind and above the character.
+- Approximately 28-35mm equivalent for cinematic wide framing. Tighter
+  framing and shallower depth of field for intimate or fearful tenor; wider
+  framing with deep depth for vast or contemplative tenor.
+
+ARTISTIC STYLE — cinematic photoreal (modern AAA CRPG cutscene):
+- Photoreal rendering with subtle filmic grain and soft anamorphic-style
+  highlights on bright sources. NOT painterly, NOT cartoon, NOT airbrushed.
+- Cool overall grade with selective warm accents (firelight, embers, sun)
+  reserved for narrative focus.
+- High microdetail in foreground props (cloth weave, metal pitting, stone
+  texture, individual hairs); atmospheric haze softens midground and far
+  distance to push depth.
+- Absolutely no text, captions, UI overlays, watermarks, or rendered prose."""
 
             # Apply additional sanitization to the complete prompt
             prompt = content_sanitizer.sanitize_for_image_generation(prompt)
@@ -411,7 +430,13 @@ ARTISTIC STYLE:
 
             Format your response as:
             NARRATION: [Mixed narration: third-person scene description with first-person thoughts in parentheses, 40-60 words total]
-            VISUAL_SCENE: [Environmental description for scene image: forest clearing with broken barrels, scattered debris, morning light, weathered ground, 30-50 words]
+            VISUAL_SCENE: [Cinematic shot brief for the image renderer — NOT prose, must NOT reuse narration phrasing. Single line, labeled clauses separated by semicolons:
+              SETTING: place + time-of-day + weather;
+              LIGHT: key source + color + intensity;
+              KEY OBJECTS: 3-4 props or features anchoring the frame;
+              ATMOSPHERE: particulates/textures (embers, mist, rain, dust)
+              Example: "SETTING: forest clearing, dawn, low fog; LIGHT: pale shafts through canopy, cool gray-blue, weak; KEY OBJECTS: shattered barrels, bloodstained earth, splintered cart wheel, scattered coins; ATMOSPHERE: drifting mist, dew on leaves, faint birdsong haze"]
+            MOOD: [one or two evocative words for the scene's emotional tenor — e.g. "disoriented dread", "fragile hope", "stunned aftermath"]
             CHOICE_1: [Weak survival choice, like "Try to stand up slowly and look around"]
             CHOICE_2: [Cautious choice, like "Check my belongings to see what's left"]
             CHOICE_3: [Defensive choice, like "Listen carefully for any sounds or threats"]
@@ -449,7 +474,13 @@ ARTISTIC STYLE:
 
             Format your response as:
             NARRATION: [Mixed narration: third-person environment/action with first-person thoughts in parentheses, 40-60 words total]
-            VISUAL_SCENE: [Environmental description for scene image: current location, lighting, atmosphere, objects, mood indicators, 30-50 words]
+            VISUAL_SCENE: [Cinematic shot brief for the image renderer — NOT prose, must NOT reuse narration phrasing. Single line, labeled clauses separated by semicolons:
+              SETTING: place + time-of-day + weather;
+              LIGHT: key source + color + intensity;
+              KEY OBJECTS: 3-4 props or features anchoring the frame;
+              ATMOSPHERE: particulates/textures (embers, mist, rain, dust)
+              Example: "SETTING: ruined chapel interior, midnight, no weather; LIGHT: single guttering candle on altar, warm amber, very dim; KEY OBJECTS: cracked stone altar, fallen crucifix, scattered prayer beads, claw-marked pew; ATMOSPHERE: drifting dust motes, cold breath fog, oppressive silence"]
+            MOOD: [one or two evocative words for the scene's emotional tenor — e.g. "creeping dread", "weary triumph", "exhilarated panic", "reverent awe"]
             CHOICE_1: [Desperate thought-choice, like "Charge forward with everything I have"]
             CHOICE_2: [Cautious thought-choice, like "Find cover and assess the situation"]
             CHOICE_3: [Creative thought-choice, like "Try something unexpected"]
@@ -485,6 +516,7 @@ ARTISTIC STYLE:
 
         narration = ""
         visual_scene = ""
+        mood = ""
         choices = []
 
         for line in lines:
@@ -492,6 +524,8 @@ ARTISTIC STYLE:
                 narration = line.replace("NARRATION:", "").strip()
             elif line.startswith("VISUAL_SCENE:"):
                 visual_scene = line.replace("VISUAL_SCENE:", "").strip()
+            elif line.startswith("MOOD:"):
+                mood = line.replace("MOOD:", "").strip()
             elif line.startswith("CHOICE_"):
                 choice_text = line.split(":", 1)[1].strip()
                 choices.append(choice_text)
@@ -503,6 +537,7 @@ ARTISTIC STYLE:
         return {
             "narration": narration,
             "visual_scene": visual_scene,
+            "mood": mood,
             "choices": choices[:4]  # Ensure exactly 4 choices
         }
 
