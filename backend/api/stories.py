@@ -19,7 +19,6 @@ from models import (
     StoryGenerateRequest,
     StoryScene,
 )
-from services.elevenlabs import elevenlabs_service
 from services.gemini import gemini_service
 from services.narration_composer import narration_composer
 from services.scene_pregenerator import scene_pregenerator
@@ -762,15 +761,17 @@ async def generate_first_scene_with_fallback(
                             consequence_hint=""
                         ))
 
-                    # Always generate fresh narration audio with character's voice
+                    # Always generate fresh dual-voice narration audio
                     audio_url = None
                     try:
-                        voice_id_to_use = character.voice_id if character.voice_id else None
-                        logger.info(f"Generating fresh narration with voice_id: {voice_id_to_use or 'default (Rachel)'}")
+                        logger.info(
+                            f"Generating fresh dual-voice narration (hero voice: "
+                            f"{character.voice_id or 'fallback to narrator'})"
+                        )
 
-                        audio_data = await elevenlabs_service.generate_narration(
-                            text=scene_data["narration"],
-                            voice_id=voice_id_to_use
+                        audio_data = await narration_composer.compose_scene_audio(
+                            narration=scene_data["narration"],
+                            hero_voice_id=character.voice_id,
                         )
 
                         if audio_data:
