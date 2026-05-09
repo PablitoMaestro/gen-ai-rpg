@@ -394,13 +394,6 @@ export default function GamePage(): React.ReactElement {
                             <source src={scene.audio_url} type="audio/mpeg" />
                             Your browser does not support the audio element.
                           </audio>
-                          
-                          {/* Voice indicator */}
-                          {character?.voice_id && (
-                            <div className="text-xs text-amber-300/70 italic">
-                              🎤 {character.name}&apos;s voice
-                            </div>
-                          )}
                         </div>
                       )}
                     </div>
@@ -449,13 +442,6 @@ export default function GamePage(): React.ReactElement {
                             <source src={scene.audio_url} type="audio/mpeg" />
                             Your browser does not support the audio element.
                           </audio>
-                          
-                          {/* Voice indicator */}
-                          {character?.voice_id && (
-                            <div className="text-xs text-amber-300/70 italic">
-                              🎤 {character.name}&apos;s voice
-                            </div>
-                          )}
                         </div>
                       )}
                     </div>
