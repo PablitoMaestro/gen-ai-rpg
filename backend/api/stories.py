@@ -474,49 +474,57 @@ async def prerender_story_branches(
                 generation_time=time.time() - start_time
             )
 
-    # Generate all branches in parallel using asyncio.gather
-    # Use timeout to prevent hanging for too long
-    try:
-        branches = await asyncio.wait_for(
-            asyncio.gather(*[
-                generate_single_branch(choice, i)
-                for i, choice in enumerate(request.choices)
-            ], return_exceptions=True),
-            timeout=30.0  # 30 second timeout for all branches
-        )
+    # Generate all branches in parallel. Each branch races its OWN clock so
+    # one slow branch can no longer cancel the others (the previous shared
+    # asyncio.wait_for(timeout=30) caused 0/4 dropouts whenever the slowest
+    # branch dragged).
+    per_branch_timeout = 45.0
 
-        # Filter out any exceptions and convert to StoryBranch objects
-        final_branches = []
-        for i, result in enumerate(branches):
-            if isinstance(result, StoryBranch):
-                final_branches.append(result)
-            else:
-                # Create a failed branch for exceptions
-                logger.error(f"Branch {i} failed with exception: {result}")
-                final_branches.append(StoryBranch(
-                    choice_id=f"choice_{i + 1}",
-                    scene=None,
-                    is_ready=False,
-                    generation_time=None
-                ))
+    async def generate_with_timeout(choice: str, idx: int) -> StoryBranch:
+        try:
+            return await asyncio.wait_for(
+                generate_single_branch(choice, idx),
+                timeout=per_branch_timeout,
+            )
+        except TimeoutError:
+            logger.warning(
+                f"Branch {idx} timed out after {per_branch_timeout}s"
+            )
+            return StoryBranch(
+                choice_id=f"choice_{idx + 1}",
+                scene=None,
+                is_ready=False,
+                generation_time=None,
+            )
 
-        success_count = sum(1 for branch in final_branches if branch.is_ready)
-        logger.info(f"Pre-rendered {success_count}/{len(request.choices)} branches successfully")
+    branches = await asyncio.gather(
+        *[
+            generate_with_timeout(choice, i)
+            for i, choice in enumerate(request.choices)
+        ],
+        return_exceptions=True,
+    )
 
-        return final_branches
-
-    except TimeoutError:
-        logger.warning("Branch pre-rendering timed out")
-        # Return placeholder branches for timeout case
-        return [
-            StoryBranch(
+    # Convert any escaped exceptions to failed StoryBranch placeholders
+    final_branches: list[StoryBranch] = []
+    for i, result in enumerate(branches):
+        if isinstance(result, StoryBranch):
+            final_branches.append(result)
+        else:
+            logger.error(f"Branch {i} failed with exception: {result}")
+            final_branches.append(StoryBranch(
                 choice_id=f"choice_{i + 1}",
                 scene=None,
                 is_ready=False,
-                generation_time=None
-            )
-            for i in range(len(request.choices))
-        ]
+                generation_time=None,
+            ))
+
+    success_count = sum(1 for branch in final_branches if branch.is_ready)
+    logger.info(
+        f"Pre-rendered {success_count}/{len(request.choices)} branches successfully"
+    )
+
+    return final_branches
 
 
 @router.get("/session/{session_id}", response_model=GameSession)

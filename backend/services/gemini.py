@@ -2,6 +2,7 @@ import asyncio
 import base64
 import io
 import logging
+import re
 from typing import Any
 
 try:
@@ -510,35 +511,77 @@ ARTISTIC STYLE — cinematic photoreal (modern AAA CRPG cutscene):
             # Generic dark fantasy fallback
             return "Mysterious medieval environment shrouded in mist. Ancient stonework and weathered surfaces. Moody lighting creates atmospheric shadows."
 
+    # Tag prefixes Gemini occasionally wraps in markdown bold; we strip
+    # leading "*", "#", and whitespace so `**CHOICE_1:** ...` parses the
+    # same as `CHOICE_1: ...`.
+    _TAG_LEADING_NOISE = re.compile(r"^[*#\s]+")
+
+    # Default choices used to pad up to 4 when Gemini returns fewer. They
+    # are deliberately generic so a partially-parsed scene is still playable
+    # rather than failing validation and dropping the branch entirely.
+    _CHOICE_PADDING_DEFAULTS = (
+        "Press onward",
+        "Hold position and observe",
+        "Look for another way",
+        "Step back and reconsider",
+    )
+
     def _parse_story_response(self, response_text: str) -> dict[str, Any]:
-        """Parse the story response into structured data."""
+        """Parse the story response into structured data.
+
+        Tolerates markdown bold around tag names and pads choices to 4
+        with sensible defaults when Gemini returns fewer — both situations
+        previously caused StoryScene Pydantic validation to fail and the
+        whole branch to be marked is_ready=False.
+        """
         lines = response_text.strip().split('\n')
 
         narration = ""
         visual_scene = ""
         mood = ""
-        choices = []
+        choices: list[str] = []
 
-        for line in lines:
+        for raw_line in lines:
+            line = self._TAG_LEADING_NOISE.sub("", raw_line)
+            # Strip trailing markdown bold like `**CHOICE_1:**` -> `CHOICE_1:`
+            line = line.replace("**", "")
+
             if line.startswith("NARRATION:"):
-                narration = line.replace("NARRATION:", "").strip()
+                narration = line[len("NARRATION:"):].strip()
             elif line.startswith("VISUAL_SCENE:"):
-                visual_scene = line.replace("VISUAL_SCENE:", "").strip()
+                visual_scene = line[len("VISUAL_SCENE:"):].strip()
             elif line.startswith("MOOD:"):
-                mood = line.replace("MOOD:", "").strip()
+                mood = line[len("MOOD:"):].strip()
             elif line.startswith("CHOICE_"):
-                choice_text = line.split(":", 1)[1].strip()
-                choices.append(choice_text)
+                _, _, after_colon = line.partition(":")
+                choice_text = after_colon.strip()
+                if choice_text:
+                    choices.append(choice_text)
 
-        # Fallback visual scene if not provided
         if not visual_scene and narration:
             visual_scene = self._generate_fallback_visual_scene(narration)
+
+        # Pad to exactly 4 choices to satisfy StoryScene validation and
+        # keep the branch playable even when Gemini's output is partial.
+        if len(choices) < 4:
+            logger.warning(
+                f"Gemini returned only {len(choices)} choices; padding with "
+                f"defaults. Raw response head: {response_text[:200]!r}"
+            )
+            for default in self._CHOICE_PADDING_DEFAULTS:
+                if len(choices) >= 4:
+                    break
+                if default not in choices:
+                    choices.append(default)
+            # Final safeguard if all defaults already appeared
+            while len(choices) < 4:
+                choices.append("Continue")
 
         return {
             "narration": narration,
             "visual_scene": visual_scene,
             "mood": mood,
-            "choices": choices[:4]  # Ensure exactly 4 choices
+            "choices": choices[:4],
         }
 
 
