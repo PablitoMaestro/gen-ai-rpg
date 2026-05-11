@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from services.gemini import gemini_service
+from services.image_provider import image_service
 from services.supabase import supabase_service
 
 router = APIRouter()
@@ -47,8 +47,8 @@ async def merge_character_scene(request: MergeCharacterSceneRequest) -> dict[str
 
             character_image_bytes = response.content
 
-        # Generate scene image using Nano Banana
-        scene_image_bytes = await gemini_service.generate_scene_image(
+        # Generate scene image via the configured image provider
+        scene_image_bytes = await image_service.generate_scene_image(
             character_image=character_image_bytes,
             scene_description=request.scene_description,
             session_id=request.scene_id

@@ -1,5 +1,3 @@
-import asyncio
-import base64
 import io
 import logging
 import re
@@ -13,6 +11,12 @@ except ImportError:
 import google.generativeai as genai
 
 from config.settings import settings
+from services._image_prompts import (
+    build_character_prompt,
+    build_references_block,
+    build_scene_prompt,
+    run_story_branches,
+)
 from services.content_sanitizer import content_sanitizer
 
 logger = logging.getLogger(__name__)
@@ -81,48 +85,13 @@ class GeminiService:
             # Open image with PIL
             portrait_pil = Image.open(io.BytesIO(portrait_image))
 
-            # Build consistent character description from portrait characteristics
-            if portrait_characteristics:
-                age = portrait_characteristics.get("age", "adult")
-                eye_color = portrait_characteristics.get("eye_color", "brown eyes")
-                skin = portrait_characteristics.get("skin", "weathered skin")
-                hair = portrait_characteristics.get("hair", "dark hair")
-
-                # Create base character description for consistency
-                consistent_desc = f"Person {age}, {eye_color}, {skin}, {hair}. "
-            else:
-                consistent_desc = f"{gender} character. "
-
-            # Build prompt based on character type - realistic, mediocre dark fantasy
-            build_prompts = {
-                "warrior": f"Create a realistic full-body {gender} warrior based on this portrait. "
-                          f"{consistent_desc}"
-                          "Worn, patched mail armor with weathered surface, simple iron sword and dented wooden shield. "
-                          "Average build, adapting portrait expression to show determination and experience, confident posture from training. "
-                          "Weathered hands gripping weapons, worn armor, realistic medieval styling. "
-                          "A practical soldier ready for adventure. Photorealistic style.",
-                "mage": f"Create a realistic full-body {gender} mage based on this portrait. "
-                       f"{consistent_desc}"
-                       "Faded, patched robes with worn fabric, simple wooden staff with crystal. "
-                       "Thin build, adapting portrait expression to show scholarly focus, upright posture from study. "
-                       "Ink-marked fingers, worn leather satchel, realistic medieval scholar appearance. "
-                       "A dedicated academic with growing talent. Photorealistic style.",
-                "rogue": f"Create a realistic full-body {gender} rogue based on this portrait. "
-                        f"{consistent_desc}"
-                        "Patched leather armor with visible repairs, simple iron daggers with worn blades. "
-                        "Wiry build, adapting portrait expression to show alertness and confidence, ready stance. "
-                        "Weathered hands, worn boots, realistic medieval adventurer appearance. "
-                        "A skilled scout ready for adventure. Photorealistic style.",
-                "ranger": f"Create a realistic full-body {gender} ranger based on this portrait. "
-                         f"{consistent_desc}"
-                         "Worn leather and rough cloth, simple hunting bow with weathered string. "
-                         "Lean build, adapting portrait expression to show cautious alertness, confident but humble stance. "
-                         "Weathered hands, worn boots, realistic medieval hunter appearance. "
-                         "A skilled tracker ready for adventure. Photorealistic style."
-            }
-
-            prompt = build_prompts.get(build_type, build_prompts["warrior"])
-            prompt += " Maintain exact facial features from the portrait. Full body visible, game-ready character art."
+            prompt = build_character_prompt(
+                gender=gender,
+                build_type=build_type,
+                characteristics=portrait_characteristics,
+                ref_phrase="based on this portrait",
+                ref_label="the portrait",
+            )
 
             # Sanitize prompt to avoid content filters
             sanitized_prompt = content_sanitizer.sanitize_for_image_generation(prompt)
@@ -178,64 +147,18 @@ class GeminiService:
             # Sanitize scene description for image generation
             sanitized_description = content_sanitizer.sanitize_for_image_generation(scene_description)
 
-            # Label each reference so the model knows what role each plays.
-            reference_labels = ["1. CHARACTER REFERENCE — preserve face, build, clothing, and equipment exactly."]
-            if anchor_pil is not None:
-                reference_labels.append(
-                    "2. WORLD ANCHOR — match this image's color palette, lighting key, "
-                    "time-of-day, weather, and overall atmosphere. This is the world's canonical look."
-                )
-            if previous_pil is not None:
-                reference_labels.append(
-                    f"{len(reference_labels) + 1}. PREVIOUS SCENE — preserve continuity of place, "
-                    "lighting direction, and props that should still be present."
-                )
-            references_block = "REFERENCE IMAGES:\n" + "\n".join(reference_labels)
-            tenor = (mood or "tense and atmospheric").strip() or "tense and atmospheric"
-
-            # Build comprehensive scene prompt — art director's brief, not a description.
-            prompt = f"""You are rendering a single frame from a dark-fantasy CRPG cutscene.
-Treat this like a still from a cinematic film — every element should serve the
-emotional beat below, not just describe a place.
-
-{references_block}
-
-SCENE BRIEF (labeled clauses; consume them, do NOT render them as text):
-{sanitized_description}
-
-EMOTIONAL TENOR:
-{tenor}
-
-DIRECTION:
-- Translate the brief into cinematography. Build the image from the labeled
-  clauses (SETTING / LIGHT / KEY OBJECTS / ATMOSPHERE); do not rephrase prose.
-- Lighting drives the mood. Construct key/fill/rim from the LIGHT clause:
-    * dread / fear / loss / dread-tinted moods → push key low, shadows long,
-      cool spill on fills, rim only when narratively required.
-    * triumph / clarity / awe / hope → raise key, lift fills, allow warm rim
-      light to catch the character's silhouette and metal accents.
-    * tension / anticipation → harsh contrast, single hard key, deep blacks.
-- Foreground anchor is one of the KEY OBJECTS framed close; the character
-  occupies the lower third of frame, oriented into the scene.
-- Color grade: pull one accent hue from the LIGHT clause and contrast it
-  against a muted earth-tone or cool steel-gray base. No fully saturated
-  fields of color; restraint is the rule.
-
-CAMERA & FRAMING:
-- Third-person over-the-shoulder, slightly behind and above the character.
-- Approximately 28-35mm equivalent for cinematic wide framing. Tighter
-  framing and shallower depth of field for intimate or fearful tenor; wider
-  framing with deep depth for vast or contemplative tenor.
-
-ARTISTIC STYLE — cinematic photoreal (modern AAA CRPG cutscene):
-- Photoreal rendering with subtle filmic grain and soft anamorphic-style
-  highlights on bright sources. NOT painterly, NOT cartoon, NOT airbrushed.
-- Cool overall grade with selective warm accents (firelight, embers, sun)
-  reserved for narrative focus.
-- High microdetail in foreground props (cloth weave, metal pitting, stone
-  texture, individual hairs); atmospheric haze softens midground and far
-  distance to push depth.
-- Absolutely no text, captions, UI overlays, watermarks, or rendered prose."""
+            # Gemini addresses references positionally in the order they
+            # appear in the inputs list — `1.`, `2.`, `3.` markers.
+            num_refs = 1 + (1 if anchor_pil else 0) + (1 if previous_pil else 0)
+            references_block = build_references_block(
+                num_refs=num_refs,
+                marker_fn=lambda i: f"{i + 1}.",
+            )
+            prompt = build_scene_prompt(
+                scene_description=sanitized_description,
+                mood=mood,
+                references_block=references_block,
+            )
 
             # Apply additional sanitization to the complete prompt
             prompt = content_sanitizer.sanitize_for_image_generation(prompt)
@@ -355,43 +278,13 @@ ARTISTIC STYLE — cinematic photoreal (modern AAA CRPG cutscene):
         current_scene: str,
         choices: list[str]
     ) -> list[dict[str, Any]]:
-        """
-        Generate multiple story branches in parallel.
-
-        Args:
-            character_image: Character image bytes
-            current_scene: Current scene description
-            choices: List of choice descriptions
-
-        Returns:
-            List of branch data with images
-        """
-        async def generate_branch(choice: str) -> dict[str, Any]:
-            try:
-                scene_prompt = f"After choosing to {choice}: {current_scene}"
-                scene_image = await self.generate_scene_image(
-                    character_image,
-                    scene_prompt
-                )
-                return {
-                    "choice": choice,
-                    "image": base64.b64encode(scene_image).decode('utf-8'),
-                    "status": "success"
-                }
-            except Exception as e:
-                logger.error(f"Branch generation failed for '{choice}': {e}")
-                return {
-                    "choice": choice,
-                    "image": None,
-                    "status": "failed",
-                    "error": str(e)
-                }
-
-        # Generate all branches concurrently
-        tasks = [generate_branch(choice) for choice in choices]
-        results = await asyncio.gather(*tasks)
-
-        return results
+        """Generate multiple story branches in parallel."""
+        return await run_story_branches(
+            scene_image_fn=self.generate_scene_image,
+            character_image=character_image,
+            current_scene=current_scene,
+            choices=choices,
+        )
 
     def _build_story_prompt(
         self,

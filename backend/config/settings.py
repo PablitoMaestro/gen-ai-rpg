@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     # API Keys
     gemini_api_key: str
     elevenlabs_api_key: str | None = None
+    xai_api_key: str | None = None
+
+    # Image generation provider — "gemini" (Nano Banana) or "grok" (xAI).
+    # Single config knob to swap providers; story generation always uses
+    # Gemini regardless of this setting.
+    image_provider: str = "gemini"
 
     # Supabase
     supabase_url: str

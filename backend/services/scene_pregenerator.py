@@ -10,6 +10,7 @@ from typing import Any
 from models import get_portrait_characteristics
 from services.content_sanitizer import content_sanitizer
 from services.gemini import gemini_service
+from services.image_provider import image_service
 from services.supabase import supabase_service
 
 logger = logging.getLogger(__name__)
@@ -307,7 +308,7 @@ class PreGenerationService:
 
             # Generate scene image
             visual_scene = story_data.get('visual_scene', story_data.get('narration', ''))
-            scene_image_bytes = await gemini_service.generate_scene_image(
+            scene_image_bytes = await image_service.generate_scene_image(
                 character_image=character_image_bytes,
                 scene_description=visual_scene,
                 mood=story_data.get('mood'),

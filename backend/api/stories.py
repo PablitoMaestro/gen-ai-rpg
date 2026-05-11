@@ -20,6 +20,7 @@ from models import (
     StoryScene,
 )
 from services.gemini import gemini_service
+from services.image_provider import image_service
 from services.narration_composer import narration_composer
 from services.scene_pregenerator import scene_pregenerator
 from services.supabase import supabase_service
@@ -171,7 +172,7 @@ async def generate_story_scene(
                             _fetch_url_bytes(request.previous_scene_image_url),
                         )
 
-                        scene_image_bytes = await gemini_service.generate_scene_image(
+                        scene_image_bytes = await image_service.generate_scene_image(
                             character_image=character_image_bytes,
                             scene_description=scene_description_for_image,
                             anchor_image=anchor_bytes,
@@ -385,7 +386,7 @@ async def prerender_story_branches(
                             character_image_bytes = response.content
 
                             scene_description_for_image = story_data.get("visual_scene", story_data["narration"])
-                            scene_image_bytes = await gemini_service.generate_scene_image(
+                            scene_image_bytes = await image_service.generate_scene_image(
                                 character_image=character_image_bytes,
                                 scene_description=scene_description_for_image,
                                 anchor_image=anchor_bytes,

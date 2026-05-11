@@ -15,7 +15,7 @@ from models import (
     get_preset_portraits,
 )
 from services.elevenlabs import elevenlabs_service
-from services.gemini import gemini_service
+from services.image_provider import image_service
 from services.portrait_dialogue import portrait_dialogue_service
 from services.supabase import supabase_service
 from services.voice_design import voice_design_service
@@ -168,8 +168,9 @@ async def generate_character_builds(
         # Generate all builds in parallel
         async def generate_single_build(build_type: Literal["warrior", "mage", "rogue", "ranger"]) -> CharacterBuildOption:
             try:
-                # Generate character image using Nano Banana
-                character_image = await gemini_service.generate_character_image(
+                # Generate character image via the configured image provider
+                # (Nano Banana / Grok — see IMAGE_PROVIDER in .env.local)
+                character_image = await image_service.generate_character_image(
                     portrait_image=portrait_bytes,
                     gender=gender,
                     build_type=build_type,
