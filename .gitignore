@@ -88,3 +88,17 @@ secrets/
 
 # Claude Code instructions
 CLAUDE.md
+
+# macOS metadata (recursive — replaces the prior shallow .DS_Store rule)
+**/.DS_Store
+
+# macOS Finder duplicate-name artifacts (e.g. "file 2.mp3" on copy collisions)
+* [0-9].mp3
+* [0-9].png
+* [0-9].sql
+* [0-9].jpg
+* [0-9].jpeg
+
+# Test artifact directories (large generated binaries)
+backend/tests/test_outputs_grok/
+backend/tests/test_outputs/
